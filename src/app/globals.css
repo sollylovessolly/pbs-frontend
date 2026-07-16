@@ -1,0 +1,338 @@
+@import "tailwindcss";
+
+
+@theme {
+  --color-cream: #f7f1e6;
+  --color-paper: #fffcf6;
+  --color-ink: #2a211c;
+
+  --color-burgundy: #7a2333;
+  --color-burgundy-deep: #5e1b27;
+
+  --color-blush: #efc8c1;
+  --color-blush-deep: #e3a9a0;
+  --color-rose: #c97b82;
+
+  --color-brown: #8b6b54;
+  --color-beige: #e7d9c2;
+  --color-gold: #b98f4e;
+
+  --shadow-retro: 0 6px 0 rgba(42, 33, 28, 0.08);
+}
+
+:root {
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+}
+@theme inline {
+  /* Colours */
+  --color-cream: #f7f1e6;
+  --color-paper: #fffcf6;
+  --color-ink: #2a211c;
+  --color-burgundy: #7a2333;
+  --color-burgundy-deep: #5e1b27;
+  --color-blush: #efc8c1;
+  --color-blush-deep: #e3a9a0;
+  --color-rose: #c97b82;
+  --color-brown: #8b6b54;
+  --color-beige: #e7d9c2;
+  --color-gold: #b98f4e;
+
+  /* Fonts from layout.tsx */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-fraunces);
+  --font-handwritten: var(--font-caveat);
+  --font-poster: var(--font-anton);
+
+  /* Shadows */
+  --shadow-soft: 0 6px 0 rgba(42, 33, 28, 0.08);
+  --shadow-card: 0 12px 0 rgba(42, 33, 28, 0.1);
+  --shadow-button: 4px 4px 0 #2a211c;
+  --shadow-button-hover: 6px 6px 0 #2a211c;
+
+  /* Border radii */
+  --radius-card: 1rem;
+  --radius-panel: 1.5rem;
+
+  /* Content width */
+  --container-site: 77.5rem;
+
+  /* Letter spacing */
+  --tracking-display: -0.01em;
+}
+
+@keyframes hero-cover-expand {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes hero-copy-appear {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-polaroid-appear {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hero-sticker-appear {
+  from {
+    opacity: 0;
+    scale: 0.8;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes hero-float-one {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(8px, -16px, 0);
+  }
+}
+
+@keyframes hero-float-two {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(-10px, -12px, 0);
+  }
+}
+
+@keyframes hero-float-three {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(5px, -20px, 0);
+  }
+}
+
+.hero-cover {
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: hero-cover-expand 1.5s cubic-bezier(0.76, 0, 0.24, 1)
+    forwards;
+}
+
+.hero-copy-reveal {
+  opacity: 0;
+  animation: hero-copy-appear 0.8s ease-out 1.65s forwards;
+}
+
+.hero-polaroid-reveal {
+  opacity: 0;
+  animation: hero-polaroid-appear 0.7s ease-out forwards;
+}
+
+.hero-sticker-reveal {
+  opacity: 0;
+  animation: hero-sticker-appear 0.6s ease-out 3.1s forwards;
+}
+
+.hero-float-one {
+  animation: hero-float-one 5.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-float-two {
+  animation: hero-float-two 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-float-three {
+  animation: hero-float-three 7.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cover,
+  .hero-copy-reveal,
+  .hero-polaroid-reveal,
+  .hero-sticker-reveal,
+  .hero-float-one,
+  .hero-float-two,
+  .hero-float-three {
+    animation: none;
+  }
+
+  .hero-cover {
+    transform: scaleX(1);
+  }
+
+  .hero-copy-reveal,
+  .hero-polaroid-reveal,
+  .hero-sticker-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* 
+.torn-divider {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='32' viewBox='0 0 240 32'%3E%3Cpath d='M0 18L12 10L22 15L35 6L48 14L61 8L74 17L88 11L101 5L115 14L128 9L141 16L154 7L168 13L182 4L196 15L210 8L224 14L240 9V32H0Z' fill='black'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='32' viewBox='0 0 240 32'%3E%3Cpath d='M0 18L12 10L22 15L35 6L48 14L61 8L74 17L88 11L101 5L115 14L128 9L141 16L154 7L168 13L182 4L196 15L210 8L224 14L240 9V32H0Z' fill='black'/%3E%3C/svg%3E");
+
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+
+  -webkit-mask-size: 240px 32px;
+  mask-size: 240px 32px;
+
+  -webkit-mask-position: top left;
+  mask-position: top left;
+} */
+
+torn-divider-shadow {
+  filter: drop-shadow(0 -3px 2px rgb(0 0 0 / 0.18));
+}
+
+.torn-divider {
+  clip-path: polygon(
+    0% 56%,
+    2% 54%,
+    4% 34%,
+    5.2% 48%,
+    8% 45%,
+
+    12% 27%,
+    13.4% 46%,
+    17% 44%,
+
+    21% 43%,
+    23% 18%,
+    24.2% 29%,
+    26% 47%,
+
+    31% 45%,
+    35% 47%,
+
+    38% 31%,
+    40% 36%,
+    43% 43%,
+
+    48% 42%,
+    51% 17%,
+    52.2% 28%,
+    54% 44%,
+
+    59% 45%,
+    63% 41%,
+
+    66% 54%,
+    68% 36%,
+    71% 39%,
+
+    76% 40%,
+    79% 15%,
+    80.2% 27%,
+    83% 42%,
+
+    87% 39%,
+    90% 49%,
+    92% 31%,
+
+    96% 43%,
+    98% 27%,
+    100% 36%,
+
+    100% 100%,
+    0% 100%
+  );
+}
+
+@keyframes delivery-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.delivery-marquee-track {
+  animation: delivery-marquee 18s linear infinite;
+}
+
+.delivery-marquee:hover .delivery-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .delivery-marquee {
+    overflow-x: auto;
+  }
+
+  .delivery-marquee-track {
+    animation: none;
+  }
+
+  .delivery-marquee-track[aria-hidden="true"] {
+    display: none;
+  }
+}
+
+@keyframes gallery-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.gallery-marquee-track {
+  animation: gallery-marquee 24s linear infinite;
+  will-change: transform;
+}
+
+.gallery-marquee:hover .gallery-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-marquee {
+    overflow-x: auto;
+  }
+
+  .gallery-marquee-track {
+    animation: none;
+  }
+
+  .gallery-marquee-track > div[aria-hidden="true"] {
+    display: none;
+  }
+}
