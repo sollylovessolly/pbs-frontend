@@ -3,7 +3,6 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Cropper, { type Area } from "react-easy-crop";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   type ChangeEvent,
@@ -78,7 +77,6 @@ type CropPosition = {
 };
 
 type UploadedPhoto = {
-  id: string;
   name: string;
   src: string;
 };
@@ -87,7 +85,7 @@ type CaseConfiguration = {
   id: string;
   modelId: string;
   packageType: PhoneCasePackage;
-  assignedPhotoId: string | null;
+  photo: UploadedPhoto | null;
   crop: CropPosition;
   zoom: number;
   rotation: number;
@@ -121,7 +119,7 @@ const createConfiguration = (
     id: crypto.randomUUID(),
     modelId,
     packageType: "with-polaroid",
-    assignedPhotoId: null,
+    photo: null,
     crop: {
       x: 0,
       y: 0,
@@ -137,7 +135,7 @@ const isConfigurationComplete = (
 ) => {
   return (
     configuration.packageType === "case-only" ||
-    Boolean(configuration.assignedPhotoId)
+    Boolean(configuration.photo)
   );
 };
 
@@ -428,10 +426,8 @@ const PhoneCaseMockup = ({
         .filter(Boolean)
         .join(" ")}
     >
-      {/* Clear case edge */}
       <div className="pointer-events-none absolute inset-2 z-30 rounded-[30px] border-2 border-white/70 bg-white/5 sm:rounded-[37px]" />
 
-      {/* Camera area */}
       <div className="absolute left-3 top-3 z-40 h-[62px] w-[62px] rounded-[19px] border-2 border-ink bg-beige shadow-[2px_2px_0_rgba(42,33,28,0.2)] sm:left-4 sm:top-4 sm:h-[78px] sm:w-[78px] sm:rounded-[23px]">
         <span className="absolute left-2.5 top-2.5 h-4 w-4 rounded-full border-2 border-ink bg-ink sm:left-3 sm:top-3 sm:h-5 sm:w-5" />
 
@@ -526,7 +522,7 @@ const PhoneCaseMockup = ({
       {packageType === "with-polaroid" &&
         !photo && (
           <div className="absolute left-[22%] top-[34%] z-10 flex aspect-[3/4] w-[57%] -rotate-6 items-center justify-center border-2 border-dashed border-ink/30 bg-paper p-3 text-center text-[9px] font-bold leading-4 text-ink/40">
-            Assign a photo to this case
+            Upload a photo for this case
           </div>
         )}
 
@@ -575,13 +571,14 @@ const PhoneCaseCustomizer = ({
   const [configurations, setConfigurations] =
     useState<CaseConfiguration[]>([]);
 
-  const [photos, setPhotos] = useState<
-    UploadedPhoto[]
-  >([]);
-
   const [
     expandedConfigurationId,
     setExpandedConfigurationId,
+  ] = useState<string | null>(null);
+
+  const [
+    uploadTargetConfigurationId,
+    setUploadTargetConfigurationId,
   ] = useState<string | null>(null);
 
   const [
@@ -686,32 +683,8 @@ const PhoneCaseCustomizer = ({
       editingConfigurationId,
     ]);
 
-  const editingPhoto = useMemo(() => {
-    if (
-      !editingConfiguration?.assignedPhotoId
-    ) {
-      return null;
-    }
-
-    return (
-      photos.find(
-        (photo) =>
-          photo.id ===
-          editingConfiguration.assignedPhotoId,
-      ) ?? null
-    );
-  }, [
-    editingConfiguration,
-    photos,
-  ]);
-
-  const needsPhotoLibrary = useMemo(() => {
-    return configurations.some(
-      (configuration) =>
-        configuration.packageType ===
-        "with-polaroid",
-    );
-  }, [configurations]);
+  const editingPhoto =
+    editingConfiguration?.photo ?? null;
 
   const completedConfigurations =
     useMemo(() => {
@@ -765,6 +738,24 @@ const PhoneCaseCustomizer = ({
     );
   };
 
+  const revokeConfigurationPhoto = (
+    configuration:
+      | CaseConfiguration
+      | undefined,
+  ) => {
+    const photoUrl =
+      configuration?.photo?.src;
+
+    if (
+      photoUrl &&
+      objectUrlsRef.current.has(photoUrl)
+    ) {
+      URL.revokeObjectURL(photoUrl);
+
+      objectUrlsRef.current.delete(photoUrl);
+    }
+  };
+
   const increaseModelQuantity = (
     modelId: string,
   ) => {
@@ -815,43 +806,52 @@ const PhoneCaseCustomizer = ({
   ) => {
     if (editItemId) return;
 
-    setConfigurations(
-      (currentConfigurations) => {
-        const lastMatchingIndex =
-          currentConfigurations.reduce(
-            (
-              foundIndex,
-              configuration,
-              index,
-            ) =>
-              configuration.modelId === modelId
-                ? index
-                : foundIndex,
-            -1,
-          );
+    const matchingConfigurations =
+      configurations.filter(
+        (configuration) =>
+          configuration.modelId === modelId,
+      );
 
-        if (lastMatchingIndex === -1) {
-          return currentConfigurations;
-        }
+    const configurationToRemove =
+      matchingConfigurations[
+        matchingConfigurations.length - 1
+      ];
 
-        const removedConfiguration =
-          currentConfigurations[
-            lastMatchingIndex
-          ];
+    if (!configurationToRemove) return;
 
-        if (
-          expandedConfigurationId ===
-          removedConfiguration.id
-        ) {
-          setExpandedConfigurationId(null);
-        }
-
-        return currentConfigurations.filter(
-          (_, index) =>
-            index !== lastMatchingIndex,
-        );
-      },
+    revokeConfigurationPhoto(
+      configurationToRemove,
     );
+
+    setConfigurations(
+      (currentConfigurations) =>
+        currentConfigurations.filter(
+          (configuration) =>
+            configuration.id !==
+            configurationToRemove.id,
+        ),
+    );
+
+    if (
+      expandedConfigurationId ===
+      configurationToRemove.id
+    ) {
+      setExpandedConfigurationId(null);
+    }
+
+    if (
+      editingConfigurationId ===
+      configurationToRemove.id
+    ) {
+      setEditingConfigurationId(null);
+    }
+
+    if (
+      uploadTargetConfigurationId ===
+      configurationToRemove.id
+    ) {
+      setUploadTargetConfigurationId(null);
+    }
   };
 
   const selectModel = (
@@ -870,95 +870,108 @@ const PhoneCaseCustomizer = ({
     }
   };
 
+  const openPhotoPicker = (
+    configurationId: string,
+  ) => {
+    setUploadTargetConfigurationId(
+      configurationId,
+    );
+
+    fileInputRef.current?.click();
+  };
+
   const handleFileChange = (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
-    const selectedFiles = Array.from(
-      event.target.files ?? [],
-    );
+    const file = event.target.files?.[0];
 
-    const validFiles = selectedFiles.filter(
-      (file) =>
-        file.type.startsWith("image/"),
-    );
-
-    if (!validFiles.length) {
+    if (
+      !file ||
+      !file.type.startsWith("image/") ||
+      !uploadTargetConfigurationId
+    ) {
       event.target.value = "";
       return;
     }
 
-    const newPhotos: UploadedPhoto[] =
-      validFiles.map((file) => {
-        const objectUrl =
-          URL.createObjectURL(file);
+    const targetConfiguration =
+      configurations.find(
+        (configuration) =>
+          configuration.id ===
+          uploadTargetConfigurationId,
+      );
 
-        objectUrlsRef.current.add(
-          objectUrl,
-        );
+    revokeConfigurationPhoto(
+      targetConfiguration,
+    );
 
-        return {
-          id: crypto.randomUUID(),
+    const objectUrl =
+      URL.createObjectURL(file);
+
+    objectUrlsRef.current.add(
+      objectUrl,
+    );
+
+    updateConfiguration(
+      uploadTargetConfigurationId,
+      {
+        photo: {
           name: file.name,
           src: objectUrl,
-        };
-      });
+        },
+        crop: {
+          x: 0,
+          y: 0,
+        },
+        zoom: 1,
+        rotation: 0,
+        croppedAreaPixels: null,
+      },
+    );
 
-    setPhotos((currentPhotos) => [
-      ...currentPhotos,
-      ...newPhotos,
-    ]);
+    setExpandedConfigurationId(
+      uploadTargetConfigurationId,
+    );
+
+    setUploadTargetConfigurationId(null);
 
     event.target.value = "";
   };
 
-  const removePhoto = (
-    photoId: string,
+  const removeConfigurationPhoto = (
+    configurationId: string,
   ) => {
-    const photoToRemove = photos.find(
-      (photo) => photo.id === photoId,
+    const configuration =
+      configurations.find(
+        (currentConfiguration) =>
+          currentConfiguration.id ===
+          configurationId,
+      );
+
+    revokeConfigurationPhoto(
+      configuration,
+    );
+
+    updateConfiguration(
+      configurationId,
+      {
+        photo: null,
+        crop: {
+          x: 0,
+          y: 0,
+        },
+        zoom: 1,
+        rotation: 0,
+        croppedAreaPixels: null,
+      },
     );
 
     if (
-      photoToRemove &&
-      objectUrlsRef.current.has(
-        photoToRemove.src,
-      )
+      editingConfigurationId ===
+      configurationId
     ) {
-      URL.revokeObjectURL(
-        photoToRemove.src,
-      );
-
-      objectUrlsRef.current.delete(
-        photoToRemove.src,
-      );
+      setEditingConfigurationId(null);
     }
-
-    setPhotos((currentPhotos) =>
-      currentPhotos.filter(
-        (photo) => photo.id !== photoId,
-      ),
-    );
-
-    setConfigurations(
-      (currentConfigurations) =>
-        currentConfigurations.map(
-          (configuration) =>
-            configuration.assignedPhotoId ===
-            photoId
-              ? {
-                  ...configuration,
-                  assignedPhotoId: null,
-                  crop: {
-                    x: 0,
-                    y: 0,
-                  },
-                  zoom: 1,
-                  rotation: 0,
-                  croppedAreaPixels: null,
-                }
-              : configuration,
-        ),
-    );
   };
 
   const setConfigurationPackage = (
@@ -969,54 +982,6 @@ const PhoneCaseCustomizer = ({
       configurationId,
       {
         packageType,
-
-        ...(packageType === "case-only"
-          ? {
-              assignedPhotoId: null,
-              crop: {
-                x: 0,
-                y: 0,
-              },
-              zoom: 1,
-              rotation: 0,
-              croppedAreaPixels: null,
-            }
-          : {}),
-      },
-    );
-  };
-
-  const assignPhotoToConfiguration = (
-    configurationId: string,
-    photoId: string,
-  ) => {
-    const currentConfiguration =
-      configurations.find(
-        (configuration) =>
-          configuration.id ===
-          configurationId,
-      );
-
-    const photoIsChanging =
-      currentConfiguration?.assignedPhotoId !==
-      photoId;
-
-    updateConfiguration(
-      configurationId,
-      {
-        assignedPhotoId: photoId,
-
-        ...(photoIsChanging
-          ? {
-              crop: {
-                x: 0,
-                y: 0,
-              },
-              zoom: 1,
-              rotation: 0,
-              croppedAreaPixels: null,
-            }
-          : {}),
       },
     );
   };
@@ -1088,15 +1053,12 @@ const PhoneCaseCustomizer = ({
       };
     }
 
-    const assignedPhoto = photos.find(
-      (photo) =>
-        photo.id ===
-        configuration.assignedPhotoId,
-    );
+    const assignedPhoto =
+      configuration.photo;
 
     if (!assignedPhoto) {
       throw new Error(
-        `A photo has not been assigned to ${model.name}.`,
+        `A photo has not been uploaded for ${model.name}.`,
       );
     }
 
@@ -1204,7 +1166,7 @@ const PhoneCaseCustomizer = ({
       );
 
       window.alert(
-        "Something went wrong while preparing your phone cases. Please check that every Polaroid case has a photo assigned.",
+        "Something went wrong while preparing your phone cases. Please check that every Polaroid + Case configuration has a photo.",
       );
     } finally {
       setIsAddingToCart(false);
@@ -1246,35 +1208,28 @@ const PhoneCaseCustomizer = ({
     const configurationId =
       crypto.randomUUID();
 
-    let photoId: string | null = null;
-
-    if (
-      packageType ===
-        "with-polaroid" &&
-      editingCartItem.sourceImageUrl
-    ) {
-      photoId = crypto.randomUUID();
-
-      setPhotos([
-        {
-          id: photoId,
-          name:
-            editingCartItem.options
-              ?.photoName ??
-            editingCartItem.name,
-          src:
-            editingCartItem
-              .sourceImageUrl,
-        },
-      ]);
-    }
+    const savedPhoto =
+      packageType === "with-polaroid" &&
+      (editingCartItem.sourceImageUrl ||
+        editingCartItem.previewUrl)
+        ? {
+            name:
+              editingCartItem.options
+                ?.photoName ??
+              editingCartItem.name,
+            src:
+              editingCartItem
+                .sourceImageUrl ??
+              editingCartItem.previewUrl,
+          }
+        : null;
 
     setConfigurations([
       {
         id: configurationId,
         modelId,
         packageType,
-        assignedPhotoId: photoId,
+        photo: savedPhoto,
 
         crop:
           editingCartItem.crop ?? {
@@ -1539,139 +1494,13 @@ const PhoneCaseCustomizer = ({
               )}
             </section>
 
-            {/* Step 2: Shared photo library */}
-            {configurations.length >
-              0 &&
-              needsPhotoLibrary && (
-                <section className="rounded-[18px] border-2 border-ink bg-paper p-4 shadow-[0_5px_0_rgba(42,33,28,0.08)] sm:p-6">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-burgundy font-serif text-sm font-bold text-cream sm:h-10 sm:w-10">
-                      2
-                    </span>
-
-                    <div>
-                      <h2 className="font-serif text-xl font-semibold text-ink sm:text-2xl">
-                        Upload your photos
-                      </h2>
-
-                      <p className="mt-1 text-xs leading-5 text-ink/60 sm:text-sm sm:leading-6">
-                        Upload the photos you
-                        may want inside your
-                        cases. You’ll assign
-                        them individually in
-                        the next section.
-                      </p>
-                    </div>
-                  </div>
-
-                  {photos.length === 0 ? (
-                    <button
-                      type="button"
-                      disabled={
-                        isAddingToCart
-                      }
-                      onClick={() =>
-                        fileInputRef.current?.click()
-                      }
-                      className="mt-5 flex w-full flex-col items-center justify-center rounded-[16px] border-2 border-dashed border-ink bg-cream px-5 py-8 text-center transition hover:bg-beige disabled:opacity-50 sm:mt-6 sm:py-10"
-                    >
-                      <LuImagePlus className="h-7 w-7 sm:h-8 sm:w-8" />
-
-                      <span className="mt-3 text-sm font-bold">
-                        Choose photos
-                      </span>
-
-                      <span className="mt-1 text-xs text-ink/50">
-                        JPG, PNG or WebP
-                      </span>
-                    </button>
-                  ) : (
-                    <div className="mt-5 grid grid-cols-3 gap-2.5 sm:mt-6 sm:grid-cols-4 sm:gap-3">
-                      {photos.map(
-                        (
-                          photo,
-                          photoIndex,
-                        ) => (
-                          <div
-                            key={photo.id}
-                            className="group relative aspect-square overflow-hidden rounded-xl border-2 border-ink bg-beige"
-                          >
-                            <img
-                              src={photo.src}
-                              alt={`Uploaded photo ${
-                                photoIndex + 1
-                              }`}
-                              className="h-full w-full object-cover"
-                            />
-
-                            <button
-                              type="button"
-                              aria-label={`Remove photo ${
-                                photoIndex + 1
-                              }`}
-                              disabled={
-                                isAddingToCart
-                              }
-                              onClick={() =>
-                                removePhoto(
-                                  photo.id,
-                                )
-                              }
-                              className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-ink bg-paper text-ink shadow-[1px_1px_0_#2A211C] transition hover:bg-burgundy hover:text-cream"
-                            >
-                              <LuTrash2 className="h-3.5 w-3.5" />
-                            </button>
-
-                            <span className="absolute inset-x-1.5 bottom-1.5 truncate rounded-full bg-ink/70 px-2 py-1 text-center text-[8px] font-bold text-cream backdrop-blur-sm sm:text-[9px]">
-                              Photo{" "}
-                              {photoIndex +
-                                1}
-                            </span>
-                          </div>
-                        ),
-                      )}
-
-                      <button
-                        type="button"
-                        disabled={
-                          isAddingToCart
-                        }
-                        onClick={() =>
-                          fileInputRef.current?.click()
-                        }
-                        className="flex aspect-square flex-col items-center justify-center rounded-xl border-2 border-dashed border-ink bg-beige/40 text-center transition hover:bg-beige"
-                      >
-                        <LuImagePlus className="h-5 w-5 sm:h-6 sm:w-6" />
-
-                        <span className="mt-2 text-[9px] font-bold sm:text-xs">
-                          Add photos
-                        </span>
-                      </button>
-                    </div>
-                  )}
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={
-                      handleFileChange
-                    }
-                    className="hidden"
-                  />
-                </section>
-              )}
-
-            {/* Step 3: Configure individual cases */}
+            {/* Step 2: Configure each case */}
             {configurations.length >
               0 && (
                 <section className="rounded-[18px] border-2 border-ink bg-paper p-4 shadow-[0_5px_0_rgba(42,33,28,0.08)] sm:p-6">
                   <div className="flex items-start gap-3">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-burgundy font-serif text-sm font-bold text-cream sm:h-10 sm:w-10">
-                      {needsPhotoLibrary
-                        ? 3
-                        : 2}
+                      2
                     </span>
 
                     <div className="min-w-0">
@@ -1680,9 +1509,9 @@ const PhoneCaseCustomizer = ({
                       </h2>
 
                       <p className="mt-1 text-xs leading-5 text-ink/60 sm:text-sm sm:leading-6">
-                        Every case can have
-                        its own package and
-                        photo.
+                        Choose the package and
+                        photo for each physical
+                        case separately.
                       </p>
                     </div>
                   </div>
@@ -1728,13 +1557,6 @@ const PhoneCaseCustomizer = ({
                           isConfigurationComplete(
                             configuration,
                           );
-
-                        const assignedPhoto =
-                          photos.find(
-                            (photo) =>
-                              photo.id ===
-                              configuration.assignedPhotoId,
-                          ) ?? null;
 
                         const configurationPrice =
                           configuration.packageType ===
@@ -1799,8 +1621,8 @@ const PhoneCaseCustomizer = ({
                                   <p className="mt-0.5 truncate text-[10px] font-semibold text-ink/50 sm:text-xs">
                                     {configuration.packageType ===
                                     "with-polaroid"
-                                      ? assignedPhoto
-                                        ? "Polaroid + Case · Photo assigned"
+                                      ? configuration.photo
+                                        ? "Polaroid + Case · Photo uploaded"
                                         : "Polaroid + Case · Needs a photo"
                                       : "Case Only · Ready"}
                                   </p>
@@ -1833,6 +1655,9 @@ const PhoneCaseCustomizer = ({
                                     <div className="mt-3 grid grid-cols-2 gap-2.5">
                                       <button
                                         type="button"
+                                        disabled={
+                                          isAddingToCart
+                                        }
                                         onClick={() =>
                                           setConfigurationPackage(
                                             configuration.id,
@@ -1873,6 +1698,9 @@ const PhoneCaseCustomizer = ({
 
                                       <button
                                         type="button"
+                                        disabled={
+                                          isAddingToCart
+                                        }
                                         onClick={() =>
                                           setConfigurationPackage(
                                             configuration.id,
@@ -1914,111 +1742,121 @@ const PhoneCaseCustomizer = ({
                                     {configuration.packageType ===
                                       "with-polaroid" && (
                                       <div className="mt-6">
-                                        <div className="flex items-center justify-between gap-3">
-                                          <p className="text-xs font-bold text-ink">
-                                            Assign a
-                                            photo
-                                          </p>
+                                        <p className="text-xs font-bold text-ink">
+                                          Add a photo
+                                          for this case
+                                        </p>
 
+                                        {!configuration.photo ? (
                                           <button
                                             type="button"
-                                            onClick={() =>
-                                              fileInputRef.current?.click()
+                                            disabled={
+                                              isAddingToCart
                                             }
-                                            className="text-[10px] font-bold text-burgundy underline underline-offset-4"
-                                          >
-                                            Add photos
-                                          </button>
-                                        </div>
-
-                                        {photos.length ===
-                                        0 ? (
-                                          <button
-                                            type="button"
                                             onClick={() =>
-                                              fileInputRef.current?.click()
-                                            }
-                                            className="mt-3 flex w-full items-center justify-center rounded-xl border-2 border-dashed border-ink bg-paper px-4 py-5 text-xs font-bold"
-                                          >
-                                            <LuImagePlus className="mr-2 h-4 w-4" />
-
-                                            Upload
-                                            photos
-                                            first
-                                          </button>
-                                        ) : (
-                                          <div className="mt-3 grid grid-cols-4 gap-2">
-                                            {photos.map(
-                                              (
-                                                photo,
-                                                photoIndex,
-                                              ) => {
-                                                const isAssigned =
-                                                  configuration.assignedPhotoId ===
-                                                  photo.id;
-
-                                                return (
-                                                  <button
-                                                    key={
-                                                      photo.id
-                                                    }
-                                                    type="button"
-                                                    onClick={() =>
-                                                      assignPhotoToConfiguration(
-                                                        configuration.id,
-                                                        photo.id,
-                                                      )
-                                                    }
-                                                    className={[
-                                                      "relative aspect-square overflow-hidden rounded-lg border-2 bg-beige",
-
-                                                      isAssigned
-                                                        ? "border-burgundy shadow-[2px_2px_0_#2A211C]"
-                                                        : "border-ink/20 hover:border-ink",
-                                                    ].join(
-                                                      " ",
-                                                    )}
-                                                  >
-                                                    <img
-                                                      src={
-                                                        photo.src
-                                                      }
-                                                      alt={`Assign photo ${
-                                                        photoIndex +
-                                                        1
-                                                      }`}
-                                                      className="h-full w-full object-cover"
-                                                    />
-
-                                                    {isAssigned && (
-                                                      <span className="absolute inset-0 flex items-center justify-center bg-burgundy/20">
-                                                        <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-burgundy text-cream">
-                                                          <LuCheck className="h-4 w-4" />
-                                                        </span>
-                                                      </span>
-                                                    )}
-                                                  </button>
-                                                );
-                                              },
-                                            )}
-                                          </div>
-                                        )}
-
-                                        {assignedPhoto && (
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              openPhotoEditor(
+                                              openPhotoPicker(
                                                 configuration.id,
                                               )
                                             }
-                                            className="mt-4 flex w-full items-center justify-center rounded-full border-2 border-ink bg-paper px-4 py-2.5 text-xs font-bold shadow-[2px_2px_0_#2A211C]"
+                                            className="mt-3 flex w-full flex-col items-center justify-center rounded-[14px] border-2 border-dashed border-ink bg-paper px-4 py-7 text-center transition hover:bg-beige disabled:opacity-50"
                                           >
-                                            <LuPencil className="mr-2 h-4 w-4" />
+                                            <LuImagePlus className="h-6 w-6" />
 
-                                            Edit photo
-                                            position
+                                            <span className="mt-2 text-xs font-bold sm:text-sm">
+                                              Upload
+                                              photo
+                                            </span>
+
+                                            <span className="mt-1 text-[10px] text-ink/50">
+                                              JPG, PNG
+                                              or WebP
+                                            </span>
                                           </button>
+                                        ) : (
+                                          <div className="mt-3 rounded-[14px] border-2 border-ink bg-paper p-3">
+                                            <div className="flex items-center gap-3">
+                                              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 border-ink bg-beige">
+                                                <img
+                                                  src={
+                                                    configuration
+                                                      .photo
+                                                      .src
+                                                  }
+                                                  alt={`Photo for ${model.name}`}
+                                                  className="h-full w-full object-cover"
+                                                />
+                                              </div>
+
+                                              <div className="min-w-0 flex-1">
+                                                <p className="truncate text-xs font-bold text-ink">
+                                                  {
+                                                    configuration
+                                                      .photo
+                                                      .name
+                                                  }
+                                                </p>
+
+                                                <p className="mt-1 text-[10px] text-ink/50">
+                                                  Photo
+                                                  uploaded
+                                                </p>
+                                              </div>
+
+                                              <button
+                                                type="button"
+                                                aria-label="Remove uploaded photo"
+                                                disabled={
+                                                  isAddingToCart
+                                                }
+                                                onClick={() =>
+                                                  removeConfigurationPhoto(
+                                                    configuration.id,
+                                                  )
+                                                }
+                                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink/40 transition hover:bg-burgundy hover:text-cream"
+                                              >
+                                                <LuTrash2 className="h-4 w-4" />
+                                              </button>
+                                            </div>
+
+                                            <div className="mt-3 grid grid-cols-2 gap-2">
+                                              <button
+                                                type="button"
+                                                disabled={
+                                                  isAddingToCart
+                                                }
+                                                onClick={() =>
+                                                  openPhotoPicker(
+                                                    configuration.id,
+                                                  )
+                                                }
+                                                className="flex items-center justify-center rounded-full border-2 border-ink bg-cream px-3 py-2.5 text-[10px] font-bold transition hover:bg-beige sm:text-xs"
+                                              >
+                                                <LuImagePlus className="mr-1.5 h-4 w-4" />
+
+                                                Change
+                                                photo
+                                              </button>
+
+                                              <button
+                                                type="button"
+                                                disabled={
+                                                  isAddingToCart
+                                                }
+                                                onClick={() =>
+                                                  openPhotoEditor(
+                                                    configuration.id,
+                                                  )
+                                                }
+                                                className="flex items-center justify-center rounded-full border-2 border-ink bg-blush px-3 py-2.5 text-[10px] font-bold shadow-[2px_2px_0_#2A211C] sm:text-xs"
+                                              >
+                                                <LuPencil className="mr-1.5 h-4 w-4" />
+
+                                                Edit
+                                                position
+                                              </button>
+                                            </div>
+                                          </div>
                                         )}
                                       </div>
                                     )}
@@ -2033,7 +1871,7 @@ const PhoneCaseCustomizer = ({
                                         configuration.packageType
                                       }
                                       photo={
-                                        assignedPhoto
+                                        configuration.photo
                                       }
                                       configuration={
                                         configuration
@@ -2059,7 +1897,7 @@ const PhoneCaseCustomizer = ({
 
                                     {isComplete
                                       ? "Configuration ready"
-                                      : "Assign a photo to continue"}
+                                      : "Upload a photo to continue"}
                                   </span>
 
                                   <span className="text-xs font-bold text-burgundy">
@@ -2078,7 +1916,6 @@ const PhoneCaseCustomizer = ({
                 </section>
               )}
 
-            {/* Mobile order summary */}
             {configurations.length >
               0 && (
                 <section className="rounded-[18px] border-2 border-ink bg-beige p-4 lg:hidden">
@@ -2121,37 +1958,6 @@ const PhoneCaseCustomizer = ({
                 </section>
               )}
 
-            {/* Extra Polaroids CTA */}
-            <section className="rounded-[18px] border-2 border-ink bg-blush p-4 shadow-[3px_3px_0_rgba(42,33,28,0.12)] sm:p-6">
-              <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper">
-                  <LuImages className="h-5 w-5" />
-                </span>
-
-                <div className="flex-1">
-                  <h2 className="font-serif text-lg font-semibold text-ink sm:text-xl">
-                    Want some extra
-                    Polaroids?
-                  </h2>
-
-                  <p className="mt-1 text-xs leading-5 text-ink/60 sm:text-sm sm:leading-6">
-                    Create loose prints with
-                    different photos,
-                    quantities and crops in
-                    the Polaroid customiser.
-                  </p>
-
-                  <Link
-                    href="/products/polaroids"
-                    className="mt-4 inline-flex items-center rounded-full border-2 border-ink bg-paper px-4 py-2.5 text-xs font-bold shadow-[3px_3px_0_#2A211C]"
-                  >
-                    Create loose Polaroids →
-                  </Link>
-                </div>
-              </div>
-            </section>
-
-            {/* Sample gallery */}
             {!editItemId && (
               <section className="pt-3 sm:pt-6">
                 <span className="inline-flex -rotate-2 rounded-full border-2 border-ink bg-paper px-3 py-1 font-handwritten text-sm font-bold text-ink shadow-[2px_2px_0_#2A211C]">
@@ -2199,7 +2005,6 @@ const PhoneCaseCustomizer = ({
             )}
           </div>
 
-          {/* Desktop order summary */}
           <aside className="hidden lg:sticky lg:top-28 lg:block">
             <div className="rounded-[18px] border-2 border-ink bg-paper p-5 shadow-[6px_7px_0_rgba(42,33,28,0.12)]">
               <div className="flex items-center gap-2">
@@ -2225,10 +2030,7 @@ const PhoneCaseCustomizer = ({
                 <>
                   <div className="mt-5 space-y-3">
                     {configurations.map(
-                      (
-                        configuration,
-                        configurationIndex,
-                      ) => {
+                      (configuration) => {
                         const model =
                           modelMap.get(
                             configuration.modelId,
@@ -2354,31 +2156,19 @@ const PhoneCaseCustomizer = ({
                             totalPrice,
                           )}`}
               </button>
-
-              <div className="mt-5 rounded-xl bg-blush p-3">
-                <p className="text-xs font-bold text-ink">
-                  Want some extra
-                  Polaroids?
-                </p>
-
-                <p className="mt-1 text-[10px] leading-4 text-ink/55">
-                  Create loose prints in
-                  the Polaroid customiser.
-                </p>
-
-                <Link
-                  href="/products/polaroids"
-                  className="mt-2 inline-flex text-[10px] font-bold text-burgundy underline underline-offset-4"
-                >
-                  Create loose Polaroids →
-                </Link>
-              </div>
             </div>
           </aside>
         </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </section>
 
-      {/* Mobile sticky bar */}
       {configurations.length > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t-2 border-ink bg-cream px-4 py-3 lg:hidden">
           <div className="min-w-0 shrink-0">
@@ -2424,7 +2214,6 @@ const PhoneCaseCustomizer = ({
         </div>
       )}
 
-      {/* Focused case editor */}
       {editingConfiguration &&
         editingPhoto && (
           <div
@@ -2633,7 +2422,6 @@ const PhoneCaseCustomizer = ({
           </div>
         )}
 
-      {/* Success prompt */}
       {successModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/55 px-4">
           <div className="w-full max-w-[460px] rounded-[22px] border-2 border-ink bg-cream p-5 text-center shadow-[8px_8px_0_#2A211C] sm:p-7">
@@ -2647,9 +2435,8 @@ const PhoneCaseCustomizer = ({
             </h2>
 
             <p className="mx-auto mt-2 max-w-[360px] text-sm leading-6 text-ink/60">
-              Each model, package and
-              assigned photo has been saved
-              separately.
+              Want to add some extra
+              Polaroids to your order?
             </p>
 
             <div className="mt-6 space-y-3">
@@ -2672,19 +2459,7 @@ const PhoneCaseCustomizer = ({
                 }
                 className="flex w-full items-center justify-center rounded-full border-2 border-ink bg-burgundy px-5 py-3 text-sm font-bold text-cream shadow-[3px_3px_0_#2A211C]"
               >
-                View Cart
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setSuccessModalOpen(
-                    false,
-                  )
-                }
-                className="text-xs font-bold text-ink/55 underline underline-offset-4"
-              >
-                Keep customising
+                No, View Cart
               </button>
             </div>
           </div>
