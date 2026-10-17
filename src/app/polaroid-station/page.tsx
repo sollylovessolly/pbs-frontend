@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import StationBooking from "@/component/events/StationBooking";
 
@@ -10,7 +11,19 @@ export const metadata = {
 export default function PolaroidStationPage() {
   return (
     <main className="bg-cream text-ink">
-      <section className="bg-burgundy px-5 py-14 text-cream sm:py-20">
+      <section className="relative isolate overflow-hidden bg-burgundy px-5 py-14 text-cream sm:py-20">
+        <Image
+          src="/images/products/polaroids.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="-z-20 object-cover object-[center_55%]"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-burgundy/95 via-burgundy/85 to-burgundy/45"
+        />
         <div className="mx-auto max-w-site">
           <Link href="/" className="text-sm underline underline-offset-4">
             Home
