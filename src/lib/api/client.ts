@@ -59,8 +59,16 @@ export const apiRequest = async <T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> => {
-  if (process.env.NEXT_PUBLIC_DIRECT_UPLOADS === "true" && init.body instanceof FormData) {
-    const body = await prepareDirectUploads(path, init.body, init.headers, init.signal ?? undefined);
+  if (
+    process.env.NEXT_PUBLIC_DIRECT_UPLOADS === "true" &&
+    init.body instanceof FormData
+  ) {
+    const body = await prepareDirectUploads(
+      path,
+      init.body,
+      init.headers,
+      init.signal ?? undefined,
+    );
     init = { ...init, body: JSON.stringify(body) };
   }
   let response: Response;
@@ -146,8 +154,9 @@ export function apiUploadWithProgress<T>(
   signal?: AbortSignal,
 ): Promise<T> {
   if (process.env.NEXT_PUBLIC_DIRECT_UPLOADS === "true") {
-    return prepareDirectUploads(path, body, undefined, signal, onProgress)
-      .then((payload) => apiPost<T>(path, payload, signal));
+    return prepareDirectUploads(path, body, undefined, signal, onProgress).then(
+      (payload) => apiPost<T>(path, payload, signal),
+    );
   }
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -200,7 +209,11 @@ export function apiUploadWithProgress<T>(
   });
 }
 
-type UploadGrant = { token: string; url: string; fields: Record<string, string> };
+type UploadGrant = {
+  token: string;
+  url: string;
+  fields: Record<string, string>;
+};
 
 /** Files go straight to private storage; only signed references cross the API. */
 async function prepareDirectUploads(
@@ -210,9 +223,14 @@ async function prepareDirectUploads(
   signal?: AbortSignal,
   onProgress?: (percent: number) => void,
 ): Promise<Record<string, unknown>> {
-  const kind = path === "/uploads" ? "production"
-    : path === "/admin/gallery/uploads" ? "gallery"
-    : path === "/reviews" ? "review" : undefined;
+  const kind =
+    path === "/uploads"
+      ? "production"
+      : path === "/admin/gallery/uploads"
+        ? "gallery"
+        : path === "/reviews"
+          ? "review"
+          : undefined;
   if (!kind) throw new ApiError("This upload is not supported.", 400);
   const payload: Record<string, unknown> = {};
   const files: File[] = [];
@@ -224,14 +242,30 @@ async function prepareDirectUploads(
     throw new ApiError("Please select the required number of files.", 400);
   const tokens: string[] = [];
   for (const [index, file] of files.entries()) {
-    const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
-    const sha256 = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-    const grant = await apiRequest<UploadGrant>(`/uploads/direct${kind === "gallery" ? "/admin" : ""}`, {
-      method: "POST", headers, signal,
-      body: JSON.stringify({ kind, contentType: file.type, size: file.size, sha256 }),
-    });
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      await file.arrayBuffer(),
+    );
+    const sha256 = Array.from(new Uint8Array(digest), (byte) =>
+      byte.toString(16).padStart(2, "0"),
+    ).join("");
+    const grant = await apiRequest<UploadGrant>(
+      `/uploads/direct${kind === "gallery" ? "/admin" : ""}`,
+      {
+        method: "POST",
+        headers,
+        signal,
+        body: JSON.stringify({
+          kind,
+          contentType: file.type,
+          size: file.size,
+          sha256,
+        }),
+      },
+    );
     await sendDirectFile(grant, file, signal, (percent) =>
-      onProgress?.(Math.round((index * 100 + percent) / files.length)));
+      onProgress?.(Math.round((index * 100 + percent) / files.length)),
+    );
     tokens.push(grant.token);
   }
   if (kind === "review") payload.uploadTokens = tokens;
@@ -248,23 +282,38 @@ function sendDirectFile(
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const abort = () => xhr.abort();
-    if (signal?.aborted) { reject(new DOMException("Aborted", "AbortError")); return; }
+    if (signal?.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
     signal?.addEventListener("abort", abort, { once: true });
     xhr.open("POST", grant.url);
     xhr.timeout = 120000;
     xhr.onloadend = () => signal?.removeEventListener("abort", abort);
     xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) onProgress?.(Math.round(event.loaded * 100 / event.total));
+      if (event.lengthComputable)
+        onProgress?.(Math.round((event.loaded * 100) / event.total));
     };
-    xhr.onerror = () => reject(new ApiError("We could not upload this file. Please retry.", 0));
-    xhr.ontimeout = () => reject(new ApiError("Upload took too long. Please retry.", 0));
+    xhr.onerror = () =>
+      reject(new ApiError("We could not upload this file. Please retry.", 0));
+    xhr.ontimeout = () =>
+      reject(new ApiError("Upload took too long. Please retry.", 0));
     xhr.onabort = () => reject(new DOMException("Aborted", "AbortError"));
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) { onProgress?.(100); resolve(); }
-      else reject(new ApiError("We could not upload this file. Please retry.", xhr.status));
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100);
+        resolve();
+      } else
+        reject(
+          new ApiError(
+            "We could not upload this file. Please retry.",
+            xhr.status,
+          ),
+        );
     };
     const form = new FormData();
-    for (const [key, value] of Object.entries(grant.fields)) form.append(key, value);
+    for (const [key, value] of Object.entries(grant.fields))
+      form.append(key, value);
     form.append("file", file);
     xhr.send(form);
   });
