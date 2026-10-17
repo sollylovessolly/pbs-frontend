@@ -3,6 +3,8 @@ import type { CreateOrderPayload } from "../api/types";
 import { validateCartPackages } from "./packages";
 import { safeUrl } from "./catalogue";
 export function orderItems(items: CartItem[]): CreateOrderPayload["items"] {
+  if (items.some((i) => i.packageDraftId))
+    throw new Error("Please complete your gift package before checkout.");
   validateCartPackages(items);
   if (!items.length) throw new Error("Your cart is empty.");
   return items.map((item) => {

@@ -5,6 +5,8 @@ export type CartProductType =
 
 export type CartItem = {
   id: string;
+  packageDraftId?: string;
+  packageDraftTemplateId?: string;
   packageId?: string;
   packageGroupId?: string;
   productType: CartProductType;

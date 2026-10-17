@@ -25,6 +25,7 @@ import {
   cartThumbnail,
 } from "@/lib/commerce/production";
 import { useCart } from "@/context/CartContext";
+import { usePackageStep } from "@/component/products/shared/PackageStepProvider";
 import { createCroppedImage } from "@/lib/image/createCroppedImage";
 
 const ROTATION_OPTIONS = [0, 90, 180, 270] as const;
@@ -209,6 +210,7 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
   const { variant } = useProduct();
   const BASE_PRICE = Number(variant.sellingPrice);
 
+  const packageStep = usePackageStep();
   const { items, isReady, addItems, updateItem } = useCart();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -226,7 +228,7 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
   const [submitError, setSubmitError] = useState("");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const draft = usePhotoDraft(
-    `polaroids:${variant.sku}`,
+    `polaroids:${variant.sku}${packageStep ? ":" + packageStep.draftId : ""}`,
     photos,
     setPhotos,
     objectUrlsRef,
@@ -289,6 +291,17 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
       return;
     }
 
+    if (
+      packageStep &&
+      totalPrints + validFiles.length > packageStep.remaining
+    ) {
+      setSubmitError(
+        `This package has room for ${Math.max(0, packageStep.remaining - totalPrints)} more photos. Remove extra photos or reduce copy quantities.`,
+      );
+      event.target.value = "";
+      return;
+    }
+    setSubmitError("");
     const newPhotos: UploadedPhoto[] = validFiles.map((file) => {
       const objectUrl = URL.createObjectURL(file);
 
@@ -357,12 +370,13 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
         1,
         Math.min(
           selectedPhoto.quantity + difference,
-          variant.availableQuantity == null
-            ? Infinity
-            : variant.availableQuantity -
-                photos
-                  .filter((p) => p.id !== photoId)
-                  .reduce((sum, p) => sum + p.quantity, 0),
+          Math.min(
+            variant.availableQuantity ?? Infinity,
+            packageStep?.remaining ?? Infinity,
+          ) -
+            photos
+              .filter((p) => p.id !== photoId)
+              .reduce((sum, p) => sum + p.quantity, 0),
         ),
       ),
     });
@@ -436,16 +450,18 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
 
         updateItem(editItemId, updatedItem);
 
-        router.push("/cart");
+        router.push(packageStep?.returnHref ?? "/cart");
         return;
       }
 
+      packageStep?.assertQuantity(totalPrints);
       const cartItems = await prepareInBatches(photos, prepareCartItem);
 
-      addItems(cartItems);
+      if (packageStep) packageStep.saveItems(cartItems);
+      else addItems(cartItems);
       await draft.finish();
 
-      router.push("/cart");
+      router.push(packageStep?.returnHref ?? "/cart");
     } catch (error) {
       console.error("Could not prepare Polaroid prints:", error);
 
@@ -607,7 +623,10 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
                 {!editItemId && (
                   <button
                     type="button"
-                    disabled={isAddingToCart}
+                    disabled={
+                      isAddingToCart ||
+                      (!!packageStep && totalPrints >= packageStep.remaining)
+                    }
                     onClick={() => fileInputRef.current?.click()}
                     className="hidden shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper px-4 py-2.5 text-sm font-bold shadow-[3px_3px_0_#2A211C] sm:flex"
                   >
@@ -694,7 +713,11 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
                               aria-label={`Increase quantity for photo ${
                                 index + 1
                               }`}
-                              disabled={isAddingToCart}
+                              disabled={
+                                isAddingToCart ||
+                                (!!packageStep &&
+                                  totalPrints >= packageStep.remaining)
+                              }
                               onClick={() => changeQuantity(photo.id, 1)}
                               className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-paper text-xs font-bold sm:h-8 sm:w-8"
                             >
@@ -714,7 +737,10 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
                 {!editItemId && (
                   <button
                     type="button"
-                    disabled={isAddingToCart}
+                    disabled={
+                      isAddingToCart ||
+                      (!!packageStep && totalPrints >= packageStep.remaining)
+                    }
                     onClick={() => fileInputRef.current?.click()}
                     className="flex min-h-[260px] flex-col items-center justify-center rounded-[14px] border-2 border-dashed border-ink bg-beige/40 p-4 text-center transition hover:bg-beige disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-[360px] sm:rounded-[18px]"
                   >
@@ -768,9 +794,11 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
                     : "Preparing Your Prints…"
                   : editItemId
                     ? `Save Changes — ${formatPrice(totalPrice)}`
-                    : `Add ${totalPrints} ${
-                        totalPrints === 1 ? "Print" : "Prints"
-                      } to Cart — ${formatPrice(totalPrice)}`}
+                    : packageStep
+                      ? `Save ${totalPrints} Prints to Package`
+                      : `Add ${totalPrints} ${
+                          totalPrints === 1 ? "Print" : "Prints"
+                        } to Cart — ${formatPrice(totalPrice)}`}
               </button>
             </>
           )}
@@ -811,7 +839,9 @@ const PolaroidCustomizer = ({ editItemId = null }: PolaroidCustomizerProps) => {
                 : "Preparing…"
               : editItemId
                 ? "Save Changes"
-                : "Add to Cart"}
+                : packageStep
+                  ? "Save to Package"
+                  : "Add to Cart"}
           </button>
         </div>
       )}

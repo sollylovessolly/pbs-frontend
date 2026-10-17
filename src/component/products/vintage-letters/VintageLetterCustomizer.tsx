@@ -29,6 +29,7 @@ import {
   canvasesToPdf,
 } from "@/lib/commerce/production";
 import { useCart } from "@/context/CartContext";
+import { usePackageStep } from "@/component/products/shared/PackageStepProvider";
 import {
   VINTAGE_LETTER_TEMPLATES,
   type VintageLetterFinish,
@@ -455,6 +456,7 @@ const GalleryCard = ({ item }: { item: GalleryItem }) => {
 const VintageLetterCustomizer = () => {
   const router = useRouter();
   const submissionLock = useRef(false);
+  const packageStep = usePackageStep();
   const { addItems } = useCart();
   const { variant, products, selectVariant } = useProduct();
 
@@ -833,6 +835,7 @@ const VintageLetterCustomizer = () => {
     setIsAddingToCart(true);
 
     try {
+      packageStep?.assertQuantity(quantity);
       await document.fonts.ready;
       const layout = getTemplatePreviewLayout(selectedTemplate.id);
       const pages: HTMLCanvasElement[] = [];
@@ -943,8 +946,9 @@ const VintageLetterCustomizer = () => {
         isFast: false,
       };
 
-      addItems([cartItem]);
-      router.push("/cart");
+      if (packageStep) packageStep.saveItems([cartItem]);
+      else addItems([cartItem]);
+      router.push(packageStep?.returnHref ?? "/cart");
     } catch (error) {
       window.alert(
         error instanceof Error
@@ -1453,11 +1457,17 @@ const VintageLetterCustomizer = () => {
                     <button
                       type="button"
                       aria-label="Increase letter quantity"
+                      disabled={
+                        !!packageStep && quantity >= packageStep.remaining
+                      }
                       onClick={() =>
                         setQuantity((currentQuantity) =>
                           Math.min(
                             currentQuantity + 1,
-                            variant.availableQuantity ?? Infinity,
+                            Math.min(
+                              variant.availableQuantity ?? Infinity,
+                              packageStep?.remaining ?? Infinity,
+                            ),
                           ),
                         )
                       }
@@ -1505,7 +1515,9 @@ const VintageLetterCustomizer = () => {
                   ? "Adding Letter…"
                   : !isComplete
                     ? "Complete Your Letter"
-                    : `Add to Cart — ${formatPrice(totalPrice)}`}
+                    : packageStep
+                      ? "Save to Package"
+                      : `Add to Cart — ${formatPrice(totalPrice)}`}
               </button>
             </div>
           </div>
@@ -1566,7 +1578,9 @@ const VintageLetterCustomizer = () => {
             ? "Adding…"
             : !isComplete
               ? "Complete Letter"
-              : "Add to Cart"}
+              : packageStep
+                ? "Save to Package"
+                : "Add to Cart"}
         </button>
       </div>
 

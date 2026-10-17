@@ -86,3 +86,37 @@ export function validateCartPackages(items: CartItem[]) {
     );
   }
 }
+
+export function packageQuantity(id: string, productType: string) {
+  const p = getPackage(id);
+  if (!p) return 0;
+  return (
+    (
+      {
+        polaroid: p.polaroids,
+        "phone-case": p.cases,
+        "vintage-letter": 1,
+        photostrip: p.strips,
+      } as Record<string, number>
+    )[productType] ?? 0
+  );
+}
+export function packageStepRemaining(
+  id: string,
+  draftId: string,
+  productType: string,
+  items: CartItem[],
+) {
+  return Math.max(
+    0,
+    packageQuantity(id, productType) -
+      items
+        .filter(
+          (i) =>
+            i.packageDraftId === draftId &&
+            i.packageDraftTemplateId === id &&
+            i.productType === productType,
+        )
+        .reduce((sum, i) => sum + i.quantity, 0),
+  );
+}

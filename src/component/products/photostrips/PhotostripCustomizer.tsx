@@ -28,6 +28,7 @@ import {
   cartThumbnail,
 } from "@/lib/commerce/production";
 import { useCart } from "@/context/CartContext";
+import { usePackageStep } from "@/component/products/shared/PackageStepProvider";
 import FramedPhoto from "@/component/products/shared/FramedPhoto";
 import { polaroidCrop } from "@/lib/image/polaroidCrop";
 import { createCroppedImage } from "@/lib/image/createCroppedImage";
@@ -487,6 +488,7 @@ const PhotostripCustomizer = () => {
   };
   const priceFor = (templateId: string) =>
     Number(variantFor(templateId)?.sellingPrice ?? 0);
+  const packageStep = usePackageStep();
   const { addItems } = useCart();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -506,7 +508,7 @@ const PhotostripCustomizer = () => {
   const [submitError, setSubmitError] = useState("");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const draft = usePhotoDraft(
-    "photostrips",
+    packageStep ? `photostrips:${packageStep.draftId}` : "photostrips",
     configurations,
     setConfigurations,
     objectUrlsRef,
@@ -652,6 +654,7 @@ const PhotostripCustomizer = () => {
   };
 
   const increaseTemplateCount = (template: PhotostripTemplate) => {
+    if (packageStep && totalPrints >= packageStep.remaining) return;
     const selected = variantFor(template.id);
     if (!selected || !available(selected)) return;
     const count = configurations
@@ -727,7 +730,13 @@ const PhotostripCustomizer = () => {
         1,
         Math.min(
           configuration.quantity + difference,
-          variantFor(configuration.templateId)?.availableQuantity ?? Infinity,
+          Math.min(
+            variantFor(configuration.templateId)?.availableQuantity ?? Infinity,
+            (packageStep?.remaining ?? Infinity) -
+              configurations
+                .filter((c) => c.id !== configurationId)
+                .reduce((sum, c) => sum + c.quantity, 0),
+          ),
         ),
       ),
     });
@@ -961,11 +970,13 @@ const PhotostripCustomizer = () => {
     setSubmitError("");
 
     try {
+      packageStep?.assertQuantity(totalPrints);
       const cartItems = await prepareInBatches(configurations, prepareCartItem);
 
-      addItems(cartItems);
+      if (packageStep) packageStep.saveItems(cartItems);
+      else addItems(cartItems);
       await draft.finish();
-      router.push("/cart");
+      router.push(packageStep?.returnHref ?? "/cart");
     } catch (error) {
       console.error("Could not prepare photostrips:", error);
 
@@ -1207,7 +1218,11 @@ const PhotostripCustomizer = () => {
                               <button
                                 type="button"
                                 aria-label={`Increase quantity for ${template.name}`}
-                                disabled={isAddingToCart}
+                                disabled={
+                                  isAddingToCart ||
+                                  (!!packageStep &&
+                                    totalPrints >= packageStep.remaining)
+                                }
                                 onClick={() =>
                                   changeQuantity(configuration.id, 1)
                                 }
@@ -1290,9 +1305,11 @@ const PhotostripCustomizer = () => {
                           ? "Design"
                           : "Designs"
                       }`
-                    : `Add ${totalPrints} ${
-                        totalPrints === 1 ? "Print" : "Prints"
-                      } to Cart — ${formatPrice(totalPrice)}`}
+                    : packageStep
+                      ? "Save Photostrips to Package"
+                      : `Add ${totalPrints} ${
+                          totalPrints === 1 ? "Print" : "Prints"
+                        } to Cart — ${formatPrice(totalPrice)}`}
               </button>
             </>
           )}
@@ -1331,7 +1348,9 @@ const PhotostripCustomizer = () => {
               ? "Preparing…"
               : !allConfigurationsComplete
                 ? `Finish ${configurations.length - completedConfigurations}`
-                : "Add to Cart"}
+                : packageStep
+                  ? "Save to Package"
+                  : "Add to Cart"}
           </button>
         </div>
       )}
@@ -1443,7 +1462,11 @@ const PhotostripCustomizer = () => {
                         {count === 0 ? (
                           <button
                             type="button"
-                            disabled={!available(selected)}
+                            disabled={
+                              !available(selected) ||
+                              (!!packageStep &&
+                                totalPrints >= packageStep.remaining)
+                            }
                             onClick={() => increaseTemplateCount(template)}
                             className="flex h-8 items-center justify-center rounded-full border-2 border-ink bg-cream px-3 text-[10px] font-bold shadow-[2px_2px_0_#2A211C]"
                           >
@@ -1468,7 +1491,11 @@ const PhotostripCustomizer = () => {
                             <button
                               type="button"
                               aria-label={`Add another ${template.name} strip`}
-                              disabled={!available(selected)}
+                              disabled={
+                                !available(selected) ||
+                                (!!packageStep &&
+                                  totalPrints >= packageStep.remaining)
+                              }
                               onClick={() => increaseTemplateCount(template)}
                               className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-ink bg-paper text-xs font-bold"
                             >

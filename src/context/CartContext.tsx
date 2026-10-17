@@ -19,6 +19,8 @@ const CART_STORAGE_KEY = "polaroidsbysolly-cart";
 
 type CartContextValue = {
   items: CartItem[];
+  draftItems: CartItem[];
+  removeDraftStep: (draftId: string, productType: string) => void;
   cartCount: number;
   subtotal: number;
   isReady: boolean;
@@ -41,7 +43,15 @@ type CartProviderProps = {
 };
 
 export const CartProvider = ({ children }: CartProviderProps) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [allItems, setItems] = useState<CartItem[]>([]);
+  const items = useMemo(
+    () => allItems.filter((i) => !i.packageDraftId),
+    [allItems],
+  );
+  const draftItems = useMemo(
+    () => allItems.filter((i) => !!i.packageDraftId),
+    [allItems],
+  );
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -69,7 +79,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       window.localStorage.setItem(
         CART_STORAGE_KEY,
         JSON.stringify(
-          items.map((item) => ({
+          allItems.map((item) => ({
             ...item,
             sourceImageUrl: undefined,
             previewUrl: cartPreview(item),
@@ -79,11 +89,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     } catch (error) {
       console.error("Could not save cart:", error);
     }
-  }, [items, isReady]);
+  }, [allItems, isReady]);
 
   const addItems = (newItems: NewCartItem[]) => {
     for (const item of newItems) {
-      const combined = [...items, ...newItems]
+      const combined = [...allItems, ...newItems]
         .filter((i) => i.variantSku === item.variantSku)
         .reduce((sum, i) => sum + i.quantity, 0);
       if (
@@ -119,7 +129,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   };
 
   const updateQuantity = (itemId: string, quantity: number) => {
-    if (items.find((i) => i.id === itemId)?.packageGroupId) return;
+    const target = allItems.find((i) => i.id === itemId);
+    if (target?.packageGroupId || target?.packageDraftId) return;
     setItems((currentItems) =>
       currentItems.map((item) =>
         item.id === itemId
@@ -177,17 +188,34 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   }, [items]);
 
   const bundleItems = (packageId: string, itemIds: string[]) => {
-    const selected = items.filter((i) => itemIds.includes(i.id));
+    const selected = allItems.filter((i) => itemIds.includes(i.id));
     validatePackageItems(packageId, selected);
     const packageGroupId = crypto.randomUUID();
     setItems((current) =>
       current.map((i) =>
-        itemIds.includes(i.id) ? { ...i, packageId, packageGroupId } : i,
+        itemIds.includes(i.id)
+          ? {
+              ...i,
+              packageId,
+              packageGroupId,
+              packageDraftId: undefined,
+              packageDraftTemplateId: undefined,
+            }
+          : i,
       ),
     );
   };
 
+  const removeDraftStep = (draftId: string, productType: string) =>
+    setItems((current) =>
+      current.filter(
+        (i) => !(i.packageDraftId === draftId && i.productType === productType),
+      ),
+    );
+
   const value: CartContextValue = {
+    draftItems,
+    removeDraftStep,
     bundleItems,
     items,
     cartCount,

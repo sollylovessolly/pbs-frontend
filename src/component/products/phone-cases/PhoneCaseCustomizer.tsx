@@ -22,6 +22,7 @@ import {
 import { useProduct } from "@/component/products/shared/ProductProvider";
 import { available } from "@/lib/commerce/catalogue";
 import { useCart } from "@/context/CartContext";
+import { usePackageStep } from "@/component/products/shared/PackageStepProvider";
 import { type PhoneCasePackage } from "@/data/phoneCaseModels";
 import { createCroppedImage } from "@/lib/image/createCroppedImage";
 import type { NewCartItem } from "@/types/cart";
@@ -499,6 +500,7 @@ const PhoneCaseCustomizer = ({
     [products],
   );
 
+  const packageStep = usePackageStep();
   const { items, isReady, addItems, updateItem } = useCart();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -639,6 +641,7 @@ const PhoneCaseCustomizer = ({
   };
 
   const increaseModelQuantity = (modelId: string) => {
+    if (packageStep && configurations.length >= packageStep.remaining) return;
     const model = modelMap.get(modelId);
     if (
       !model?.inStock ||
@@ -797,6 +800,7 @@ const PhoneCaseCustomizer = ({
     configurationId: string,
     packageType: PhoneCasePackage,
   ) => {
+    if (packageStep && packageType !== "case-only") return;
     updateConfiguration(configurationId, {
       packageType,
     });
@@ -936,10 +940,16 @@ const PhoneCaseCustomizer = ({
         return;
       }
 
+      packageStep?.assertQuantity(configurations.length);
       const newCartItems = await Promise.all(
         configurations.map(prepareCartItem),
       );
 
+      if (packageStep) {
+        packageStep.saveItems(newCartItems);
+        router.push(packageStep.returnHref);
+        return;
+      }
       addItems(newCartItems);
 
       setSuccessModalOpen(true);
@@ -1157,7 +1167,11 @@ const PhoneCaseCustomizer = ({
                           <button
                             type="button"
                             aria-label={`Increase ${model.name} quantity`}
-                            disabled={isAddingToCart}
+                            disabled={
+                              isAddingToCart ||
+                              (!!packageStep &&
+                                configurations.length >= packageStep.remaining)
+                            }
                             onClick={() => increaseModelQuantity(model.id)}
                             className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-paper text-xs font-bold"
                           >
@@ -1702,9 +1716,11 @@ const PhoneCaseCustomizer = ({
                         } Remaining`
                       : editItemId
                         ? `Save Changes — ${formatPrice(totalPrice)}`
-                        : `Add ${configurations.length} ${
-                            configurations.length === 1 ? "Case" : "Cases"
-                          } — ${formatPrice(totalPrice)}`}
+                        : packageStep
+                          ? "Save Cases to Package"
+                          : `Add ${configurations.length} ${
+                              configurations.length === 1 ? "Case" : "Cases"
+                            } — ${formatPrice(totalPrice)}`}
               </button>
             </div>
           </aside>
@@ -1749,7 +1765,9 @@ const PhoneCaseCustomizer = ({
                   } Remaining`
                 : editItemId
                   ? "Save Changes"
-                  : "Add to Cart"}
+                  : packageStep
+                    ? "Save to Package"
+                    : "Add to Cart"}
           </button>
         </div>
       )}

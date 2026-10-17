@@ -129,6 +129,9 @@ test("complete package has one fixed cart price, locked quantities and included 
 }) => {
   await setup(page);
   await page.goto("/products/packages/you-and-me");
+  await page
+    .getByText("Use keepsakes already in your cart", { exact: true })
+    .click();
   await expect(page.getByRole("checkbox")).toHaveCount(3);
   for (const checkbox of await page.getByRole("checkbox").all())
     await checkbox.check();

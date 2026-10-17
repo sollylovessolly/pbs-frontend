@@ -119,3 +119,24 @@ test("gallery generation discovers photos, chooses covers, and tags only matchin
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("package quotas count only the matching draft and unfinished items cannot enter checkout", () => {
+  const {
+    packageQuantity,
+    packageStepRemaining,
+  } = require("../src/lib/commerce/packages.ts");
+  const p = giftPackages[0];
+  const rows = parts(p).map((i) => ({
+    ...i,
+    packageDraftId: "draft-a",
+    packageDraftTemplateId: p.id,
+  }));
+  assert.equal(packageQuantity(p.id, "polaroid"), 2);
+  assert.equal(packageStepRemaining(p.id, "draft-a", "polaroid", rows), 0);
+  assert.equal(packageStepRemaining(p.id, "draft-b", "polaroid", rows), 2);
+  assert.equal(
+    packageStepRemaining("birthday-mini", "draft-a", "polaroid", rows),
+    2,
+  );
+  assert.throws(() => orderItems(rows), /complete your gift package/);
+});

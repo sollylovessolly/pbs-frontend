@@ -12,8 +12,15 @@ const formatPrice = (amount: number) => {
 };
 
 const CartPage = () => {
-  const { items, cartCount, subtotal, isReady, updateQuantity, removeItem } =
-    useCart();
+  const {
+    items,
+    draftItems,
+    cartCount,
+    subtotal,
+    isReady,
+    updateQuantity,
+    removeItem,
+  } = useCart();
 
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState("");
@@ -73,6 +80,30 @@ const CartPage = () => {
       <section className="mx-auto grid max-w-[1240px] items-start gap-8 px-5 py-10 md:px-7 lg:grid-cols-[1.7fr_1fr] lg:py-14">
         {/* Cart items */}
         <div>
+          {[...new Set(draftItems.map((i) => i.packageDraftId))].map(
+            (draftId) => {
+              const item = draftItems.find(
+                (i) => i.packageDraftId === draftId,
+              )!;
+              return (
+                <div
+                  key={draftId}
+                  className="mb-5 rounded-xl border-2 border-ink bg-blush p-4"
+                >
+                  <p className="font-bold">
+                    Your {getPackage(item.packageDraftTemplateId)?.name} package
+                    is still in progress.
+                  </p>
+                  <Link
+                    href={`/products/packages/${item.packageDraftTemplateId}?draft=${draftId}`}
+                    className="mt-2 inline-block font-bold underline"
+                  >
+                    Continue your package →
+                  </Link>
+                </div>
+              );
+            },
+          )}
           {items.length === 0 ? (
             <div className="rounded-[18px] border-2 border-ink bg-paper px-6 py-16 text-center shadow-[0_6px_0_rgba(42,33,28,0.08)]">
               <div className="text-4xl">🛍️</div>

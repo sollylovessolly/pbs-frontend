@@ -14,7 +14,9 @@ Customer quotes supplied by Solly are in `src/data/customer-reviews.ts`. These q
 
 Edit display content in `src/data/packages.json`. Matching authoritative contents and prices live in the backend repository at `src/orders/packages.catalogue.ts`; update both together when changing offers. The final requested list is used: You and Me costs NGN 21,000; Moments with You has no photostrips.
 
-Customers customise the individual products, return to the package page, and select exactly the included quantities. Completing the package groups those cart items at the fixed package price. Quantities are locked; removing a component removes that package. The backend checks all package contents and stock using the physical product variants. No stock is created by this feature.
+Customers start a package draft, then customise each component with the remaining package quota. Saving each component returns to the package page and updates progress. Draft components persist in the existing local cart storage with package-draft metadata but stay separate from the purchasable cart and checkout. Only a complete package enters the cart at its fixed price. A cart resume link and the package page restore progress after navigation or refresh. Completed steps can be replaced. The optional “Use keepsakes already in your cart” section supports older cart items.
+
+Once bundled, quantities are locked; removing a component removes that package. The backend still checks all package contents and stock using the physical product variants. No stock is created by this feature. Package-specific photo draft keys prevent unrelated Polaroid/photostrip drafts from leaking between packages or standalone customisers.
 
 Package phone cases use Case Only because custom Polaroid prints are already included. The Ultimate Birthday Gift's free mini photostrip reuses its full-size strip design; fulfillment is flagged in the admin order details.
 

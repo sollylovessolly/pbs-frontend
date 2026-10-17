@@ -1,12 +1,14 @@
 "use client";
 import {
   createContext,
+  Suspense,
   useContext,
   useEffect,
   useState,
   type ReactNode,
 } from "react";
 import { beginUploadSession } from "@/lib/commerce/production";
+import PackageStepProvider from "./PackageStepProvider";
 import UploadProgress from "./UploadProgress";
 import { getProducts } from "@/lib/api";
 import type {
@@ -138,7 +140,11 @@ export default function ProductProvider({
             }
             className="min-w-0"
           >
-            {children}
+            <Suspense fallback={<p className="p-5">Loading customiser…</p>}>
+              <PackageStepProvider category={category}>
+                {children}
+              </PackageStepProvider>
+            </Suspense>
           </fieldset>
         </Context.Provider>
       )}
