@@ -11,7 +11,10 @@
     "test": "node --require ./tests/register.cjs --test tests/*.test.cjs",
     "test:e2e": "playwright test",
     "format": "prettier --write src tests playwright.config.ts",
-    "format:check": "prettier --check src tests playwright.config.ts"
+    "format:check": "prettier --check src tests playwright.config.ts",
+    "gallery:generate": "node scripts/generate-gallery.mjs",
+    "predev": "npm run gallery:generate",
+    "prebuild": "npm run gallery:generate"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",

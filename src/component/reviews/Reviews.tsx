@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiRequest, ApiError } from "@/lib/api/client";
 import type { ReviewPage } from "@/lib/reviews/types";
 import ReviewCards from "./ReviewCards";
+import { customerReviews } from "@/data/customer-reviews";
 
 type Selection = { file: File; url: string };
 export default function Reviews({ preview = false }: { preview?: boolean }) {
@@ -54,6 +55,8 @@ export default function Reviews({ preview = false }: { preview?: boolean }) {
             {preview ? "Read & write reviews →" : "Write a review →"}
           </Link>
         </div>
+        {page === 1 && <ReviewCards reviews={customerReviews} />}
+        <div className="mt-5" />
         {loading ? (
           <p role="status">Loading reviews…</p>
         ) : error ? (

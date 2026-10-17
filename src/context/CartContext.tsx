@@ -13,6 +13,8 @@ import type { CartItem, NewCartItem } from "@/types/cart";
 
 import { restoreCart, cartPreview } from "@/lib/commerce/cart";
 
+import { cartSubtotal, validatePackageItems } from "@/lib/commerce/packages";
+
 const CART_STORAGE_KEY = "polaroidsbysolly-cart";
 
 type CartContextValue = {
@@ -29,6 +31,7 @@ type CartContextValue = {
 
   removeItem: (itemId: string) => void;
   clearCart: () => void;
+  bundleItems: (packageId: string, itemIds: string[]) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -116,6 +119,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   };
 
   const updateQuantity = (itemId: string, quantity: number) => {
+    if (items.find((i) => i.id === itemId)?.packageGroupId) return;
     setItems((currentItems) =>
       currentItems.map((item) =>
         item.id === itemId
@@ -153,7 +157,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
   const removeItem = (itemId: string) => {
     setItems((currentItems) =>
-      currentItems.filter((item) => item.id !== itemId),
+      currentItems.filter((item) => {
+        const group = currentItems.find((i) => i.id === itemId)?.packageGroupId;
+        return group ? item.packageGroupId !== group : item.id !== itemId;
+      }),
     );
   };
 
@@ -166,13 +173,22 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   }, [items]);
 
   const subtotal = useMemo(() => {
-    return items.reduce(
-      (total, item) => total + item.unitPrice * item.quantity,
-      0,
-    );
+    return cartSubtotal(items);
   }, [items]);
 
+  const bundleItems = (packageId: string, itemIds: string[]) => {
+    const selected = items.filter((i) => itemIds.includes(i.id));
+    validatePackageItems(packageId, selected);
+    const packageGroupId = crypto.randomUUID();
+    setItems((current) =>
+      current.map((i) =>
+        itemIds.includes(i.id) ? { ...i, packageId, packageGroupId } : i,
+      ),
+    );
+  };
+
   const value: CartContextValue = {
+    bundleItems,
     items,
     cartCount,
     subtotal,

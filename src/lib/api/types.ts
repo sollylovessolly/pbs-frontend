@@ -40,6 +40,7 @@ export type UploadResponse = { key: string; url: string };
 export type CreateOrderPayload = {
   checkoutKey: string;
   discountCode?: string;
+  premiumPackaging?: boolean;
   shipment?: {
     requestToken: string;
     serviceCode: string;
@@ -59,6 +60,8 @@ export type CreateOrderPayload = {
   items: Array<{
     variantSku: string;
     quantity: number;
+    packageId?: string;
+    packageGroupId?: string;
     customization?: Record<string, unknown>;
   }>;
 };

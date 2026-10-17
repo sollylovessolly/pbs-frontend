@@ -93,99 +93,35 @@ const file = {
   ),
 };
 
-test("public named albums and photo captions work in a mobile lightbox", async ({
+test("repo albums load without any gallery backend on mobile", async ({
   page,
 }) => {
   await setup(page);
+  let galleryCalls = 0;
+  await page.route("**/api/gallery/**", (route) => {
+    galleryCalls++;
+    return route.abort();
+  });
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/gallery");
-  await page.getByRole("link", { name: /GTCO Event/ }).click();
-  await expect(page).toHaveURL(/\/gallery\/gtco-event$/);
-  await page.getByRole("button", { name: /The station setup/ }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await page.getByRole("dialog").getByRole("button", { name: /Next/ }).click();
+  for (const name of [
+    "Product Showcase",
+    "Oriya Living",
+    "AOO@50",
+    "Blazing Wheels",
+  ])
+    await expect(
+      page.getByRole("link", { name: new RegExp(name) }),
+    ).toBeVisible();
+  await page.getByRole("link", { name: /Product Showcase/ }).click();
+  await expect(page).toHaveURL(/\/gallery\/product-showcase$/);
   await expect(
-    page.getByRole("dialog").getByText("The celebration"),
+    page.getByRole("heading", { name: "Product Showcase" }),
   ).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).not.toBeVisible();
+  expect(galleryCalls).toBe(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     360,
   );
-});
-
-test("admin bulk uploads, arranges, saves a draft and publishes with permission", async ({
-  page,
-}) => {
-  await session(page);
-  await setup(page);
-  let uploads = 0;
-  let saved = { ...album, status: "DRAFT", permissionConfirmed: false };
-  await page.route("**/api/admin/gallery/**", async (route) => {
-    const path = new URL(route.request().url()).pathname;
-    expect(route.request().headers().authorization).toBe("Bearer qa-token");
-    if (path.endsWith("/uploads")) {
-      uploads++;
-      expect(route.request().headers()["content-type"]).toContain(
-        "multipart/form-data; boundary=",
-      );
-      expect(route.request().postDataBuffer()!.toString()).toContain(
-        'name="requestKey"',
-      );
-      return route.fulfill({
-        status: 201,
-        json: { ...photo, id: `photo-${uploads}` },
-      });
-    }
-    if (route.request().method() === "POST") {
-      const body = route.request().postDataJSON();
-      expect(body.requestKey).toBeTruthy();
-      expect(body.photos.map((p: { id: string }) => p.id)).toEqual([
-        "photo-2",
-        "photo-1",
-      ]);
-      saved = {
-        ...album,
-        ...body,
-        photos: body.photos.map((p: object) => ({ ...photo, ...p })),
-      };
-      return route.fulfill({ status: 201, json: saved });
-    }
-    if (route.request().method() === "PATCH") {
-      const body = route.request().postDataJSON();
-      expect(body.permissionConfirmed).toBe(true);
-      expect(body.status).toBe("PUBLISHED");
-      expect(body.expectedVersion).toBe(1);
-      saved = {
-        ...saved,
-        ...body,
-        photos: body.photos.map((p: object) => ({ ...photo, ...p })),
-        version: 2,
-      };
-      return route.fulfill({ json: saved });
-    }
-    return route.fulfill({ json: saved });
-  });
-  await page.goto("/admin/gallery/new");
-  await page.getByLabel("Album name").fill("GTCO Event");
-  await page
-    .getByLabel("Add photos", { exact: true })
-    .setInputFiles([file, { ...file, name: "second.png" }]);
-  await expect(page.getByText("Photos (2/100)")).toBeVisible();
-  await page.getByRole("button", { name: "Move photo 2 earlier" }).click();
-  await page.getByRole("button", { name: "Save draft", exact: true }).click();
-  await expect(page).toHaveURL(/\/admin\/gallery\/album-1$/);
-  await page.getByLabel("Visibility").selectOption("PUBLISHED");
-  await page.getByRole("button", { name: "Save & publish" }).click();
-  await expect(page.locator("p[role=alert]")).toContainText(
-    "confirm permission",
-  );
-  await page.getByRole("checkbox", { name: /I have permission/ }).check();
-  await page.getByRole("button", { name: "Save & publish" }).click();
-  await expect(
-    page.getByText("Album published.", { exact: true }),
-  ).toBeVisible();
-  expect(uploads).toBe(2);
 });
 
 test("customer review photos submit privately for moderation with safe retry", async ({
@@ -269,14 +205,15 @@ test("admin can publish a lower-rated review and public cards do not show contac
   await expect(page.getByText(review.phone, { exact: true })).toHaveCount(0);
 });
 
-test("missing gallery backend gives an honest admin error", async ({
+test("admin gallery explains the repo workflow without storage uploads", async ({
   page,
 }) => {
   await session(page);
   await setup(page);
   await page.goto("/admin/gallery");
-  await expect(page.locator("p[role=alert]")).toContainText(
-    "isn’t connected yet",
-  );
-  await expect(page.getByText("Draft saved.")).toHaveCount(0);
+  await expect(
+    page.getByText("Add photos through your code", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(/npm run gallery:generate/)).toBeVisible();
+  await expect(page.locator('input[type="file"]')).toHaveCount(0);
 });

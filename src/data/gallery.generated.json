@@ -1,0 +1,58 @@
+[
+  {
+    "id": "product-showcase",
+    "slug": "product-showcase",
+    "title": "Product Showcase",
+    "description": "Our prints, letters, cases and other keepsakes.",
+    "status": "PUBLISHED",
+    "version": 1,
+    "permissionConfirmed": true,
+    "coverPhotoId": null,
+    "updatedAt": "",
+    "photos": [],
+    "cover": null,
+    "photoCount": 0
+  },
+  {
+    "id": "oriya-living",
+    "slug": "oriya-living",
+    "title": "Oriya Living",
+    "description": "Memories from Oriya Living.",
+    "status": "PUBLISHED",
+    "version": 1,
+    "permissionConfirmed": true,
+    "coverPhotoId": null,
+    "updatedAt": "",
+    "photos": [],
+    "cover": null,
+    "photoCount": 0
+  },
+  {
+    "id": "aoo-50",
+    "slug": "aoo-50",
+    "title": "AOO@50",
+    "description": "A celebration worth keeping.",
+    "status": "PUBLISHED",
+    "version": 1,
+    "permissionConfirmed": true,
+    "coverPhotoId": null,
+    "updatedAt": "",
+    "photos": [],
+    "cover": null,
+    "photoCount": 0
+  },
+  {
+    "id": "blazing-wheels",
+    "slug": "blazing-wheels",
+    "title": "Blazing Wheels",
+    "description": "Moments from Blazing Wheels.",
+    "status": "PUBLISHED",
+    "version": 1,
+    "permissionConfirmed": true,
+    "coverPhotoId": null,
+    "updatedAt": "",
+    "photos": [],
+    "cover": null,
+    "photoCount": 0
+  }
+]

@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LuImagePlus, LuPackage, LuTruck } from "react-icons/lu";
 
+import { giftPackages } from "@/lib/commerce/packages";
 import Button from "@/component/ui/Button";
 
 const deliveryInfo = [
@@ -46,6 +47,7 @@ const BestSellers = () => {
   }, [attempt]);
   const bestSellers = products
     .filter((p) => p.isActive && p.variants.some((v) => v.isActive))
+    .slice(0, 2)
     .map((p) => ({
       title: p.name,
       price: `From ${money(Math.min(...p.variants.filter((v) => v.isActive).map((v) => Number(v.sellingPrice))))}`,
@@ -56,7 +58,20 @@ const BestSellers = () => {
       src: productAssets[p.category].image,
       alt: p.name,
       isBestSeller: false,
+      compareAt: "",
     }));
+  bestSellers.push(
+    ...[giftPackages[0], giftPackages[2], giftPackages[4]].map((p) => ({
+      title: p.name,
+      price: money(p.price),
+      compareAt: money(p.compareAt),
+      time: `${p.occasion} package · premium packaging included`,
+      href: `/products/packages/${p.id}`,
+      src: "/images/products/albums.jpg",
+      alt: `${p.name} gift package`,
+      isBestSeller: false,
+    })),
+  );
   return (
     <>
       <section className="bg-cream py-12 sm:py-16 lg:py-24">
@@ -126,6 +141,11 @@ const BestSellers = () => {
                   <div className="mt-1.5 flex flex-col gap-0.5 sm:mt-2">
                     <span className="font-sans text-xs font-bold text-ink sm:text-[15px]">
                       {product.price}
+                      {product.compareAt && (
+                        <del className="ml-2 font-normal text-ink/60">
+                          {product.compareAt}
+                        </del>
+                      )}
                     </span>
 
                     <span className="font-sans text-[10px] text-brown sm:text-[11.5px]">

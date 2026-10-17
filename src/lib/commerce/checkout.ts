@@ -1,7 +1,9 @@
 import type { CartItem } from "../../types/cart";
 import type { CreateOrderPayload } from "../api/types";
+import { validateCartPackages } from "./packages";
 import { safeUrl } from "./catalogue";
 export function orderItems(items: CartItem[]): CreateOrderPayload["items"] {
+  validateCartPackages(items);
   if (!items.length) throw new Error("Your cart is empty.");
   return items.map((item) => {
     if (
@@ -35,6 +37,9 @@ export function orderItems(items: CartItem[]): CreateOrderPayload["items"] {
     return {
       variantSku: item.variantSku,
       quantity: item.quantity,
+      ...(item.packageId
+        ? { packageId: item.packageId, packageGroupId: item.packageGroupId }
+        : {}),
       ...(Object.keys(customization).length ? { customization } : {}),
     };
   });

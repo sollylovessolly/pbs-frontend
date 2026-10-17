@@ -1,3 +1,4 @@
+import ProductGallery from "@/component/gallery/ProductGallery";
 import ProductProvider from "@/component/products/shared/ProductProvider";
 import Link from "next/link";
 
@@ -68,6 +69,7 @@ const PolaroidsPage = async ({ searchParams }: PolaroidsPageProps) => {
       <ProductProvider category="POLAROID">
         <PolaroidCustomizer editItemId={editItemId ?? null} />
       </ProductProvider>
+      <ProductGallery category="polaroids" />
     </main>
   );
 };

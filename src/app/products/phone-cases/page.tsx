@@ -1,3 +1,4 @@
+import ProductGallery from "@/component/gallery/ProductGallery";
 import ProductProvider from "@/component/products/shared/ProductProvider";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -63,6 +64,7 @@ const PhoneCasesPage = async ({ searchParams }: PhoneCasesPageProps) => {
       <ProductProvider category="PHONE_CASE">
         <PhoneCaseCustomizer editItemId={editItemId ?? null} />
       </ProductProvider>
+      <ProductGallery category="phone-cases" />
     </main>
   );
 };

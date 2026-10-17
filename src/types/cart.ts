@@ -5,6 +5,8 @@ export type CartProductType =
 
 export type CartItem = {
   id: string;
+  packageId?: string;
+  packageGroupId?: string;
   productType: CartProductType;
   variantSku?: string;
   availableQuantity?: number | null;

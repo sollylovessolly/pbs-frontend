@@ -1,16 +1,20 @@
-# Gallery photos — 6 pictures
+# Repo-managed gallery
 
-Add these exact filenames to this folder. They appear in the scrolling homepage gallery.
+Add photos to these folders, then run `npm run gallery:generate` (also runs automatically before `npm run dev` and `npm run build`):
 
-| Filename | What to show |
-| --- | --- |
-| gallery-01.jpg | Your finished Polaroid prints, arranged nicely or held in a hand |
-| gallery-02.jpg | Your finished photostrips |
-| gallery-03.jpg | Your Polaroid station setup at an event |
-| gallery-04.jpg | A vintage letter, styled with its packaging |
-| gallery-05.jpg | A finished Polaroid phone case |
-| gallery-06.jpg | An album with prints inside, or an album gift set |
+- `product-showcase/` → Product Showcase
+- `oriya-living/` → Oriya Living
+- `aoo-50/` → AOO@50
+- `blazing-wheels/` → Blazing Wheels
 
-Use actual JPG files, ideally square (1200 × 1200 px), under 500 KB each. Keep the important subject near the centre: the gallery crops to a square. Use only photos you own and have permission to publish, including visible guests and personal letter text.
+Use JPG, PNG, WebP or AVIF. Prefer compressed WebP/JPEG under 500 KB. Add an optional `cover.jpg` to choose an album cover; otherwise the first filename is used. Empty albums remain visible without pretend event photos.
 
-Existing product pictures appear as fallbacks until you add these files. Filenames are lowercase and must match exactly. Export HEIC/PNG photos as JPEG; don't just rename the extension. After adding files, refresh the local site. Publish a new deployment to update the live site.
+In Product Showcase, start filenames with a product category so they also appear in that product’s mini gallery:
+
+- `vintage-letters-amber.jpg`
+- `polaroids-birthday.jpg`
+- `photostrips-classic.jpg`
+- `phone-cases-iphone.jpg`
+- `albums-memories.jpg`
+
+Other filenames appear only in the main album. Captions are derived from filenames. Adjust caption/alt generation in `scripts/generate-gallery.mjs` if needed. Commit photos and the generated `src/data/gallery.generated.json`, then push to deploy. These photos are served from the frontend; no backend storage uploads are used.

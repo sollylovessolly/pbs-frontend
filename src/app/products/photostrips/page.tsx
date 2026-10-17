@@ -1,3 +1,4 @@
+import ProductGallery from "@/component/gallery/ProductGallery";
 import ProductProvider from "@/component/products/shared/ProductProvider";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -52,6 +53,7 @@ const PhotostripsPage = () => {
       <ProductProvider category="PHOTOSTRIP">
         <PhotostripCustomizer />
       </ProductProvider>
+      <ProductGallery category="photostrips" />
     </main>
   );
 };

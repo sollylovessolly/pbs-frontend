@@ -1,3 +1,4 @@
+import PackageCards from "@/component/products/PackageCards";
 import Link from "next/link";
 import { LuImagePlus, LuPackage, LuTruck } from "react-icons/lu";
 
@@ -60,6 +61,7 @@ const ProductsPage = () => {
 
       {/* Interactive product catalogue */}
       <ProductsCatalogue />
+      <PackageCards />
 
       {/* Delivery information */}
       <section className="overflow-hidden border-y-2 border-ink bg-ink text-cream">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { getPackage } from "@/lib/commerce/packages";
 import CartItemPreview from "./CartItemPreview";
 import TornDivider from "../ui/TornDivider";
 
@@ -127,18 +128,23 @@ const CartPage = () => {
                       </div>
 
                       <p className="shrink-0 text-sm font-bold">
-                        {formatPrice(item.unitPrice * item.quantity)}
+                        {item.packageId
+                          ? "Included in package"
+                          : formatPrice(item.unitPrice * item.quantity)}
                       </p>
                     </div>
 
                     <span className="mt-3 inline-flex rounded-full border border-ink bg-beige px-3 py-1 text-[11px] font-bold">
-                      {item.turnaround}
+                      {item.packageId
+                        ? `${getPackage(item.packageId)?.name} · premium packaging included`
+                        : item.turnaround}
                     </span>
 
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
+                          disabled={!!item.packageGroupId}
                           aria-label={`Reduce quantity for ${item.name}`}
                           onClick={() =>
                             updateQuantity(item.id, item.quantity - 1)
@@ -154,6 +160,7 @@ const CartPage = () => {
 
                         <button
                           type="button"
+                          disabled={!!item.packageGroupId}
                           aria-label={`Increase quantity for ${item.name}`}
                           onClick={() =>
                             updateQuantity(item.id, item.quantity + 1)
@@ -177,7 +184,7 @@ const CartPage = () => {
                           onClick={() => removeItem(item.id)}
                           className="text-burgundy underline underline-offset-4"
                         >
-                          Remove
+                          {item.packageId ? "Remove package" : "Remove"}
                         </button>
                       </div>
                     </div>
@@ -203,6 +210,24 @@ const CartPage = () => {
         {/* Summary */}
         <aside className="rounded-[18px] border-2 border-ink bg-paper p-6 shadow-[0_6px_0_rgba(42,33,28,0.08)] lg:sticky lg:top-28">
           <h2 className="font-serif text-xl font-semibold">Order Summary</h2>
+          <Link
+            href="/products/packages"
+            className="mt-4 inline-block text-sm font-bold underline"
+          >
+            Build or complete a gift package →
+          </Link>
+          {[...new Set(items.map((i) => i.packageGroupId).filter(Boolean))].map(
+            (group) => {
+              const p = getPackage(
+                items.find((i) => i.packageGroupId === group)?.packageId,
+              );
+              return p ? (
+                <p key={group} className="mt-3 text-sm">
+                  {p.name}: {formatPrice(p.price)} · packaging included
+                </p>
+              ) : null;
+            },
+          )}
 
           <div className="mt-5 flex justify-between border-b border-dashed border-ink/20 py-3 text-sm">
             <span className="font-semibold text-ink/60">Subtotal</span>

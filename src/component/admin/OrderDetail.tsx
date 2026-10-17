@@ -138,6 +138,17 @@ export default function OrderDetail({ id }: { id: string }) {
                   Quantity {item.quantity} · {money(item.unitPriceSnapshot)}{" "}
                   each
                 </p>
+                {item.customization?.giftPackageName && (
+                  <p className="adm-note">
+                    Gift package: {item.customization.giftPackageName} · premium
+                    packaging included
+                  </p>
+                )}
+                {item.customization?.bonusMiniPhotostrip && (
+                  <p className="adm-note">
+                    Include a free mini photostrip using this design.
+                  </p>
+                )}
                 {item.customization?.package && (
                   <p className="adm-note">
                     {label(item.customization.package.toLowerCase())}
@@ -260,6 +271,8 @@ export default function OrderDetail({ id }: { id: string }) {
               record={order}
               fields={[
                 { key: "subtotal", kind: "money" },
+                { key: "packagingFee", kind: "money" },
+                { key: "premiumPackaging" },
                 {
                   key: "deliveryFee",
                   title: "Customer delivery fee",

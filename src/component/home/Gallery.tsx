@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { apiRequest } from "@/lib/api/client";
-import { galleryImage, type FeaturedPhoto } from "@/lib/gallery/types";
+
+import { galleryAlbums } from "@/lib/gallery/albums";
+
 import GalleryPhoto from "./GalleryPhoto";
 import Button from "@/component/ui/Button";
 
@@ -74,28 +74,26 @@ const GalleryItem = ({
 );
 
 const Gallery = () => {
-  const [galleryItems, setGalleryItems] = useState(localItems);
-  useEffect(() => {
-    const controller = new AbortController();
-    apiRequest<FeaturedPhoto[]>("/gallery/featured?limit=12", {
-      signal: controller.signal,
-    })
-      .then((photos) =>
-        setGalleryItems(
-          photos.map((photo) => ({
-            src: galleryImage(photo.thumbnailUrl),
-            alt: photo.alt || photo.caption || photo.albumTitle,
-            fallback: "/images/products/polaroids.jpg",
-            href: `/gallery/${encodeURIComponent(photo.albumSlug)}`,
-            title: photo.albumTitle,
-          })),
-        ),
-      )
-      .catch(() => {
-        /* Keep the existing local gallery while the gallery API is unavailable. */
-      });
-    return () => controller.abort();
-  }, []);
+  const photos = galleryAlbums
+    .flatMap((album) =>
+      album.photos
+        .filter((p) => p.featured)
+        .map((photo) => ({
+          ...photo,
+          albumSlug: album.slug,
+          albumTitle: album.title,
+        })),
+    )
+    .slice(0, 12);
+  const galleryItems = photos.length
+    ? photos.map((photo) => ({
+        src: photo.thumbnailUrl,
+        alt: photo.alt,
+        fallback: "/images/products/polaroids.jpg",
+        href: `/gallery/${photo.albumSlug}`,
+        title: photo.albumTitle,
+      }))
+    : localItems;
   return (
     <section className="overflow-hidden bg-cream py-12 sm:py-16 lg:py-[72px]">
       <div className="mx-auto max-w-site px-4 sm:px-5 md:px-7">

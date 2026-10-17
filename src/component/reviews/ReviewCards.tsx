@@ -9,13 +9,15 @@ export default function ReviewCards({ reviews }: { reviews: Review[] }) {
           key={review.id}
           className="min-w-0 rounded-2xl border-2 border-ink bg-paper p-5 shadow-soft"
         >
-          <p
-            aria-label={`${review.rating} out of 5 stars`}
-            className="text-xl tracking-widest text-burgundy"
-          >
-            {"★".repeat(Math.max(0, Math.min(5, review.rating)))}
-            {"☆".repeat(Math.max(0, 5 - review.rating))}
-          </p>
+          {review.rating > 0 && (
+            <p
+              aria-label={`${review.rating} out of 5 stars`}
+              className="text-xl tracking-widest text-burgundy"
+            >
+              {"★".repeat(Math.max(0, Math.min(5, review.rating)))}
+              {"☆".repeat(Math.max(0, 5 - review.rating))}
+            </p>
+          )}
           <p className="mt-4 whitespace-pre-wrap break-words leading-7">
             {review.text}
           </p>

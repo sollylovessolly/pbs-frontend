@@ -1,3 +1,4 @@
+import ProductGallery from "@/component/gallery/ProductGallery";
 import ProductProvider from "@/component/products/shared/ProductProvider";
 import type { Metadata } from "next";
 
@@ -13,6 +14,7 @@ const AlbumsPage = () => {
   return (
     <ProductProvider category="ALBUM">
       <AlbumProductPage />
+      <ProductGallery category="albums" />
     </ProductProvider>
   );
 };

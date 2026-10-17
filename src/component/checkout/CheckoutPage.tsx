@@ -50,6 +50,9 @@ export default function CheckoutPage({
     note: "",
     discountCode: initialDiscountCode,
   });
+  const [premiumPackaging, setPremiumPackaging] = useState(false);
+  const packagingIncluded = items.some((i) => !!i.packageGroupId);
+  const packagingFee = premiumPackaging && !packagingIncluded ? 1500 : 0;
   const [rates, setRates] = useState<DeliveryRate[]>([]);
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [error, setError] = useState("");
@@ -191,6 +194,7 @@ export default function CheckoutPage({
             payload: {
               checkoutKey: crypto.randomUUID(),
               source: "WEBSITE",
+              premiumPackaging: premiumPackaging || packagingIncluded,
               customer: {
                 name: form.name.trim(),
                 email: form.email.trim(),
@@ -444,6 +448,34 @@ export default function CheckoutPage({
                   later.
                 </p>
               )}
+              <div className="rounded-xl border-2 border-ink bg-paper p-4">
+                {packagingIncluded ? (
+                  <p className="font-bold">
+                    Premium protective packaging is included with your gift
+                    package.
+                  </p>
+                ) : (
+                  <label className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={premiumPackaging}
+                      onChange={(e) => {
+                        setPremiumPackaging(e.target.checked);
+                        setReview(false);
+                      }}
+                      className="mt-1"
+                    />
+                    <span>
+                      <strong>Premium protective packaging · ₦1,500</strong>
+                      <span className="mt-2 block text-sm leading-6">
+                        Add a sturdy protective box for extra cushioning and
+                        support during delivery, helping reduce the risk of
+                        crushing and damage from rough handling.
+                      </span>
+                    </span>
+                  </label>
+                )}
+              </div>
               <label className="block" htmlFor="checkout-note">
                 Order note (optional)
                 <textarea
@@ -476,15 +508,28 @@ export default function CheckoutPage({
                   <span>
                     {item.name} × {item.quantity}
                   </span>
-                  <span>{money(item.unitPrice * item.quantity)}</span>
+                  <span>
+                    {item.packageId
+                      ? "Included in package"
+                      : money(item.unitPrice * item.quantity)}
+                  </span>
                 </div>
               ))}
               <p className="mt-4">Subtotal: {money(subtotal)}</p>
               <p className="mt-2">
+                Premium packaging:{" "}
+                {packagingIncluded
+                  ? "Included"
+                  : packagingFee
+                    ? money(packagingFee)
+                    : "Not selected"}
+              </p>
+              <p className="mt-2">
                 Delivery: {fee === undefined ? "Choose a state" : money(fee)}
               </p>
               <p className="my-4 font-serif text-2xl">
-                Estimated total: {money(subtotal + Number(fee ?? 0))}
+                Estimated total:{" "}
+                {money(subtotal + packagingFee + Number(fee ?? 0))}
               </p>
               {review && (
                 <section aria-live="polite">

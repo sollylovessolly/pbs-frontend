@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { apiRequest, ApiError } from "@/lib/api/client";
+import { galleryAlbums } from "@/lib/gallery/albums";
 import {
   galleryImage,
   type GalleryAlbum,
@@ -26,36 +26,25 @@ export default function AlbumGallery({ slug }: { slug?: string }) {
         setError("");
       }
     });
-    const request = slug
-      ? apiRequest<GalleryAlbum>(
-          `/gallery/albums/${encodeURIComponent(slug)}`,
-          { signal: controller.signal },
-        ).then((data) => {
-          if (!Array.isArray(data.photos) || !data.title)
-            throw new Error("Invalid album response");
-          setAlbum(data);
-        })
-      : apiRequest<GalleryPage>(`/gallery/albums?page=${page}&limit=12`, {
-          signal: controller.signal,
-        }).then((data) => {
-          if (!Array.isArray(data.data) || !data.pagination)
-            throw new Error("Invalid gallery response");
-          setAlbums(data);
+    queueMicrotask(() => {
+      if (controller.signal.aborted) return;
+      if (slug) {
+        const found = galleryAlbums.find((a) => a.slug === slug);
+        if (found) setAlbum(found);
+        else setError("This album isn’t available.");
+      } else {
+        setAlbums({
+          data: galleryAlbums,
+          pagination: {
+            page: 1,
+            totalPages: 1,
+            total: galleryAlbums.length,
+            limit: 12,
+          },
         });
-    request
-      .catch((e) => {
-        if (!controller.signal.aborted)
-          setError(
-            e instanceof ApiError && e.status === 404
-              ? slug
-                ? "This album isn’t available."
-                : "Our albums are coming soon."
-              : "We couldn’t load the gallery. Please try again.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
+      }
+      setLoading(false);
+    });
     return () => controller.abort();
   }, [slug, page, attempt]);
   useEffect(() => {
