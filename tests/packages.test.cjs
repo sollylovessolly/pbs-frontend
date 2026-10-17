@@ -104,7 +104,7 @@ test("gallery generation discovers photos, chooses covers, and tags only matchin
         "utf8",
       ),
     );
-    assert.equal(data.length, 4);
+    assert.equal(data.length, 7);
     assert.equal(data[0].photos.length, 3);
     assert.equal(
       data[0].cover.url,

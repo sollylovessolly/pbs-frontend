@@ -109,6 +109,9 @@ test("repo albums load without any gallery backend on mobile", async ({
     "Oriya Living",
     "AOO@50",
     "Blazing Wheels",
+    "GTCO Fashion Weekend",
+    "Covenant University Thanksgiving",
+    "My First Photobooth",
   ])
     await expect(
       page.getByRole("link", { name: new RegExp(name) }),
@@ -118,6 +121,23 @@ test("repo albums load without any gallery backend on mobile", async ({
   await expect(
     page.getByRole("heading", { name: "Product Showcase" }),
   ).toBeVisible();
+  await page
+    .locator("main button")
+    .filter({ has: page.locator("img") })
+    .first()
+    .click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .getByRole("dialog")
+        .locator("img")
+        .evaluate((el: HTMLImageElement) => el.naturalWidth),
+    )
+    .toBeGreaterThan(0);
+  await page.getByRole("dialog").getByRole("button", { name: /Next/ }).click();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
   expect(galleryCalls).toBe(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     360,

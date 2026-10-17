@@ -78,6 +78,7 @@ const Gallery = () => {
     .flatMap((album) =>
       album.photos
         .filter((p) => p.featured)
+        .slice(0, 3)
         .map((photo) => ({
           ...photo,
           albumSlug: album.slug,

@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import { useState } from "react";
 
 export default function GalleryPhoto({
@@ -13,7 +13,8 @@ export default function GalleryPhoto({
 }) {
   const [failed, setFailed] = useState(false);
   return (
-    <img
+    <Image
+      sizes="(max-width: 639px) 145px, (max-width: 1023px) 180px, 215px"
       src={failed ? fallback : src}
       alt={failed ? "PolaroidsBySolly product preview" : alt}
       loading="lazy"

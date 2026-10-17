@@ -10,6 +10,21 @@ const albums = [
   ["oriya-living", "Oriya Living", "Memories from Oriya Living."],
   ["aoo-50", "AOO@50", "A celebration worth keeping."],
   ["blazing-wheels", "Blazing Wheels", "Moments from Blazing Wheels."],
+  [
+    "gtco-fashion-weekend",
+    "GTCO Fashion Weekend",
+    "Instant memories from GTCO Fashion Weekend.",
+  ],
+  [
+    "covenant-university-thanksgiving",
+    "Covenant University Thanksgiving",
+    "Thanksgiving moments, printed to keep.",
+  ],
+  [
+    "my-first-photobooth",
+    "My First Photobooth",
+    "Where the photobooth memories began.",
+  ],
 ];
 const categories = [
   "vintage-letters",
@@ -25,15 +40,19 @@ const result = albums.map(([slug, title, description]) => {
     .readdirSync(dir)
     .filter((name) => /\.(jpe?g|png|webp|avif)$/i.test(name))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-  const photos = files.map((name) => {
+  const photos = files.map((name, index) => {
     const category =
       slug === "product-showcase"
         ? (categories.find((tag) => name.startsWith(tag + "-")) ?? null)
         : null;
-    const caption = name
+    const filenameCaption = name
       .replace(/\.[^.]+$/, "")
       .replace(/[-_]+/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
+    const caption =
+      slug === "product-showcase"
+        ? filenameCaption
+        : `${title} · Photo ${index + 1}`;
     const url = `/images/gallery/${slug}/${encodeURIComponent(name)}`;
     return {
       id: `${slug}/${name}`,

@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { galleryAlbums } from "@/lib/gallery/albums";
 import {
@@ -94,7 +95,8 @@ export default function AlbumGallery({ slug }: { slug?: string }) {
                   onClick={() => setSelected(index)}
                   className="overflow-hidden rounded-xl border-2 border-ink bg-paper text-left shadow-[3px_4px_0_#2A211C] focus-visible:outline-burgundy"
                 >
-                  <img
+                  <Image
+                    sizes="(max-width: 767px) 50vw, 33vw"
                     src={galleryImage(item.thumbnailUrl)}
                     alt={
                       item.alt ||
@@ -128,7 +130,8 @@ export default function AlbumGallery({ slug }: { slug?: string }) {
                   className="overflow-hidden rounded-2xl border-2 border-ink bg-paper shadow-[4px_5px_0_#2A211C]"
                 >
                   {item.cover ? (
-                    <img
+                    <Image
+                      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
                       src={galleryImage(item.cover.thumbnailUrl)}
                       alt={item.cover.alt || item.title}
                       width={600}

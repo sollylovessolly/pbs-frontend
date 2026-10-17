@@ -13,12 +13,12 @@ export default function PolaroidStationPage() {
     <main className="bg-cream text-ink">
       <section className="relative isolate overflow-hidden bg-burgundy px-5 py-14 text-cream sm:py-20">
         <Image
-          src="/images/products/polaroids.jpg"
+          src="/images/station/booking-hero.jpeg"
           alt=""
           fill
           priority
           sizes="100vw"
-          className="-z-20 object-cover object-[center_55%]"
+          className="-z-20 object-cover object-[center_35%] sm:object-[center_30%]"
         />
         <div
           aria-hidden="true"

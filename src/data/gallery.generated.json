@@ -7,11 +7,55 @@
     "status": "PUBLISHED",
     "version": 1,
     "permissionConfirmed": true,
-    "coverPhotoId": null,
+    "coverPhotoId": "product-showcase/photostrips-keepsakes.jpeg",
     "updatedAt": "",
-    "photos": [],
-    "cover": null,
-    "photoCount": 0
+    "photos": [
+      {
+        "id": "product-showcase/photostrips-keepsakes.jpeg",
+        "url": "/images/gallery/product-showcase/photostrips-keepsakes.jpeg",
+        "thumbnailUrl": "/images/gallery/product-showcase/photostrips-keepsakes.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Photostrips Keepsakes",
+        "alt": "Product Showcase: Photostrips Keepsakes",
+        "featured": true,
+        "category": "photostrips"
+      },
+      {
+        "id": "product-showcase/polaroids-prints.jpeg",
+        "url": "/images/gallery/product-showcase/polaroids-prints.jpeg",
+        "thumbnailUrl": "/images/gallery/product-showcase/polaroids-prints.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Polaroids Prints",
+        "alt": "Product Showcase: Polaroids Prints",
+        "featured": true,
+        "category": "polaroids"
+      },
+      {
+        "id": "product-showcase/vintage-letters-burnt-edges.jpeg",
+        "url": "/images/gallery/product-showcase/vintage-letters-burnt-edges.jpeg",
+        "thumbnailUrl": "/images/gallery/product-showcase/vintage-letters-burnt-edges.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Vintage Letters Burnt Edges",
+        "alt": "Product Showcase: Vintage Letters Burnt Edges",
+        "featured": true,
+        "category": "vintage-letters"
+      }
+    ],
+    "cover": {
+      "id": "product-showcase/photostrips-keepsakes.jpeg",
+      "url": "/images/gallery/product-showcase/photostrips-keepsakes.jpeg",
+      "thumbnailUrl": "/images/gallery/product-showcase/photostrips-keepsakes.jpeg",
+      "width": 1200,
+      "height": 1200,
+      "caption": "Photostrips Keepsakes",
+      "alt": "Product Showcase: Photostrips Keepsakes",
+      "featured": true,
+      "category": "photostrips"
+    },
+    "photoCount": 3
   },
   {
     "id": "oriya-living",
@@ -54,5 +98,377 @@
     "photos": [],
     "cover": null,
     "photoCount": 0
+  },
+  {
+    "id": "gtco-fashion-weekend",
+    "slug": "gtco-fashion-weekend",
+    "title": "GTCO Fashion Weekend",
+    "description": "Instant memories from GTCO Fashion Weekend.",
+    "status": "PUBLISHED",
+    "version": 1,
+    "permissionConfirmed": true,
+    "coverPhotoId": "gtco-fashion-weekend/gtco-fashion-weekend-01.jpeg",
+    "updatedAt": "",
+    "photos": [
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-01.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-01.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-01.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 1",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 1",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-02.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-02.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-02.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 2",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 2",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-03.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-03.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-03.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 3",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 3",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-04.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-04.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-04.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 4",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 4",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-05.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-05.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-05.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 5",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 5",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-06.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-06.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-06.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 6",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 6",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-07.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-07.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-07.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 7",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 7",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-08.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-08.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-08.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 8",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 8",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-09.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-09.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-09.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 9",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 9",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-10.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-10.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-10.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 10",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 10",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "gtco-fashion-weekend/gtco-fashion-weekend-11.jpeg",
+        "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-11.jpeg",
+        "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-11.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "GTCO Fashion Weekend · Photo 11",
+        "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 11",
+        "featured": true,
+        "category": null
+      }
+    ],
+    "cover": {
+      "id": "gtco-fashion-weekend/gtco-fashion-weekend-01.jpeg",
+      "url": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-01.jpeg",
+      "thumbnailUrl": "/images/gallery/gtco-fashion-weekend/gtco-fashion-weekend-01.jpeg",
+      "width": 1200,
+      "height": 1200,
+      "caption": "GTCO Fashion Weekend · Photo 1",
+      "alt": "GTCO Fashion Weekend: GTCO Fashion Weekend · Photo 1",
+      "featured": true,
+      "category": null
+    },
+    "photoCount": 11
+  },
+  {
+    "id": "covenant-university-thanksgiving",
+    "slug": "covenant-university-thanksgiving",
+    "title": "Covenant University Thanksgiving",
+    "description": "Thanksgiving moments, printed to keep.",
+    "status": "PUBLISHED",
+    "version": 1,
+    "permissionConfirmed": true,
+    "coverPhotoId": "covenant-university-thanksgiving/covenant-university-thanksgiving-01.jpeg",
+    "updatedAt": "",
+    "photos": [
+      {
+        "id": "covenant-university-thanksgiving/covenant-university-thanksgiving-01.jpeg",
+        "url": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-01.jpeg",
+        "thumbnailUrl": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-01.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Covenant University Thanksgiving · Photo 1",
+        "alt": "Covenant University Thanksgiving: Covenant University Thanksgiving · Photo 1",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "covenant-university-thanksgiving/covenant-university-thanksgiving-02.jpeg",
+        "url": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-02.jpeg",
+        "thumbnailUrl": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-02.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Covenant University Thanksgiving · Photo 2",
+        "alt": "Covenant University Thanksgiving: Covenant University Thanksgiving · Photo 2",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "covenant-university-thanksgiving/covenant-university-thanksgiving-03.jpeg",
+        "url": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-03.jpeg",
+        "thumbnailUrl": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-03.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Covenant University Thanksgiving · Photo 3",
+        "alt": "Covenant University Thanksgiving: Covenant University Thanksgiving · Photo 3",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "covenant-university-thanksgiving/covenant-university-thanksgiving-04.jpeg",
+        "url": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-04.jpeg",
+        "thumbnailUrl": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-04.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Covenant University Thanksgiving · Photo 4",
+        "alt": "Covenant University Thanksgiving: Covenant University Thanksgiving · Photo 4",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "covenant-university-thanksgiving/covenant-university-thanksgiving-05.jpeg",
+        "url": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-05.jpeg",
+        "thumbnailUrl": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-05.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Covenant University Thanksgiving · Photo 5",
+        "alt": "Covenant University Thanksgiving: Covenant University Thanksgiving · Photo 5",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "covenant-university-thanksgiving/covenant-university-thanksgiving-06.jpeg",
+        "url": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-06.jpeg",
+        "thumbnailUrl": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-06.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "Covenant University Thanksgiving · Photo 6",
+        "alt": "Covenant University Thanksgiving: Covenant University Thanksgiving · Photo 6",
+        "featured": true,
+        "category": null
+      }
+    ],
+    "cover": {
+      "id": "covenant-university-thanksgiving/covenant-university-thanksgiving-01.jpeg",
+      "url": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-01.jpeg",
+      "thumbnailUrl": "/images/gallery/covenant-university-thanksgiving/covenant-university-thanksgiving-01.jpeg",
+      "width": 1200,
+      "height": 1200,
+      "caption": "Covenant University Thanksgiving · Photo 1",
+      "alt": "Covenant University Thanksgiving: Covenant University Thanksgiving · Photo 1",
+      "featured": true,
+      "category": null
+    },
+    "photoCount": 6
+  },
+  {
+    "id": "my-first-photobooth",
+    "slug": "my-first-photobooth",
+    "title": "My First Photobooth",
+    "description": "Where the photobooth memories began.",
+    "status": "PUBLISHED",
+    "version": 1,
+    "permissionConfirmed": true,
+    "coverPhotoId": "my-first-photobooth/my-first-photobooth-01.jpeg",
+    "updatedAt": "",
+    "photos": [
+      {
+        "id": "my-first-photobooth/my-first-photobooth-01.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-01.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-01.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 1",
+        "alt": "My First Photobooth: My First Photobooth · Photo 1",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-02.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-02.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-02.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 2",
+        "alt": "My First Photobooth: My First Photobooth · Photo 2",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-03.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-03.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-03.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 3",
+        "alt": "My First Photobooth: My First Photobooth · Photo 3",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-04.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-04.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-04.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 4",
+        "alt": "My First Photobooth: My First Photobooth · Photo 4",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-05.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-05.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-05.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 5",
+        "alt": "My First Photobooth: My First Photobooth · Photo 5",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-06.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-06.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-06.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 6",
+        "alt": "My First Photobooth: My First Photobooth · Photo 6",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-07.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-07.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-07.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 7",
+        "alt": "My First Photobooth: My First Photobooth · Photo 7",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-08.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-08.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-08.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 8",
+        "alt": "My First Photobooth: My First Photobooth · Photo 8",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-09.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-09.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-09.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 9",
+        "alt": "My First Photobooth: My First Photobooth · Photo 9",
+        "featured": true,
+        "category": null
+      },
+      {
+        "id": "my-first-photobooth/my-first-photobooth-10.jpeg",
+        "url": "/images/gallery/my-first-photobooth/my-first-photobooth-10.jpeg",
+        "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-10.jpeg",
+        "width": 1200,
+        "height": 1200,
+        "caption": "My First Photobooth · Photo 10",
+        "alt": "My First Photobooth: My First Photobooth · Photo 10",
+        "featured": true,
+        "category": null
+      }
+    ],
+    "cover": {
+      "id": "my-first-photobooth/my-first-photobooth-01.jpeg",
+      "url": "/images/gallery/my-first-photobooth/my-first-photobooth-01.jpeg",
+      "thumbnailUrl": "/images/gallery/my-first-photobooth/my-first-photobooth-01.jpeg",
+      "width": 1200,
+      "height": 1200,
+      "caption": "My First Photobooth · Photo 1",
+      "alt": "My First Photobooth: My First Photobooth · Photo 1",
+      "featured": true,
+      "category": null
+    },
+    "photoCount": 10
   }
 ]

@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import Link from "next/link";
 import { showcasePhotos } from "@/lib/gallery/albums";
 export default function ProductGallery({ category }: { category: string }) {
@@ -15,7 +15,8 @@ export default function ProductGallery({ category }: { category: string }) {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {photos.slice(0, 6).map((photo) => (
           <a key={photo.id} href={photo.url} target="_blank" rel="noreferrer">
-            <img
+            <Image
+              sizes="(max-width: 767px) 50vw, 33vw"
               src={photo.thumbnailUrl}
               alt={photo.alt}
               width={1200}
