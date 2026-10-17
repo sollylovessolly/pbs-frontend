@@ -1,4 +1,6 @@
 "use client";
+
+import PackagePhoto from "./PackagePhoto";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,6 +31,9 @@ export default function PackageBuilder({ id }: { id: string }) {
           <strong>{money(p.price)}</strong>{" "}
           <del className="text-base text-ink/60">{money(p.compareAt)}</del>
         </p>
+        <div className="relative mt-6 aspect-[4/3] max-w-xl overflow-hidden rounded-2xl border-2 border-ink">
+          <PackagePhoto id={id} />
+        </div>
         <ul className="my-6 list-disc space-y-2 pl-5">
           {packageContents(p).map((line) => (
             <li key={line}>{line}</li>

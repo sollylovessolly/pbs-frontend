@@ -18,6 +18,8 @@ Customers customise the individual products, return to the package page, and sel
 
 Package phone cases use Case Only because custom Polaroid prints are already included. The Ultimate Birthday Gift's free mini photostrip reuses its full-size strip design; fulfillment is flagged in the admin order details.
 
+Package cards, the homepage bestsellers and package detail pages use the existing product photos as a collage. To add dedicated package photos later, put them in `public/images/packages/` and add their paths by package ID in `src/data/package-images.ts` (for example, `"you-and-me": "/images/packages/you-and-me.jpg"`).
+
 ## Protective packaging
 
 Regular orders can select premium protective packaging at NGN 1,500 per order. Gift packages include it without another fee. The backend calculates and persists the charge and selection; the admin order summary shows both. The fee does not create stock or represent the actual packaging cost, which remains part of your normal inventory/accounting setup.

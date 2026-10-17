@@ -216,7 +216,7 @@ const HeroImage = ({
             height={650}
             priority={priority}
             sizes="(max-width: 768px) 160px, 200px"
-            className="h-auto w-full object-contain drop-shadow-[6px_10px_0_rgba(42,33,28,0.16)]"
+            className="polaroid-faded h-auto w-full object-contain drop-shadow-[6px_10px_0_rgba(42,33,28,0.16)]"
           />
         </div>
       </div>

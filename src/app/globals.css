@@ -334,3 +334,8 @@ torn-divider-shadow {
     display: none;
   }
 }
+
+/* A gentle instant-film finish; the source photos and print exports stay intact. */
+.polaroid-faded {
+  filter: sepia(0.16) saturate(0.78) contrast(0.9) brightness(1.06);
+}

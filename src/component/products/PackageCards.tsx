@@ -1,3 +1,4 @@
+import PackagePhoto from "./PackagePhoto";
 import Link from "next/link";
 import { giftPackages, packageContents } from "@/lib/commerce/packages";
 import { money } from "@/lib/commerce/catalogue";
@@ -21,6 +22,13 @@ export default function PackageCards() {
             key={p.id}
             className="flex flex-col rounded-2xl border-2 border-ink bg-paper p-6 shadow-soft"
           >
+            <Link
+              href={`/products/packages/${p.id}`}
+              aria-label={`View ${p.name} package`}
+              className="relative mb-5 block aspect-[4/3] overflow-hidden rounded-xl border-2 border-ink"
+            >
+              <PackagePhoto id={p.id} />
+            </Link>
             <p className="text-sm font-bold text-burgundy">{p.occasion}</p>
             <h3 className="mt-2 font-serif text-2xl">{p.name}</h3>
             <ul className="my-5 flex-1 list-disc space-y-2 pl-5 text-sm">

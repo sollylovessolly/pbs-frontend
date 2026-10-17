@@ -68,7 +68,8 @@ const products = ["POLAROID", "PHONE_CASE", "VINTAGE_LETTER"].map(
 );
 async function setup(page: Page, cart = items) {
   await page.addInitScript((cart) => {
-    if (!localStorage.getItem("polaroidsbysolly-cart")) localStorage.setItem("polaroidsbysolly-cart", JSON.stringify(cart));
+    if (!localStorage.getItem("polaroidsbysolly-cart"))
+      localStorage.setItem("polaroidsbysolly-cart", JSON.stringify(cart));
   }, cart);
   await page.route("**/api/**", (route) => {
     const path = new URL(route.request().url()).pathname;
@@ -108,12 +109,19 @@ test("six gift packages list the final prices and contents", async ({
     await expect(
       page.getByRole("heading", { name, exact: true }),
     ).toBeVisible();
-  const moments = page
-    .locator("article")
-    .filter({
-      has: page.getByRole("heading", { name: "Moments with You", exact: true }),
-    });
+  const moments = page.locator("article").filter({
+    has: page.getByRole("heading", { name: "Moments with You", exact: true }),
+  });
   await expect(moments).toContainText("₦38,000");
+  await expect(moments.locator("img").first()).toBeVisible();
+  await expect
+    .poll(() =>
+      moments
+        .locator("img")
+        .first()
+        .evaluate((el: HTMLImageElement) => el.naturalWidth),
+    )
+    .toBeGreaterThan(0);
   await expect(moments).not.toContainText("photostrip");
 });
 test("complete package has one fixed cart price, locked quantities and included packaging at checkout", async ({

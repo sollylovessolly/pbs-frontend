@@ -93,7 +93,7 @@ const AboutUs = ({ showStoryLink = true }: { showStoryLink?: boolean }) => {
                     alt={photo.alt}
                     fill
                     sizes="(max-width: 767px) 250px, 355px"
-                    className="object-contain drop-shadow-[8px_10px_0_rgba(42,33,28,0.14)]"
+                    className="polaroid-faded object-contain drop-shadow-[8px_10px_0_rgba(42,33,28,0.14)]"
                   />
                 </div>
               );

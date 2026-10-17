@@ -40,6 +40,9 @@ export default function Reviews({ preview = false }: { preview?: boolean }) {
   return (
     <section className="bg-cream px-5 py-14 text-ink">
       <div className="mx-auto max-w-site">
+        <p className="mb-3 font-handwritten text-xl text-burgundy">
+          from our little corner of the world, with love
+        </p>
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           {preview ? (
             <h2 className="font-serif text-3xl sm:text-4xl">

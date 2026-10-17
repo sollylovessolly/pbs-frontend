@@ -107,10 +107,21 @@ export default function ProductProvider({
             {category !== "PHONE_CASE" &&
               category !== "PHOTOSTRIP" &&
               !available(variant) && (
-                <p role="status">
-                  {variant.reasonIfUnavailable ||
-                    "This option is out of stock."}
-                </p>
+                <div
+                  role="status"
+                  className="mt-4 rounded-xl border border-burgundy/30 bg-blush p-4 text-ink"
+                >
+                  <p className="font-bold">
+                    {variant.reasonIfUnavailable ||
+                      "This option is out of stock."}
+                  </p>
+                  {variant.availableQuantity === 0 && (
+                    <p className="mt-1 text-sm leading-6">
+                      This option is currently out of stock. Ordering will
+                      reopen when it is restocked.
+                    </p>
+                  )}
+                </div>
               )}
           </>
         )}

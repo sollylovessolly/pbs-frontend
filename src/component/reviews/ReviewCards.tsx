@@ -4,23 +4,34 @@ import { galleryImage } from "@/lib/gallery/types";
 export default function ReviewCards({ reviews }: { reviews: Review[] }) {
   return (
     <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-      {reviews.map((review) => (
+      {reviews.map((review, index) => (
         <article
           key={review.id}
-          className="min-w-0 rounded-2xl border-2 border-ink bg-paper p-5 shadow-soft"
+          className={`relative flex min-w-0 flex-col overflow-hidden rounded-2xl border-2 border-ink p-6 shadow-[4px_5px_0_rgba(42,33,28,0.18)] sm:p-7 ${["bg-burgundy text-cream", "bg-blush text-ink", "bg-beige text-ink"][index % 3]}`}
         >
+          <div
+            aria-hidden="true"
+            className="mb-2 flex items-center justify-between"
+          >
+            <span className="font-serif text-6xl leading-none opacity-60">
+              “
+            </span>
+            <span className="-rotate-6 rounded-full border border-current px-3 py-1 font-handwritten text-sm">
+              a little customer love ♡
+            </span>
+          </div>
           {review.rating > 0 && (
             <p
               aria-label={`${review.rating} out of 5 stars`}
-              className="text-xl tracking-widest text-burgundy"
+              className="text-xl tracking-widest"
             >
               {"★".repeat(Math.max(0, Math.min(5, review.rating)))}
               {"☆".repeat(Math.max(0, 5 - review.rating))}
             </p>
           )}
-          <p className="mt-4 whitespace-pre-wrap break-words leading-7">
+          <blockquote className="mt-2 flex-1 whitespace-pre-wrap break-words text-base leading-7">
             {review.text}
-          </p>
+          </blockquote>
           {review.photos.length > 0 && (
             <div className="mt-4 grid grid-cols-3 gap-2">
               {review.photos.map((photo, index) => (
@@ -43,9 +54,17 @@ export default function ReviewCards({ reviews }: { reviews: Review[] }) {
               ))}
             </div>
           )}
-          <p className="mt-5 font-bold">{review.displayName}</p>
+          <div className="mt-6 flex items-center gap-3 border-t border-current/25 pt-4">
+            <span
+              aria-hidden="true"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-current font-serif text-xl"
+            >
+              {review.displayName.slice(0, 1).toUpperCase()}
+            </span>
+            <p className="font-bold">{review.displayName}</p>
+          </div>
           {review.verifiedPurchase && (
-            <p className="mt-1 text-xs text-burgundy">Verified purchase</p>
+            <p className="mt-2 text-xs font-semibold">Verified purchase</p>
           )}
         </article>
       ))}

@@ -1,4 +1,6 @@
 "use client";
+
+import PackagePhoto from "@/component/products/PackagePhoto";
 import { useEffect, useState } from "react";
 import { getProducts } from "@/lib/api";
 import type { BackendProduct } from "@/lib/api/types";
@@ -59,6 +61,7 @@ const BestSellers = () => {
       alt: p.name,
       isBestSeller: false,
       compareAt: "",
+      packageId: "",
     }));
   bestSellers.push(
     ...[giftPackages[0], giftPackages[2], giftPackages[4]].map((p) => ({
@@ -67,7 +70,8 @@ const BestSellers = () => {
       compareAt: money(p.compareAt),
       time: `${p.occasion} package · premium packaging included`,
       href: `/products/packages/${p.id}`,
-      src: "/images/products/albums.jpg",
+      src: "/images/products/polaroids.jpg",
+      packageId: p.id,
       alt: `${p.name} gift package`,
       isBestSeller: false,
     })),
@@ -123,13 +127,17 @@ const BestSellers = () => {
 
                 <div className="rounded-sm border-2 border-ink bg-paper px-2 pb-6 pt-2 shadow-[3px_4px_0_rgba(42,33,28,0.12)] transition-transform duration-150 sm:px-3 sm:pb-10 sm:pt-3 sm:shadow-[5px_6px_0_rgba(42,33,28,0.12)] sm:group-hover:-translate-y-1 sm:group-hover:-rotate-1">
                   <div className="relative aspect-[4/5] w-full overflow-hidden bg-beige">
-                    <Image
-                      src={product.src}
-                      alt={product.alt}
-                      fill
-                      sizes="(max-width: 639px) 50vw, (max-width: 1024px) 50vw, 20vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    {product.packageId ? (
+                      <PackagePhoto id={product.packageId} />
+                    ) : (
+                      <Image
+                        src={product.src}
+                        alt={product.alt}
+                        fill
+                        sizes="(max-width: 639px) 50vw, (max-width: 1024px) 50vw, 20vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    )}
                   </div>
                 </div>
 
