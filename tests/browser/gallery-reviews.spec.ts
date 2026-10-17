@@ -265,3 +265,23 @@ test("approved reviews refresh on return and every public card stays burgundy wi
   await expect(cards.locator(".rounded-full")).toHaveCount(0);
   await expect(page.getByText("a little customer love ♡")).toHaveCount(0);
 });
+
+test("homepage caps reviews at three while the reviews page shows published submissions", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.goto("/");
+  const preview = page
+    .locator("section")
+    .filter({
+      has: page.getByRole("heading", {
+        name: "Loved, kept, gifted",
+        exact: true,
+      }),
+    });
+  await expect(preview.locator("article")).toHaveCount(3);
+  await expect(preview.getByText("Ada O.", { exact: true })).toHaveCount(0);
+  await preview.getByRole("link", { name: "Read & write reviews →" }).click();
+  await expect(page.getByText("Ada O.", { exact: true })).toBeVisible();
+  await expect(page.locator("article")).toHaveCount(4);
+});

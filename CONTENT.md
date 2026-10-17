@@ -28,6 +28,6 @@ Regular orders can select premium protective packaging at NGN 1,500 per order. G
 
 ## Product navigation and review approval
 
-Products opens on the Packages category; All shows packages first followed by individual products. Polaroid, photostrip and vintage-letter product previews use the supplied Product Showcase images.
+Products opens on All, with individual products in their original order followed by packages. Packages is the last filter and is selected only when clicked. Polaroid, photostrip and vintage-letter product previews use the supplied Product Showcase images.
 
-New customer reviews stay pending. In `/admin/reviews`, use Publish review to approve them for the public reviews page and homepage preview. Only published reviews with publication consent are returned by the public API. The public reviews refresh when the browser tab regains focus. Public review cards consistently use burgundy and cream without pill badges.
+New customer reviews stay pending. In `/admin/reviews`, use Publish review to approve them for the public reviews page. The homepage shows only the first three customer quotes; Read & write reviews opens the full list, including approved submissions. Only published reviews with publication consent are returned by the public API. The public reviews refresh when the browser tab regains focus. Public review cards consistently use burgundy and cream without pill badges.

@@ -97,10 +97,17 @@ test("six gift packages list the final prices and contents", async ({
   await page.goto("/products");
   await expect(
     page.locator('[aria-label="Filter products"] button').first(),
-  ).toHaveText("Packages");
+  ).toHaveText("All");
   await expect(
-    page.getByRole("button", { name: "Packages", exact: true }),
+    page.getByRole("button", { name: "All", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.locator('[aria-label="Filter products"] button').last(),
+  ).toHaveText("Packages");
+  await page.getByRole("button", { name: "Packages", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Custom Polaroids", exact: true }),
+  ).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Gift packages", exact: true }),
   ).toBeVisible();
@@ -141,7 +148,7 @@ test("six gift packages list the final prices and contents", async ({
   );
   await page.getByRole("button", { name: "All", exact: true }).click();
   await expect(page.locator("article").first().getByRole("heading")).toHaveText(
-    "You and Me",
+    "Custom Polaroids",
   );
 });
 test("complete package has one fixed cart price, locked quantities and included packaging at checkout", async ({

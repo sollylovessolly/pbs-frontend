@@ -67,32 +67,39 @@ export default function Reviews({ preview = false }: { preview?: boolean }) {
             {preview ? "Read & write reviews →" : "Write a review →"}
           </Link>
         </div>
-        {page === 1 && <ReviewCards reviews={customerReviews} />}
+        {preview ? (
+          <ReviewCards
+            reviews={[...customerReviews, ...(result?.data ?? [])].slice(0, 3)}
+          />
+        ) : page === 1 ? (
+          <ReviewCards reviews={customerReviews} />
+        ) : null}
         <div className="mt-5" />
-        {loading ? (
-          <p role="status">Loading reviews…</p>
-        ) : error ? (
-          <p role="status">
-            {error}{" "}
-            <button
-              className="font-bold underline"
-              onClick={() => {
-                setError("");
-                setLoading(true);
-                setAttempt((x) => x + 1);
-              }}
-            >
-              Retry
-            </button>
-          </p>
-        ) : result?.data.length ? (
-          <ReviewCards reviews={result.data} />
-        ) : (
-          <p>
-            Have a PBS keepsake or an event memory? We’d love to hear your
-            experience.
-          </p>
-        )}
+        {!preview &&
+          (loading ? (
+            <p role="status">Loading reviews…</p>
+          ) : error ? (
+            <p role="status">
+              {error}{" "}
+              <button
+                className="font-bold underline"
+                onClick={() => {
+                  setError("");
+                  setLoading(true);
+                  setAttempt((x) => x + 1);
+                }}
+              >
+                Retry
+              </button>
+            </p>
+          ) : result?.data.length ? (
+            <ReviewCards reviews={result.data} />
+          ) : (
+            <p>
+              Have a PBS keepsake or an event memory? We’d love to hear your
+              experience.
+            </p>
+          ))}
         {!preview && result && result.pagination.totalPages > 1 && (
           <div className="my-6 flex items-center gap-5">
             <button

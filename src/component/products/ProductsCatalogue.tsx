@@ -49,13 +49,13 @@ const filters: {
   label: string;
   value: ProductCategory;
 }[] = [
-  { label: "Packages", value: "packages" },
   { label: "All", value: "all" },
   { label: "Polaroid Prints", value: "prints" },
   { label: "Photostrips", value: "strips" },
   { label: "Vintage Letters", value: "letters" },
   { label: "Phone Cases", value: "cases" },
   { label: "Albums", value: "albums" },
+  { label: "Packages", value: "packages" },
 ];
 
 const toProductCard = (product: BackendProduct): Product | null => {
@@ -92,8 +92,7 @@ const toProductCard = (product: BackendProduct): Product | null => {
 
 const ProductsCatalogue = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [activeCategory, setActiveCategory] =
-    useState<ProductCategory>("packages");
+  const [activeCategory, setActiveCategory] = useState<ProductCategory>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -191,9 +190,6 @@ const ProductsCatalogue = () => {
           </div>
         </div>
 
-        {(activeCategory === "packages" || activeCategory === "all") && (
-          <PackageCards embedded />
-        )}
         {/* Product cards */}
         {activeCategory !== "packages" &&
           (isLoading ? (
@@ -280,6 +276,9 @@ const ProductsCatalogue = () => {
               ))}
             </div>
           ))}
+        {(activeCategory === "packages" || activeCategory === "all") && (
+          <PackageCards embedded />
+        )}
       </div>
     </section>
   );
