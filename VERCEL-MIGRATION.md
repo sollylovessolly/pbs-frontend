@@ -15,3 +15,5 @@ The storefront's production domain is `https://polaroids-by-solly.vercel.app`. B
 The complete dashboard steps, environment-file generator, old-file migration status and checks are in the sibling backend's `VERCEL-MIGRATION.md`. Its `npm run vercel:env -- --frontend https://polaroids-by-solly.vercel.app --api https://pbs-be.vercel.app` command generates this repository's ignored `.env.vercel` for dashboard import. The current import files use those actual domains.
 
 Use the native Next.js preset and Node.js 24.x. `vercel.json` defines installation/build defaults. Environment changes to `NEXT_PUBLIC_` values require rebuilding.
+
+Next.js and its ESLint configuration are updated to 16.4.2. The production dependency audit reports no known vulnerabilities. Saved carts translate legacy Render artwork references to the new API without discarding the cart or changing uploaded-file tokens.

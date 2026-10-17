@@ -9,6 +9,36 @@ const previous = {
   xhr: global.XMLHttpRequest,
   mode: process.env.NEXT_PUBLIC_DIRECT_UPLOADS,
 };
+test("saved carts resolve old Render artwork against the current API", () => {
+  const { restoreCart } = require("../src/lib/commerce/cart.ts");
+  const previousApi = process.env.NEXT_PUBLIC_API_URL;
+  process.env.NEXT_PUBLIC_API_URL = "https://pbs-be.vercel.app/api";
+  try {
+    const old =
+      "https://polaroidsbysolly-be.onrender.com/api/uploads/files/opaque-token";
+    const item = {
+      id: "saved",
+      name: "Print",
+      previewUrl: old,
+      productType: "polaroid",
+      quantity: 1,
+      unitPrice: 100,
+      editHref: "/products/polaroids",
+      customization: { previewUrl: old, package: "CASE_ONLY" },
+    };
+    const [restored] = restoreCart([item]);
+    assert.equal(
+      restored.previewUrl,
+      "https://pbs-be.vercel.app/api/uploads/files/opaque-token",
+    );
+    assert.equal(restored.customization.previewUrl, restored.previewUrl);
+    assert.equal(restored.customization.package, "CASE_ONLY");
+    assert.equal(item.previewUrl, old);
+  } finally {
+    if (previousApi === undefined) delete process.env.NEXT_PUBLIC_API_URL;
+    else process.env.NEXT_PUBLIC_API_URL = previousApi;
+  }
+});
 afterEach(() => {
   global.fetch = previous.fetch;
   global.XMLHttpRequest = previous.xhr;

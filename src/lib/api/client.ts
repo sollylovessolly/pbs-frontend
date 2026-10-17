@@ -15,6 +15,25 @@ export class ApiError extends Error {
 const getApiUrl = () =>
   (process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_URL).replace(/\/$/, "");
 
+export function resolveArtworkUrl(value: string): string {
+  try {
+    const url = new URL(value);
+    const token = url.pathname.match(
+      /^\/api\/uploads\/files\/([A-Za-z0-9_-]+)$/,
+    )?.[1];
+    if (
+      url.origin === "https://polaroidsbysolly-be.onrender.com" &&
+      token &&
+      !url.username &&
+      !url.password
+    )
+      return `${getApiUrl()}/uploads/files/${token}`;
+  } catch {
+    /* Relative images and local thumbnails stay as stored. */
+  }
+  return value;
+}
+
 const getErrorMessage = (payload: unknown): string => {
   if (typeof payload === "string" && payload.trim()) {
     return "The request could not be completed. Please try again.";
