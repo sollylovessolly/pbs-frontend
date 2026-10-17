@@ -1,10 +1,9 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import CartItemPreview from "./CartItemPreview";
 import TornDivider from "../ui/TornDivider";
 
 const formatPrice = (amount: number) => {
@@ -12,21 +11,13 @@ const formatPrice = (amount: number) => {
 };
 
 const CartPage = () => {
-  const {
-    items,
-    cartCount,
-    subtotal,
-    isReady,
-    updateQuantity,
-    removeItem,
-  } = useCart();
+  const { items, cartCount, subtotal, isReady, updateQuantity, removeItem } =
+    useCart();
 
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState("");
 
-  const hasSlowItem = items.some(
-    (item) => !item.isFast,
-  );
+  const hasSlowItem = items.some((item) => !item.isFast);
 
   const handlePromoCode = () => {
     if (!promoCode.trim()) {
@@ -34,9 +25,7 @@ const CartPage = () => {
       return;
     }
 
-    setPromoMessage(
-      "That promo code is not available yet.",
-    );
+    setPromoMessage("Code saved. Your discount will be checked at checkout.");
   };
 
   if (!isReady) {
@@ -55,10 +44,7 @@ const CartPage = () => {
       <section className="border-b-2 border-ink bg-burgundy text-cream pb-15">
         <div className="mx-auto max-w-[1240px] px-5 py-10 md:px-7 text-cream">
           <div className="mb-4 text-sm font-semibold text-cream/40">
-            <Link
-              href="/"
-              className="transition hover:text-burgundy-deep"
-            >
+            <Link href="/" className="transition hover:text-burgundy-deep">
               Home
             </Link>
 
@@ -76,9 +62,7 @@ const CartPage = () => {
 
           {cartCount > 0 && (
             <p className="mt-2 text-sm text-cream/40">
-              {cartCount}{" "}
-              {cartCount === 1 ? "print" : "prints"} in
-              your cart
+              {cartCount} {cartCount === 1 ? "print" : "prints"} in your cart
             </p>
           )}
         </div>
@@ -97,8 +81,7 @@ const CartPage = () => {
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-ink/60">
-                Looks like you haven&apos;t added a
-                keepsake yet.
+                Looks like you haven&apos;t added a keepsake yet.
               </p>
 
               <Link
@@ -116,11 +99,7 @@ const CartPage = () => {
                   className="flex gap-4 rounded-[16px] border-2 border-ink bg-paper p-4 shadow-[0_6px_0_rgba(42,33,28,0.08)] sm:gap-5 sm:p-5"
                 >
                   <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border-2 border-ink bg-beige shadow-[3px_4px_0_rgba(42,33,28,0.14)]">
-                    <img
-                      src={item.previewUrl}
-                      alt={`${item.name} ${index + 1}`}
-                      className="h-full w-full object-cover"
-                    />
+                    <CartItemPreview key={item.previewUrl} item={item} />
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -130,13 +109,13 @@ const CartPage = () => {
                           {item.name}
                         </h2>
                         {item.options && (
-                        <p className="mt-1 text-xs text-ink/55">
+                          <p className="mt-1 text-xs text-ink/55">
                             {item.options.phoneModel}
 
                             {item.options.packageLabel
-                            ? ` · ${item.options.packageLabel}`
-                            : ""}
-                        </p>
+                              ? ` · ${item.options.packageLabel}`
+                              : ""}
+                          </p>
                         )}
 
                         <p className="mt-1 text-xs text-ink/55">
@@ -148,9 +127,7 @@ const CartPage = () => {
                       </div>
 
                       <p className="shrink-0 text-sm font-bold">
-                        {formatPrice(
-                          item.unitPrice * item.quantity,
-                        )}
+                        {formatPrice(item.unitPrice * item.quantity)}
                       </p>
                     </div>
 
@@ -164,10 +141,7 @@ const CartPage = () => {
                           type="button"
                           aria-label={`Reduce quantity for ${item.name}`}
                           onClick={() =>
-                            updateQuantity(
-                              item.id,
-                              item.quantity - 1,
-                            )
+                            updateQuantity(item.id, item.quantity - 1)
                           }
                           className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-ink bg-cream font-bold"
                         >
@@ -182,10 +156,7 @@ const CartPage = () => {
                           type="button"
                           aria-label={`Increase quantity for ${item.name}`}
                           onClick={() =>
-                            updateQuantity(
-                              item.id,
-                              item.quantity + 1,
-                            )
+                            updateQuantity(item.id, item.quantity + 1)
                           }
                           className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-ink bg-cream font-bold"
                         >
@@ -195,12 +166,10 @@ const CartPage = () => {
 
                       <div className="flex items-center gap-4 text-xs font-bold">
                         <Link
-                            href={`${item.editHref}?edit=${encodeURIComponent(
-                                item.id,
-                            )}`}
-                            className="underline underline-offset-4"
-                            >
-                            Edit
+                          href={item.editHref}
+                          className="underline underline-offset-4"
+                        >
+                          Create another
                         </Link>
 
                         <button
@@ -233,24 +202,16 @@ const CartPage = () => {
 
         {/* Summary */}
         <aside className="rounded-[18px] border-2 border-ink bg-paper p-6 shadow-[0_6px_0_rgba(42,33,28,0.08)] lg:sticky lg:top-28">
-          <h2 className="font-serif text-xl font-semibold">
-            Order Summary
-          </h2>
+          <h2 className="font-serif text-xl font-semibold">Order Summary</h2>
 
           <div className="mt-5 flex justify-between border-b border-dashed border-ink/20 py-3 text-sm">
-            <span className="font-semibold text-ink/60">
-              Subtotal
-            </span>
+            <span className="font-semibold text-ink/60">Subtotal</span>
 
-            <span className="font-bold">
-              {formatPrice(subtotal)}
-            </span>
+            <span className="font-bold">{formatPrice(subtotal)}</span>
           </div>
 
           <div className="flex justify-between border-b border-dashed border-ink/20 py-3 text-sm">
-            <span className="font-semibold text-ink/60">
-              Delivery
-            </span>
+            <span className="font-semibold text-ink/60">Delivery</span>
 
             <span className="text-right text-xs font-bold">
               Calculated at checkout
@@ -294,7 +255,11 @@ const CartPage = () => {
 
           {items.length > 0 ? (
             <Link
-              href="/checkout"
+              href={
+                promoCode.trim()
+                  ? `/checkout?discountCode=${encodeURIComponent(promoCode.trim())}`
+                  : "/checkout"
+              }
               className="mt-6 flex w-full items-center justify-center rounded-full border-2 border-ink bg-burgundy px-5 py-3.5 text-sm font-bold text-cream shadow-[4px_4px_0_#2A211C]"
             >
               Proceed to Checkout
@@ -322,9 +287,7 @@ const CartPage = () => {
       {items.length > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t-2 border-ink bg-cream px-4 py-3 lg:hidden">
           <div className="shrink-0">
-            <p className="text-[10px] font-semibold text-ink/55">
-              Total
-            </p>
+            <p className="text-[10px] font-semibold text-ink/55">Total</p>
 
             <p className="font-serif text-base font-bold text-burgundy">
               {formatPrice(subtotal)}
@@ -332,7 +295,11 @@ const CartPage = () => {
           </div>
 
           <Link
-            href="/checkout"
+            href={
+              promoCode.trim()
+                ? `/checkout?discountCode=${encodeURIComponent(promoCode.trim())}`
+                : "/checkout"
+            }
             className="flex flex-1 items-center justify-center rounded-full border-2 border-ink bg-burgundy px-4 py-3 text-sm font-bold text-cream shadow-[3px_3px_0_#2A211C]"
           >
             Checkout

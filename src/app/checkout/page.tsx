@@ -8,8 +8,19 @@ export const metadata: Metadata = {
     "Enter your delivery details and complete your PolaroidsBySolly order.",
 };
 
-const CheckoutRoute = () => {
-  return <CheckoutPage />;
+const CheckoutRoute = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ paymentReference?: string; discountCode?: string }>;
+}) => {
+  const { paymentReference, discountCode } = await searchParams;
+  return (
+    <CheckoutPage
+      key={paymentReference || "checkout"}
+      paymentReference={paymentReference}
+      initialDiscountCode={discountCode}
+    />
+  );
 };
 
 export default CheckoutRoute;

@@ -1,0 +1,1789 @@
+{
+  "schemas": {
+    "CreateProductDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "Polaroids",
+          "description": "Display name of the product"
+        },
+        "slug": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "polaroids",
+          "description": "Unique URL-friendly identifier"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "example": "Custom Polaroid prints created from customer photos."
+        },
+        "category": {
+          "enum": [
+            "POLAROID",
+            "PHONE_CASE",
+            "PHOTOSTRIP",
+            "VINTAGE_LETTER",
+            "ALBUM"
+          ],
+          "type": "string",
+          "example": "POLAROID"
+        },
+        "isActive": {
+          "type": "boolean",
+          "example": true,
+          "default": true
+        }
+      },
+      "required": ["name", "slug", "category"]
+    },
+    "UpdateProductDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "Polaroids",
+          "description": "Display name of the product"
+        },
+        "slug": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "polaroids",
+          "description": "Unique URL-friendly identifier"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "example": "Custom Polaroid prints created from customer photos."
+        },
+        "category": {
+          "enum": [
+            "POLAROID",
+            "PHONE_CASE",
+            "PHOTOSTRIP",
+            "VINTAGE_LETTER",
+            "ALBUM"
+          ],
+          "type": "string",
+          "example": "POLAROID"
+        },
+        "isActive": {
+          "type": "boolean",
+          "example": true,
+          "default": true
+        }
+      }
+    },
+    "CreateVariantDto": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "example": "PRODUCT_ID_HERE",
+          "description": "The product this variant belongs to"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "example": "iPhone 15 Pro"
+        },
+        "sku": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "PHONECASE-IP15-PRO"
+        },
+        "sellingPrice": {
+          "type": "number",
+          "minimum": 0,
+          "example": 5500,
+          "description": "Selling price in naira"
+        },
+        "tracksStock": {
+          "type": "boolean",
+          "example": true,
+          "default": false,
+          "description": "Whether availability depends on physical inventory"
+        },
+        "isActive": {
+          "type": "boolean",
+          "example": true,
+          "default": true
+        },
+        "outsourcedUnitCost": {
+          "type": "number",
+          "minimum": 0,
+          "example": 1200,
+          "default": 0,
+          "description": "Cost paid to an external vendor for one unit"
+        },
+        "supplierId": {
+          "type": "string",
+          "example": "SUPPLIER_ID_HERE"
+        }
+      },
+      "required": ["productId", "name", "sku", "sellingPrice"]
+    },
+    "UpdateVariantDto": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "example": "PRODUCT_ID_HERE",
+          "description": "The product this variant belongs to"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "example": "iPhone 15 Pro"
+        },
+        "sku": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "PHONECASE-IP15-PRO"
+        },
+        "sellingPrice": {
+          "type": "number",
+          "minimum": 0,
+          "example": 5500,
+          "description": "Selling price in naira"
+        },
+        "tracksStock": {
+          "type": "boolean",
+          "example": true,
+          "default": false,
+          "description": "Whether availability depends on physical inventory"
+        },
+        "isActive": {
+          "type": "boolean",
+          "example": true,
+          "default": true
+        },
+        "outsourcedUnitCost": {
+          "type": "number",
+          "minimum": 0,
+          "example": 1200,
+          "default": 0,
+          "description": "Cost paid to an external vendor for one unit"
+        },
+        "supplierId": {
+          "type": "string",
+          "example": "SUPPLIER_ID_HERE"
+        }
+      }
+    },
+    "CreateResourceDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "Polaroid Film",
+          "description": "Display name of the resource"
+        },
+        "sku": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "FILM-POLAROID-STD",
+          "description": "Unique stock keeping unit"
+        },
+        "category": {
+          "enum": ["MATERIAL", "PACKAGING", "CONSUMABLE", "FINISHED_GOOD"],
+          "type": "string",
+          "example": "MATERIAL"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30,
+          "example": "SHEET",
+          "description": "Smallest useful unit for this resource"
+        },
+        "currentStock": {
+          "type": "number",
+          "minimum": 0,
+          "example": 100,
+          "default": 0
+        },
+        "averageUnitCost": {
+          "type": "number",
+          "minimum": 0,
+          "example": 250,
+          "default": 0,
+          "description": "Average cost paid per unit"
+        },
+        "lowStockThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "example": 20,
+          "default": 0,
+          "description": "Threshold below which stock is considered low"
+        },
+        "isActive": {
+          "type": "boolean",
+          "example": true,
+          "default": true
+        }
+      },
+      "required": ["name", "sku", "category", "unit"]
+    },
+    "RestockResourceDto": {
+      "type": "object",
+      "properties": {
+        "quantity": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 20,
+          "description": "Quantity added in the resource base unit"
+        },
+        "unitCost": {
+          "type": "number",
+          "minimum": 0,
+          "example": 900,
+          "description": "Cost of one resource unit"
+        },
+        "note": {
+          "type": "string",
+          "example": "Bought one pack of Instax film"
+        }
+      },
+      "required": ["quantity", "unitCost"]
+    },
+    "UpdateResourceDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "Polaroid Film",
+          "description": "Display name of the resource"
+        },
+        "sku": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "FILM-POLAROID-STD",
+          "description": "Unique stock keeping unit"
+        },
+        "category": {
+          "enum": ["MATERIAL", "PACKAGING", "CONSUMABLE", "FINISHED_GOOD"],
+          "type": "string",
+          "example": "MATERIAL"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30,
+          "example": "SHEET",
+          "description": "Smallest useful unit for this resource"
+        },
+        "currentStock": {
+          "type": "number",
+          "minimum": 0,
+          "example": 100,
+          "default": 0
+        },
+        "averageUnitCost": {
+          "type": "number",
+          "minimum": 0,
+          "example": 250,
+          "default": 0,
+          "description": "Average cost paid per unit"
+        },
+        "lowStockThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "example": 20,
+          "default": 0,
+          "description": "Threshold below which stock is considered low"
+        },
+        "isActive": {
+          "type": "boolean",
+          "example": true,
+          "default": true
+        }
+      }
+    },
+    "ShipmentSelectionDto": {
+      "type": "object",
+      "properties": {
+        "requestToken": {
+          "type": "string",
+          "description": "Opaque token returned by Shipbubble Rates API"
+        },
+        "serviceCode": {
+          "type": "string"
+        },
+        "courierId": {
+          "type": "string"
+        }
+      },
+      "required": ["requestToken", "serviceCode", "courierId"]
+    },
+    "CustomerDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Jane Doe"
+        },
+        "phone": {
+          "type": "string",
+          "example": "08012345678"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "jane@example.com"
+        }
+      },
+      "required": ["name", "phone"]
+    },
+    "DeliveryDto": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "example": "Lagos"
+        },
+        "address": {
+          "type": "string",
+          "example": "12 Marina Road, Victoria Island"
+        }
+      },
+      "required": ["state", "address"]
+    },
+    "OrderItemDto": {
+      "type": "object",
+      "properties": {
+        "variantSku": {
+          "type": "string",
+          "description": "Stable product variant SKU",
+          "example": "POLAROID-STANDARD"
+        },
+        "quantity": {
+          "type": "number",
+          "minimum": 1,
+          "example": 2
+        },
+        "customization": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Product-dependent fulfillment data: Polaroid finalPngUrl/previewUrl, Photostrip finalPngUrl, Vintage Letter finalPdfUrl, or Phone Case package",
+          "example": {
+            "finalPngUrl": "https://example.com/final.png",
+            "previewUrl": "https://example.com/preview.png"
+          }
+        }
+      },
+      "required": ["variantSku", "quantity"]
+    },
+    "CreateOrderDto": {
+      "type": "object",
+      "properties": {
+        "discountCode": {
+          "type": "string",
+          "example": "WELCOME10"
+        },
+        "shipment": {
+          "$ref": "#/components/schemas/ShipmentSelectionDto"
+        },
+        "customer": {
+          "$ref": "#/components/schemas/CustomerDto"
+        },
+        "delivery": {
+          "$ref": "#/components/schemas/DeliveryDto"
+        },
+        "source": {
+          "enum": ["WEBSITE", "WHATSAPP", "INSTAGRAM", "MANUAL"],
+          "type": "string",
+          "example": "WEBSITE"
+        },
+        "customerNote": {
+          "type": "string",
+          "example": "Please deliver before 5pm"
+        },
+        "items": {
+          "minItems": 1,
+          "example": [
+            {
+              "variantSku": "POLAROID-STANDARD",
+              "quantity": 2,
+              "customization": {
+                "finalPngUrl": "https://storage.example/polaroids.png",
+                "previewUrl": "https://storage.example/polaroids-preview.png"
+              }
+            },
+            {
+              "variantSku": "VINTAGE-AMBER-BURNT",
+              "quantity": 1,
+              "customization": {
+                "finalPdfUrl": "https://storage.example/letter.pdf"
+              }
+            },
+            {
+              "variantSku": "PHONECASE-IPHONE-15-PRO",
+              "quantity": 1,
+              "customization": {
+                "package": "WITH_POLAROID"
+              }
+            }
+          ],
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/OrderItemDto"
+          }
+        }
+      },
+      "required": ["customer", "delivery", "source", "items"]
+    },
+    "CreateManualOrderDto": {
+      "type": "object",
+      "properties": {
+        "discountCode": {
+          "type": "string",
+          "example": "WELCOME10"
+        },
+        "shipment": {
+          "$ref": "#/components/schemas/ShipmentSelectionDto"
+        },
+        "customer": {
+          "$ref": "#/components/schemas/CustomerDto"
+        },
+        "delivery": {
+          "$ref": "#/components/schemas/DeliveryDto"
+        },
+        "customerNote": {
+          "type": "string",
+          "example": "Please deliver before 5pm"
+        },
+        "items": {
+          "minItems": 1,
+          "example": [
+            {
+              "variantSku": "POLAROID-STANDARD",
+              "quantity": 2,
+              "customization": {
+                "finalPngUrl": "https://storage.example/polaroids.png",
+                "previewUrl": "https://storage.example/polaroids-preview.png"
+              }
+            },
+            {
+              "variantSku": "VINTAGE-AMBER-BURNT",
+              "quantity": 1,
+              "customization": {
+                "finalPdfUrl": "https://storage.example/letter.pdf"
+              }
+            },
+            {
+              "variantSku": "PHONECASE-IPHONE-15-PRO",
+              "quantity": 1,
+              "customization": {
+                "package": "WITH_POLAROID"
+              }
+            }
+          ],
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/OrderItemDto"
+          }
+        },
+        "source": {
+          "enum": ["WHATSAPP", "INSTAGRAM", "MANUAL"],
+          "type": "string",
+          "example": "WHATSAPP"
+        },
+        "adminNote": {
+          "type": "string",
+          "example": "Received through WhatsApp"
+        }
+      },
+      "required": ["customer", "delivery", "items", "source"]
+    },
+    "UpdateOrderStatusDto": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "PENDING",
+            "DESIGNING",
+            "PRINTING",
+            "PACKING",
+            "READY",
+            "OUT_FOR_DELIVERY",
+            "DELIVERED",
+            "CANCELLED"
+          ],
+          "type": "string",
+          "example": "PRINTING"
+        },
+        "note": {
+          "type": "string",
+          "example": "Printing files"
+        }
+      },
+      "required": ["status"]
+    },
+    "UpdateAdminNoteDto": {
+      "type": "object",
+      "properties": {
+        "adminNote": {
+          "type": "string",
+          "example": "Customer requested Friday delivery"
+        }
+      },
+      "required": ["adminNote"]
+    },
+    "UpdateTrackingDto": {
+      "type": "object",
+      "properties": {
+        "trackingLink": {
+          "type": "string",
+          "format": "uri",
+          "example": "https://tracking.example/PBS-123"
+        }
+      },
+      "required": ["trackingLink"]
+    },
+    "UpdateDeliveryCostDto": {
+      "type": "object",
+      "properties": {
+        "actualDeliveryCost": {
+          "type": "number",
+          "minimum": 0,
+          "example": 3500
+        }
+      },
+      "required": ["actualDeliveryCost"]
+    },
+    "UpdateFulfillmentDto": {
+      "type": "object",
+      "properties": {
+        "customization": {
+          "type": "object",
+          "additionalProperties": true,
+          "example": {
+            "finalPngUrl": "https://storage.example/final.png",
+            "previewUrl": "https://storage.example/preview.png"
+          }
+        }
+      },
+      "required": ["customization"]
+    },
+    "ManualPaymentDto": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "enum": ["TRANSFER", "OPAY"],
+          "type": "string",
+          "example": "TRANSFER"
+        },
+        "reference": {
+          "type": "string",
+          "example": "TRANSFER-2026-001"
+        }
+      },
+      "required": ["method"]
+    },
+    "CancelOrderDto": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500,
+          "example": "Customer requested cancellation"
+        },
+        "restoreInventory": {
+          "type": "object",
+          "default": false
+        }
+      },
+      "required": ["reason"]
+    },
+    "CreateDeliveryRateDto": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "pattern": "\\S",
+          "example": "Lagos"
+        },
+        "fee": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 3800
+        }
+      },
+      "required": ["state", "fee"]
+    },
+    "UpdateDeliveryRateDto": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "pattern": "\\S",
+          "example": "Lagos"
+        },
+        "fee": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 3800
+        },
+        "isActive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "InitializePaymentDto": {
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "example": "cm123orderid"
+        }
+      },
+      "required": ["orderId"]
+    },
+    "VerifyPaymentDto": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "type": "string",
+          "example": "pbs_test_reference"
+        }
+      },
+      "required": ["reference"]
+    },
+    "ShippingRateItemDto": {
+      "type": "object",
+      "properties": {
+        "variantSku": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "number",
+          "minimum": 1
+        }
+      },
+      "required": ["variantSku", "quantity"]
+    },
+    "ShippingRateDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "pickupDate": {
+          "type": "string"
+        },
+        "items": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ShippingRateItemDto"
+          }
+        }
+      },
+      "required": ["name", "email", "phone", "address", "state", "items"]
+    },
+    "ArchiveCustomerDto": {
+      "type": "object",
+      "properties": {}
+    },
+    "CreateDiscountDto": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 2,
+          "example": "WELCOME10"
+        },
+        "type": {
+          "enum": ["FIXED", "PERCENTAGE"],
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000,
+          "example": 10
+        },
+        "startsAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endsAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "minimumOrderAmount": {
+          "type": "number",
+          "minimum": 0,
+          "example": 5000
+        }
+      },
+      "required": ["code", "type", "value"]
+    },
+    "UpdateDiscountDto": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 2,
+          "example": "WELCOME10"
+        },
+        "type": {
+          "enum": ["FIXED", "PERCENTAGE"],
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000,
+          "example": 10
+        },
+        "startsAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endsAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "minimumOrderAmount": {
+          "type": "number",
+          "minimum": 0,
+          "example": 5000
+        },
+        "isActive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "CreateResourceRuleDto": {
+      "type": "object",
+      "properties": {
+        "variantId": {
+          "type": "string",
+          "example": "VARIANT_ID_HERE",
+          "description": "The product variant that consumes the resource"
+        },
+        "resourceId": {
+          "type": "string",
+          "example": "RESOURCE_ID_HERE",
+          "description": "The physical resource consumed by the variant"
+        },
+        "rule": {
+          "enum": ["PER_UNIT", "FIXED", "CAPACITY"],
+          "type": "string",
+          "example": "PER_UNIT"
+        },
+        "quantity": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 1,
+          "description": "Number of resource units consumed"
+        },
+        "capacity": {
+          "type": "number",
+          "minimum": 1,
+          "example": 20,
+          "description": "Required for CAPACITY rules, such as one box per 20 Polaroids"
+        },
+        "usageGroup": {
+          "type": "string",
+          "example": "POLAROID_PRINT",
+          "description": "Groups related usage together before calculating capacity"
+        }
+      },
+      "required": ["variantId", "resourceId", "rule", "quantity"]
+    },
+    "UpdateResourceRuleDto": {
+      "type": "object",
+      "properties": {
+        "variantId": {
+          "type": "string",
+          "example": "VARIANT_ID_HERE",
+          "description": "The product variant that consumes the resource"
+        },
+        "resourceId": {
+          "type": "string",
+          "example": "RESOURCE_ID_HERE",
+          "description": "The physical resource consumed by the variant"
+        },
+        "rule": {
+          "enum": ["PER_UNIT", "FIXED", "CAPACITY"],
+          "type": "string",
+          "example": "PER_UNIT"
+        },
+        "quantity": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 1,
+          "description": "Number of resource units consumed"
+        },
+        "capacity": {
+          "type": "number",
+          "minimum": 1,
+          "example": 20,
+          "description": "Required for CAPACITY rules, such as one box per 20 Polaroids"
+        },
+        "usageGroup": {
+          "type": "string",
+          "example": "POLAROID_PRINT",
+          "description": "Groups related usage together before calculating capacity"
+        }
+      }
+    },
+    "CreateSupplierDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "example": "Film Supplier Lagos",
+          "description": "Display name of the supplier"
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30,
+          "example": "08012345678"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "supplier@example.com"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 500,
+          "example": "Main film supplier for Instax mini sheets"
+        }
+      },
+      "required": ["name"]
+    },
+    "UpdateSupplierDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "example": "Film Supplier Lagos",
+          "description": "Display name of the supplier"
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30,
+          "example": "08012345678"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "supplier@example.com"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 500,
+          "example": "Main film supplier for Instax mini sheets"
+        }
+      }
+    },
+    "PurchaseItemDto": {
+      "type": "object",
+      "properties": {
+        "resourceId": {
+          "type": "string",
+          "description": "ID of the resource being purchased",
+          "example": "cmrwr5resource0001"
+        },
+        "purchaseQuantity": {
+          "type": "number",
+          "minimum": 0.01,
+          "description": "How many purchase units were bought (e.g. 3 packs)",
+          "example": 3
+        },
+        "purchaseUnit": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "The unit the resource was bought in (e.g. PACK, BOX)",
+          "example": "PACK"
+        },
+        "unitsPerPurchaseUnit": {
+          "type": "number",
+          "minimum": 0.01,
+          "description": "How many base units are in one purchase unit (e.g. 20 sheets per pack). Defaults to 1.",
+          "example": 20,
+          "default": 1
+        },
+        "totalCost": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total amount paid for this line item (all purchase units combined)",
+          "example": 2700
+        }
+      },
+      "required": [
+        "resourceId",
+        "purchaseQuantity",
+        "purchaseUnit",
+        "totalCost"
+      ]
+    },
+    "CreatePurchaseDto": {
+      "type": "object",
+      "properties": {
+        "supplierId": {
+          "type": "string",
+          "description": "Optional supplier the purchase was made from",
+          "example": "cmrwsupplier0001"
+        },
+        "purchasedAt": {
+          "type": "string",
+          "description": "When the purchase happened. Defaults to now.",
+          "example": "2026-07-25T21:00:00.000Z"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Free-form note about the purchase",
+          "example": "Bought 3 packs of Instax film and 2 boxes of mailers"
+        },
+        "items": {
+          "minItems": 1,
+          "description": "The resources bought in this purchase",
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/PurchaseItemDto"
+          }
+        }
+      },
+      "required": ["items"]
+    },
+    "TrackOrdersDto": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "pattern": "[0-9]{10,}",
+          "example": "08012345678"
+        }
+      },
+      "required": ["phone"]
+    },
+    "CreateExpenseDto": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "August Internet"
+        },
+        "description": {
+          "type": "string",
+          "example": "Monthly data subscription"
+        },
+        "category": {
+          "enum": [
+            "DATA",
+            "HOSTING",
+            "SALARY",
+            "MARKETING",
+            "DELIVERY",
+            "UTILITIES",
+            "EQUIPMENT",
+            "MATERIAL_PURCHASE",
+            "OUTSOURCING",
+            "OTHER"
+          ],
+          "type": "string",
+          "example": "DATA"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 15000
+        },
+        "expenseDate": {
+          "format": "date-time",
+          "type": "string",
+          "example": "2026-08-05T10:00:00.000Z"
+        },
+        "relatedOrderId": {
+          "type": "string",
+          "example": "cm123orderid"
+        }
+      },
+      "required": ["title", "category", "amount", "expenseDate"]
+    },
+    "UpdateExpenseDto": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "August Internet"
+        },
+        "description": {
+          "type": "string",
+          "example": "Monthly data subscription"
+        },
+        "category": {
+          "enum": [
+            "DATA",
+            "HOSTING",
+            "SALARY",
+            "MARKETING",
+            "DELIVERY",
+            "UTILITIES",
+            "EQUIPMENT",
+            "MATERIAL_PURCHASE",
+            "OUTSOURCING",
+            "OTHER"
+          ],
+          "type": "string",
+          "example": "DATA"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 15000
+        },
+        "expenseDate": {
+          "format": "date-time",
+          "type": "string",
+          "example": "2026-08-05T10:00:00.000Z"
+        },
+        "relatedOrderId": {
+          "type": "string",
+          "example": "cm123orderid"
+        }
+      }
+    },
+    "AdminLoginDto": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "owner@example.com"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8,
+          "example": "strong-password"
+        }
+      },
+      "required": ["email", "password"]
+    },
+    "CreateOwnerWithdrawalDto": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 100000
+        },
+        "description": {
+          "type": "string",
+          "example": "August personal withdrawal"
+        },
+        "withdrawnAt": {
+          "format": "date-time",
+          "type": "string",
+          "example": "2026-08-31T12:00:00.000Z"
+        }
+      },
+      "required": ["amount"]
+    },
+    "UpdateOwnerWithdrawalDto": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "example": 100000
+        },
+        "description": {
+          "type": "string",
+          "example": "August personal withdrawal"
+        },
+        "withdrawnAt": {
+          "format": "date-time",
+          "type": "string",
+          "example": "2026-08-31T12:00:00.000Z"
+        }
+      }
+    }
+  },
+  "queries": {
+    "/products": [],
+    "/products/{id}": [],
+    "/variants": [
+      {
+        "name": "productId",
+        "required": false,
+        "in": "query",
+        "description": "Optional product ID to filter variants. Omit to return all variants.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "/variants/{id}": [],
+    "/resources": [
+      {
+        "name": "lowStock",
+        "required": false,
+        "in": "query",
+        "description": "Set to \"true\" to only return resources at or below their low-stock threshold. Omit to return all.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "/resources/{id}/restock": [],
+    "/resources/{id}": [],
+    "/orders": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "status",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "DESIGNING",
+            "PRINTING",
+            "PACKING",
+            "READY",
+            "OUT_FOR_DELIVERY",
+            "DELIVERED",
+            "CANCELLED"
+          ]
+        }
+      },
+      {
+        "name": "paymentStatus",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": ["UNPAID", "PAID", "FAILED"]
+        }
+      },
+      {
+        "name": "source",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": ["WEBSITE", "WHATSAPP", "INSTAGRAM", "MANUAL"]
+        }
+      },
+      {
+        "name": "search",
+        "required": false,
+        "in": "query",
+        "description": "Order number, customer name, or phone",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ],
+    "/orders/manual": [],
+    "/orders/{id}/status": [],
+    "/orders/{id}/admin-note": [],
+    "/orders/{id}/tracking": [],
+    "/orders/{id}/delivery-cost": [],
+    "/orders/{orderId}/items/{itemId}/fulfillment": [],
+    "/orders/{id}/manual-payment": [],
+    "/orders/{id}/cancel": [],
+    "/orders/{id}/shipment/retry": [],
+    "/orders/{id}": [],
+    "/delivery-rates": [],
+    "/delivery-rates/{state}": [],
+    "/delivery-rates/{id}": [],
+    "/payments/initialize": [],
+    "/payments/verify": [],
+    "/payments/webhook": [],
+    "/payments": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "method",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": ["PAYSTACK", "TRANSFER", "OPAY"]
+        }
+      },
+      {
+        "name": "status",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": ["UNPAID", "PAID", "FAILED"]
+        }
+      },
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ],
+    "/payments/{id}": [],
+    "/shipping/rates": [],
+    "/customers": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "search",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "phone",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "email",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "archived",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "/customers/{id}": [],
+    "/customers/{id}/archive": [],
+    "/discounts": [],
+    "/discounts/{id}": [],
+    "/resource-rules": [
+      {
+        "name": "variantId",
+        "required": false,
+        "in": "query",
+        "description": "Filter rules by product variant ID",
+        "schema": {
+          "example": "VARIANT_ID_HERE",
+          "type": "string"
+        }
+      }
+    ],
+    "/resource-rules/{id}": [],
+    "/suppliers": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "search",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "inactive",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "/suppliers/{id}": [],
+    "/purchases": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "supplierId",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ],
+    "/purchases/{id}": [],
+    "/tracking/orders": [],
+    "/tracking/{token}": [],
+    "/uploads": [],
+    "/uploads/files/{token}": [],
+    "/expenses": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "category",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "DATA",
+            "HOSTING",
+            "SALARY",
+            "MARKETING",
+            "DELIVERY",
+            "UTILITIES",
+            "EQUIPMENT",
+            "MATERIAL_PURCHASE",
+            "OUTSOURCING",
+            "OTHER"
+          ]
+        }
+      },
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "example": "2026-08-01T00:00:00.000Z",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "example": "2026-08-31T23:59:59.999Z",
+          "type": "string"
+        }
+      }
+    ],
+    "/expenses/summary": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "category",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "DATA",
+            "HOSTING",
+            "SALARY",
+            "MARKETING",
+            "DELIVERY",
+            "UTILITIES",
+            "EQUIPMENT",
+            "MATERIAL_PURCHASE",
+            "OUTSOURCING",
+            "OTHER"
+          ]
+        }
+      },
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "example": "2026-08-01T00:00:00.000Z",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "example": "2026-08-31T23:59:59.999Z",
+          "type": "string"
+        }
+      }
+    ],
+    "/expenses/{id}": [],
+    "/auth/admin/login": [],
+    "/auth/admin/me": [],
+    "/owner-withdrawals": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ],
+    "/owner-withdrawals/summary": [
+      {
+        "name": "page",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "default": 1,
+          "type": "number"
+        }
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20,
+          "type": "number"
+        }
+      },
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ],
+    "/owner-withdrawals/{id}": [],
+    "/dashboard/summary": [
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ],
+    "/dashboard/monthly-profit": [
+      {
+        "name": "year",
+        "required": true,
+        "in": "query",
+        "schema": {
+          "minimum": 2000,
+          "maximum": 2100,
+          "type": "number"
+        }
+      }
+    ],
+    "/dashboard/products": [
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ],
+    "/dashboard/sources": [
+      {
+        "name": "from",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "to",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ],
+    "/health": [],
+    "/health/ready": []
+  }
+}

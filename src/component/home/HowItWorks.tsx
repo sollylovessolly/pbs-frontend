@@ -2,26 +2,22 @@ const steps = [
   {
     number: 1,
     title: "Upload photos",
-    description:
-      "Pick your favourite shots straight from your gallery.",
+    description: "Pick your favourite shots straight from your gallery.",
   },
   {
     number: 2,
     title: "Customise",
-    description:
-      "Crop and adjust your keepsake until it feels right.",
+    description: "Crop and adjust your keepsake until it feels right.",
   },
   {
     number: 3,
     title: "Pay securely",
-    description:
-      "Checkout online. Production starts after payment.",
+    description: "Checkout online. Production starts after payment.",
   },
   {
     number: 4,
     title: "Get it delivered",
-    description:
-      "We print, pack and send it straight to your door.",
+    description: "We print, pack and send it straight to your door.",
   },
 ];
 
@@ -29,7 +25,7 @@ const HowItWorks = () => {
   return (
     <section
       id="how-it-works"
-      className="bg-cream py-10 sm:py-14 lg:py-[72px]"
+      className="scroll-mt-24 bg-cream pt-10 pb-4 sm:pt-14 sm:pb-5 lg:pt-[72px]"
     >
       <div className="mx-auto max-w-site px-4 sm:px-5 md:px-7">
         <div className="overflow-hidden rounded-[18px] border-2 border-ink bg-beige py-7 shadow-soft sm:rounded-panel sm:px-10 sm:py-10 lg:px-14 lg:py-14">
@@ -48,6 +44,10 @@ const HowItWorks = () => {
               </span>
             </div>
           </div>
+
+          <p className="mt-4 px-4 text-sm leading-6 text-brown sm:px-0">
+            For prints delivered to your door, start here.
+          </p>
 
           <div className="mt-7 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-0 lg:mt-9 lg:overflow-visible lg:pb-0">
             <div className="flex w-max snap-x snap-mandatory items-stretch gap-4 lg:grid lg:w-full lg:grid-cols-4 lg:gap-0">

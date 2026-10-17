@@ -6,16 +6,10 @@ type OrderPageProps = {
   }>;
 };
 
-const OrderPage = async ({
-  params,
-}: OrderPageProps) => {
+const OrderPage = async ({ params }: OrderPageProps) => {
   const { orderNumber } = await params;
 
-  return (
-    <OrderDetailsPage
-      orderNumber={orderNumber}
-    />
-  );
+  return <OrderDetailsPage orderNumber={orderNumber} />;
 };
 
 export default OrderPage;

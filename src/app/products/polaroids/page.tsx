@@ -1,3 +1,4 @@
+import ProductProvider from "@/component/products/shared/ProductProvider";
 import Link from "next/link";
 
 import PolaroidCustomizer from "@/component/products/polaroids/PolaroidCustomizer";
@@ -15,21 +16,20 @@ type PolaroidsPageProps = {
   }>;
 };
 
-const PolaroidsPage = async ({
-  searchParams,
-}: PolaroidsPageProps) => {
+const PolaroidsPage = async ({ searchParams }: PolaroidsPageProps) => {
   const params = await searchParams;
 
-  const editItemId = Array.isArray(params.edit)
-    ? params.edit[0]
-    : params.edit;
+  const editItemId = Array.isArray(params.edit) ? params.edit[0] : params.edit;
 
   return (
-  <main className="min-h-screen bg-cream text-ink">
-      <section className="border-b-2 border-ink bg-burgundy text-cream pb-15" >
+    <main className="min-h-screen bg-cream text-ink">
+      <section className="border-b-2 border-ink bg-burgundy text-cream pb-15">
         <div className="mx-auto max-w-[1240px] px-5 py-10 md:px-7">
           <div className="mb-4 text-sm font-semibold text-cream/40">
-            <Link href="/" className="hover:text-burgundy-deep transition-colors">
+            <Link
+              href="/"
+              className="hover:text-burgundy-deep transition-colors"
+            >
               Home
             </Link>
 
@@ -43,12 +43,8 @@ const PolaroidsPage = async ({
             <span>Polaroid Prints</span>
           </div>
 
-         
-
           <h1 className="font-serif text-4xl font-semibold md:text-5xl">
-            {editItemId
-              ? "Edit Polaroid Print"
-              : "Polaroid Prints"}
+            {editItemId ? "Edit Polaroid Print" : "Polaroid Prints"}
           </h1>
 
           <p className="mt-3 max-w-xl leading-7 text-cream/60">
@@ -59,7 +55,7 @@ const PolaroidsPage = async ({
 
           <div className="mt-5 flex flex-wrap gap-5 text-sm font-semibold">
             <span className="font-serif text-xl text-cream">
-              ₦2,500 / print
+              Choose your print option below
             </span>
 
             <span className="text-ink/90">📦 Ready in 24hrs</span>
@@ -69,9 +65,9 @@ const PolaroidsPage = async ({
       </section>
       <TornDivider color="cream" />
 
-      <PolaroidCustomizer
-        editItemId={editItemId ?? null}
-      />
+      <ProductProvider category="POLAROID">
+        <PolaroidCustomizer editItemId={editItemId ?? null} />
+      </ProductProvider>
     </main>
   );
 };

@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const Sticker = () => {
-  return (
-    <div>Sticker</div>
-  )
-}
+  return <div>Sticker</div>;
+};
 
-export default Sticker
+export default Sticker;

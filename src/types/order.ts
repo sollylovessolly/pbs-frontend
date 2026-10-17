@@ -1,21 +1,11 @@
 import type { CartItem } from "@/types/cart";
 
-export type PaymentStatus =
-  | "pending"
-  | "paid"
-  | "failed";
+export type PaymentStatus = "pending" | "paid" | "failed";
 
 export type OrderStatus =
-  | "processing"
-  | "ready"
-  | "dispatched"
-  | "delivered"
-  | "cancelled";
+  "processing" | "ready" | "dispatched" | "delivered" | "cancelled";
 
-export type DeliveryStatus =
-  | "not_dispatched"
-  | "dispatched"
-  | "delivered";
+export type DeliveryStatus = "not_dispatched" | "dispatched" | "delivered";
 
 export type Order = {
   id: string;

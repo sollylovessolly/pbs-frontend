@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-
 @theme {
   --color-cream: #f7f1e6;
   --color-paper: #fffcf6;
@@ -143,8 +142,7 @@
 .hero-cover {
   transform: scaleX(0);
   transform-origin: left center;
-  animation: hero-cover-expand 1.5s cubic-bezier(0.76, 0, 0.24, 1)
-    forwards;
+  animation: hero-cover-expand 1.5s cubic-bezier(0.76, 0, 0.24, 1) forwards;
 }
 
 .hero-copy-reveal {

@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import { Caveat, Fraunces, Inter, Anton} from "next/font/google";
+import { Caveat, Fraunces, Inter, Anton } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
-
-
 
 import "./globals.css";
 
-import Header from "@/component/layout/Header";
-import Footer from "@/component/layout/Footer";
-import { OrderProvider } from "@/context/OrderContext";
+import StorefrontFrame from "@/component/layout/StorefrontFrame";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,7 +28,8 @@ const anton = Anton({
 
 export const metadata: Metadata = {
   title: "PolaroidsBySolly",
-  description: "Turn your favourite memories into keepsakes.",
+  description:
+    "Personalised photo prints and Polaroid stations for weddings, birthdays and events. Turn your favourite memories into keepsakes with PolaroidsBySolly.",
 };
 
 export default function RootLayout({
@@ -46,15 +43,9 @@ export default function RootLayout({
       className={`${inter.variable} ${fraunces.variable} ${caveat.variable} ${anton.variable}`}
     >
       <body className="flex min-h-screen flex-col">
-        <OrderProvider>
         <CartProvider>
-        <Header />
-
-        <main className="flex-1">{children}</main>
-
-        <Footer />
+          <StorefrontFrame>{children}</StorefrontFrame>
         </CartProvider>
-        </OrderProvider>
       </body>
     </html>
   );

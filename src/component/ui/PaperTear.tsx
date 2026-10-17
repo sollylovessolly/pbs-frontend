@@ -1,3 +1,5 @@
+/* Plain SVG image preserves decorative sizing without image optimization. */
+/* eslint-disable @next/next/no-img-element */
 type PaperTearProps = {
   src?: string;
   position?: "top" | "bottom";
@@ -23,11 +25,7 @@ const PaperTear = ({
         .filter(Boolean)
         .join(" ")}
     >
-      <img
-        src={src}
-        alt=""
-        draggable={false}
-      />
+      <img src={src} alt="" draggable={false} />
     </div>
   );
 };

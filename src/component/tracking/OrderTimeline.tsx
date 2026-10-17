@@ -1,7 +1,4 @@
-import {
-  LuCheck,
-  LuCircle,
-} from "react-icons/lu";
+import { LuCheck, LuCircle } from "react-icons/lu";
 
 import type { Order } from "@/types/order";
 
@@ -40,9 +37,7 @@ const getCurrentStep = (order: Order) => {
   return statusSteps[order.orderStatus];
 };
 
-const OrderTimeline = ({
-  order,
-}: OrderTimelineProps) => {
+const OrderTimeline = ({ order }: OrderTimelineProps) => {
   if (order.orderStatus === "cancelled") {
     return (
       <div className="rounded-[14px] border-2 border-burgundy bg-blush p-5">
@@ -51,9 +46,8 @@ const OrderTimeline = ({
         </p>
 
         <p className="mt-2 text-sm leading-6 text-ink/65">
-          This order is no longer being processed.
-          Contact PolaroidsBySolly if you need more
-          information.
+          This order is no longer being processed. Contact PolaroidsBySolly if
+          you need more information.
         </p>
       </div>
     );
@@ -66,22 +60,16 @@ const OrderTimeline = ({
       {timelineSteps.map((step, index) => {
         const isCompleted = index < currentStep;
         const isCurrent = index === currentStep;
-        const isLast =
-          index === timelineSteps.length - 1;
+        const isLast = index === timelineSteps.length - 1;
 
         return (
-          <li
-            key={step}
-            className="relative flex gap-4"
-          >
+          <li key={step} className="relative flex gap-4">
             {!isLast && (
               <span
                 aria-hidden="true"
                 className={[
                   "absolute left-[15px] top-8 h-[calc(100%-18px)] w-0.5",
-                  isCompleted
-                    ? "bg-burgundy"
-                    : "bg-ink/15",
+                  isCompleted ? "bg-burgundy" : "bg-ink/15",
                 ].join(" ")}
               />
             )}
@@ -102,9 +90,7 @@ const OrderTimeline = ({
                 <LuCircle
                   className={[
                     "h-3 w-3",
-                    isCurrent
-                      ? "fill-burgundy text-burgundy"
-                      : "",
+                    isCurrent ? "fill-burgundy text-burgundy" : "",
                   ].join(" ")}
                 />
               )}

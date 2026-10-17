@@ -4,6 +4,11 @@ import { useState } from "react";
 
 const faqs = [
   {
+    question: "Can I book a Polaroid station for my event?",
+    answer:
+      "Yes! Open Polaroid Station in the menu, share your event details and send us your enquiry on WhatsApp. We’ll confirm availability and discuss a quote before you book.",
+  },
+  {
     question: "How long does delivery take?",
     answer:
       "Production usually takes 24–48 hours for Polaroids, phone cases, and photostrips. Delivery time depends on your location and begins after your order is ready.",
@@ -29,13 +34,11 @@ const FaqPreview = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
-    setOpenIndex((currentIndex) =>
-      currentIndex === index ? null : index
-    );
+    setOpenIndex((currentIndex) => (currentIndex === index ? null : index));
   };
 
   return (
-    <section className="bg-cream py-24">
+    <section id="faqs" className="scroll-mt-24 bg-cream py-24">
       <div className="mx-auto max-w-site px-7">
         <div className="mb-12 flex flex-col items-center text-center">
           <h2 className="font-display text-3xl font-semibold text-ink sm:text-4xl">
@@ -52,10 +55,7 @@ const FaqPreview = () => {
             const isOpen = openIndex === index;
 
             return (
-              <div
-                key={faq.question}
-                className="border-b-2 border-ink"
-              >
+              <div key={faq.question} className="border-b-2 border-ink">
                 <button
                   type="button"
                   onClick={() => toggleFaq(index)}
@@ -78,9 +78,7 @@ const FaqPreview = () => {
 
                 <div
                   className={`grid transition-[grid-template-rows] duration-300 ${
-                    isOpen
-                      ? "grid-rows-[1fr]"
-                      : "grid-rows-[0fr]"
+                    isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                   }`}
                 >
                   <div className="overflow-hidden">

@@ -2,15 +2,11 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import Cropper, { type Area } from "react-easy-crop";
+import { type Area } from "react-easy-crop";
+import { usePhotoDraft } from "@/hooks/usePhotoDraft";
+import DraftNotice from "@/component/products/shared/DraftNotice";
 import { useRouter } from "next/navigation";
-import {
-  type ChangeEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuArrowLeft,
   LuCheck,
@@ -24,11 +20,19 @@ import {
   LuX,
 } from "react-icons/lu";
 
+import { available } from "@/lib/commerce/catalogue";
+import { useProduct } from "@/component/products/shared/ProductProvider";
+import {
+  prepareInBatches,
+  uploadAsset,
+  cartThumbnail,
+} from "@/lib/commerce/production";
 import { useCart } from "@/context/CartContext";
+import FramedPhoto from "@/component/products/shared/FramedPhoto";
+import { polaroidCrop } from "@/lib/image/polaroidCrop";
 import { createCroppedImage } from "@/lib/image/createCroppedImage";
 import type { NewCartItem } from "@/types/cart";
 
-const BASE_PRICE = 4000;
 const INITIAL_TEMPLATE_COUNT = 6;
 const ROTATION_OPTIONS = [0, 90, 180, 270] as const;
 
@@ -86,16 +90,15 @@ type PhotostripConfiguration = {
 type UploadTarget = {
   configurationId: string;
   slotIndex: number;
+  bulk?: boolean;
 };
 
 type PhotostripPreviewProps = {
   template: PhotostripTemplate;
   slots: SlotState[];
   editableSlotIndex?: number | null;
-  onSlotChange?: (
-    slotIndex: number,
-    updates: Partial<SlotState>,
-  ) => void;
+  onSelectSlot?: (slotIndex: number) => void;
+  onSlotChange?: (slotIndex: number, updates: Partial<SlotState>) => void;
   className?: string;
 };
 
@@ -278,9 +281,7 @@ const formatPrice = (amount: number) => {
   return `₦${amount.toLocaleString("en-NG")}`;
 };
 
-const createSlotState = (
-  geometry: SlotGeometry,
-): SlotState => {
+const createSlotState = (geometry: SlotGeometry): SlotState => {
   return {
     id: crypto.randomUUID(),
     geometry,
@@ -306,9 +307,7 @@ const createConfiguration = (
   };
 };
 
-const isConfigurationComplete = (
-  configuration: PhotostripConfiguration,
-) => {
+const isConfigurationComplete = (configuration: PhotostripConfiguration) => {
   return (
     configuration.slots.length > 0 &&
     configuration.slots.every((slot) => Boolean(slot.photo))
@@ -328,45 +327,7 @@ const loadImage = (src: string) => {
   });
 };
 
-const getDefaultCrop = async (
-  imageSrc: string,
-  rotation: number,
-  targetAspect: number,
-): Promise<Area> => {
-  const image = await loadImage(imageSrc);
-  const isSideways = rotation === 90 || rotation === 270;
-
-  const rotatedWidth = isSideways
-    ? image.naturalHeight
-    : image.naturalWidth;
-
-  const rotatedHeight = isSideways
-    ? image.naturalWidth
-    : image.naturalHeight;
-
-  const imageAspect = rotatedWidth / rotatedHeight;
-
-  let cropWidth = rotatedWidth;
-  let cropHeight = rotatedHeight;
-
-  if (imageAspect > targetAspect) {
-    cropWidth = rotatedHeight * targetAspect;
-  } else {
-    cropHeight = rotatedWidth / targetAspect;
-  }
-
-  return {
-    x: Math.round((rotatedWidth - cropWidth) / 2),
-    y: Math.round((rotatedHeight - cropHeight) / 2),
-    width: Math.round(cropWidth),
-    height: Math.round(cropHeight),
-  };
-};
-
-const getSlotStyle = (
-  geometry: SlotGeometry,
-  template: PhotostripTemplate,
-) => {
+const getSlotStyle = (geometry: SlotGeometry, template: PhotostripTemplate) => {
   return {
     left: `${(geometry.x / template.sourceWidth) * 100}%`,
     top: `${(geometry.y / template.sourceHeight) * 100}%`,
@@ -418,10 +379,7 @@ const TemplateArtwork = ({
       alt={`${template.name} design`}
       draggable={false}
       onError={() => setHasError(true)}
-      className={[
-        "block h-auto w-full select-none object-fill",
-        className,
-      ]
+      className={["block h-auto w-full select-none object-fill", className]
         .filter(Boolean)
         .join(" ")}
       style={{
@@ -436,12 +394,13 @@ const PhotostripPreview = ({
   slots,
   editableSlotIndex = null,
   onSlotChange,
+  onSelectSlot,
   className = "",
 }: PhotostripPreviewProps) => {
   return (
     <div
       className={[
-        "relative w-full overflow-hidden bg-ink shadow-[7px_9px_0_rgba(42,33,28,0.16)]",
+        "relative w-full shrink-0 overflow-hidden bg-ink shadow-[7px_9px_0_rgba(42,33,28,0.16)]",
         className,
       ]
         .filter(Boolean)
@@ -456,7 +415,19 @@ const PhotostripPreview = ({
       />
 
       {slots.map((slot, slotIndex) => {
-        if (!slot.photo) return null;
+        if (!slot.photo)
+          return onSelectSlot ? (
+            <button
+              type="button"
+              key={slot.id}
+              onClick={() => onSelectSlot(slotIndex)}
+              aria-label={`Choose photo ${slotIndex + 1}`}
+              className="absolute z-10 flex items-center justify-center border border-dashed border-cream/60 bg-beige text-xs font-bold text-ink"
+              style={getSlotStyle(slot.geometry, template)}
+            >
+              <LuImagePlus className="mr-1 h-4 w-4" /> Photo {slotIndex + 1}
+            </button>
+          ) : null;
 
         const isEditable = editableSlotIndex === slotIndex;
 
@@ -470,54 +441,32 @@ const PhotostripPreview = ({
                 : "",
             ].join(" ")}
             style={getSlotStyle(slot.geometry, template)}
+            role={onSelectSlot ? "button" : undefined}
+            tabIndex={onSelectSlot ? 0 : undefined}
+            aria-label={
+              onSelectSlot ? `Adjust photo ${slotIndex + 1}` : undefined
+            }
+            aria-pressed={onSelectSlot ? isEditable : undefined}
+            onPointerDownCapture={() => onSelectSlot?.(slotIndex)}
+            onKeyDown={(event) => {
+              if (
+                onSelectSlot &&
+                (event.key === "Enter" || event.key === " ")
+              ) {
+                event.preventDefault();
+                onSelectSlot(slotIndex);
+              }
+            }}
           >
-            <Cropper
-              image={slot.photo.src}
+            <FramedPhoto
+              key={slot.photo.src}
+              src={slot.photo.src}
               crop={slot.crop}
               zoom={slot.zoom}
               rotation={slot.rotation}
               aspect={slot.geometry.width / slot.geometry.height}
-              objectFit="cover"
-              cropShape="rect"
-              showGrid={isEditable}
-              restrictPosition
-              onCropChange={(crop) => {
-                if (!isEditable) return;
-
-                onSlotChange?.(slotIndex, {
-                  crop,
-                });
-              }}
-              onZoomChange={(zoom) => {
-                if (!isEditable) return;
-
-                onSlotChange?.(slotIndex, {
-                  zoom,
-                });
-              }}
-              onCropComplete={(_, croppedAreaPixels) => {
-                if (!isEditable) return;
-
-                onSlotChange?.(slotIndex, {
-                  croppedAreaPixels,
-                });
-              }}
-              style={{
-                containerStyle: {
-                  position: "absolute",
-                  inset: 0,
-                  pointerEvents: isEditable ? "auto" : "none",
-                },
-                cropAreaStyle: {
-                  border: isEditable
-                    ? "2px solid rgba(255,255,255,0.95)"
-                    : "none",
-                  boxShadow: "none",
-                },
-                mediaStyle: {
-                  pointerEvents: "none",
-                },
-              }}
+              editable={Boolean(onSlotChange)}
+              onChange={(updates) => onSlotChange?.(slotIndex, updates)}
             />
           </div>
         );
@@ -528,6 +477,16 @@ const PhotostripPreview = ({
 
 const PhotostripCustomizer = () => {
   const router = useRouter();
+  const submissionLock = useRef(false);
+  const { products } = useProduct();
+  const variantFor = (templateId: string) => {
+    const index = PHOTOSTRIP_TEMPLATES.findIndex((t) => t.id === templateId);
+    return products
+      .flatMap((p) => p.variants)
+      .find((v) => v.sku === `PHOTOSTRIP-${index + 1}` && v.isActive);
+  };
+  const priceFor = (templateId: string) =>
+    Number(variantFor(templateId)?.sellingPrice ?? 0);
   const { addItems } = useCart();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -542,13 +501,17 @@ const PhotostripCustomizer = () => {
   const [activeConfigurationId, setActiveConfigurationId] = useState<
     string | null
   >(null);
-  const [editingSlotIndex, setEditingSlotIndex] = useState<number | null>(
-    null,
-  );
-  const [uploadTarget, setUploadTarget] = useState<UploadTarget | null>(
-    null,
-  );
+  const [editingSlotIndex, setEditingSlotIndex] = useState<number | null>(null);
+  const [uploadTarget, setUploadTarget] = useState<UploadTarget | null>(null);
+  const [submitError, setSubmitError] = useState("");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const draft = usePhotoDraft(
+    "photostrips",
+    configurations,
+    setConfigurations,
+    objectUrlsRef,
+    true,
+  );
 
   const templateMap = useMemo(() => {
     return new Map(
@@ -603,13 +566,17 @@ const PhotostripCustomizer = () => {
     );
   }, [configurations]);
 
-  const totalPrice = totalPrints * BASE_PRICE;
+  const totalPrice = configurations.reduce(
+    (sum, c) => sum + c.quantity * priceFor(c.templateId),
+    0,
+  );
 
   const orderSizeSummary = useMemo(() => {
     const selectedSizes = new Set(
       configurations
-        .map((configuration) =>
-          templateMap.get(configuration.templateId)?.sizeLabel,
+        .map(
+          (configuration) =>
+            templateMap.get(configuration.templateId)?.sizeLabel,
         )
         .filter((sizeLabel): sizeLabel is string => Boolean(sizeLabel)),
     );
@@ -685,6 +652,16 @@ const PhotostripCustomizer = () => {
   };
 
   const increaseTemplateCount = (template: PhotostripTemplate) => {
+    const selected = variantFor(template.id);
+    if (!selected || !available(selected)) return;
+    const count = configurations
+      .filter((c) => c.templateId === template.id)
+      .reduce((sum, c) => sum + c.quantity, 0);
+    if (
+      selected.availableQuantity !== null &&
+      count >= selected.availableQuantity
+    )
+      return;
     const newConfiguration = createConfiguration(template);
 
     setConfigurations((currentConfigurations) => [
@@ -738,25 +715,28 @@ const PhotostripCustomizer = () => {
     }
   };
 
-  const changeQuantity = (
-    configurationId: string,
-    difference: number,
-  ) => {
+  const changeQuantity = (configurationId: string, difference: number) => {
     const configuration = configurations.find(
-      (currentConfiguration) =>
-        currentConfiguration.id === configurationId,
+      (currentConfiguration) => currentConfiguration.id === configurationId,
     );
 
     if (!configuration) return;
 
     updateConfiguration(configurationId, {
-      quantity: Math.max(1, configuration.quantity + difference),
+      quantity: Math.max(
+        1,
+        Math.min(
+          configuration.quantity + difference,
+          variantFor(configuration.templateId)?.availableQuantity ?? Infinity,
+        ),
+      ),
     });
   };
 
   const openEditor = (configurationId: string) => {
     setActiveConfigurationId(configurationId);
     setEditingSlotIndex(null);
+    setUploadNotice("");
   };
 
   const closeEditor = () => {
@@ -767,66 +747,76 @@ const PhotostripCustomizer = () => {
   const openPhotoPicker = (
     configurationId: string,
     slotIndex: number,
+    bulk = false,
   ) => {
     setUploadTarget({
       configurationId,
       slotIndex,
+      bulk,
     });
 
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-
-    if (!file || !file.type.startsWith("image/") || !uploadTarget) {
-      event.target.value = "";
-      return;
-    }
-
-    const targetConfiguration = configurations.find(
-      (configuration) => configuration.id === uploadTarget.configurationId,
+  const [uploadNotice, setUploadNotice] = useState("");
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []).filter((file) =>
+      ["image/jpeg", "image/png", "image/webp"].includes(file.type),
     );
-
-    const targetSlot =
-      targetConfiguration?.slots[uploadTarget.slotIndex] ?? null;
-
-    revokePhoto(targetSlot?.photo ?? null);
-
-    const objectUrl = URL.createObjectURL(file);
-    objectUrlsRef.current.add(objectUrl);
-
-    updateSlot(
-      uploadTarget.configurationId,
-      uploadTarget.slotIndex,
-      {
-        photo: {
-          name: file.name,
-          src: objectUrl,
-        },
-        crop: {
-          x: 0,
-          y: 0,
-        },
-        zoom: 1,
-        rotation: 0,
-        croppedAreaPixels: null,
-      },
-    );
-
-    setUploadTarget(null);
+    const target = uploadTarget;
     event.target.value = "";
+    if (!target || !files.length) return;
+    const configuration = configurations.find(
+      (item) => item.id === target.configurationId,
+    );
+    if (!configuration) return;
+    const empty = configuration.slots.flatMap((slot, index) =>
+      !slot.photo ? [index] : [],
+    );
+    const indexes = target.bulk
+      ? empty.length
+        ? empty
+        : configuration.slots.map((_, index) => index)
+      : [
+          target.slotIndex,
+          ...empty.filter((index) => index !== target.slotIndex),
+        ];
+    const assigned = files.slice(0, indexes.length);
+    const replacements = new Map(
+      assigned.map((file, index) => {
+        const slotIndex = indexes[index];
+        revokePhoto(configuration.slots[slotIndex].photo);
+        const src = URL.createObjectURL(file);
+        objectUrlsRef.current.add(src);
+        return [
+          slotIndex,
+          {
+            ...configuration.slots[slotIndex],
+            photo: { name: file.name, src },
+            crop: { x: 0, y: 0 },
+            zoom: 1,
+            rotation: 0,
+            croppedAreaPixels: null,
+          },
+        ] as const;
+      }),
+    );
+    updateConfiguration(configuration.id, {
+      slots: configuration.slots.map(
+        (slot, index) => replacements.get(index) ?? slot,
+      ),
+    });
+    setUploadNotice(
+      files.length > indexes.length
+        ? `Added ${assigned.length} photos. This design has no more empty spaces.`
+        : "",
+    );
+    setUploadTarget(null);
   };
 
-  const removeSlotPhoto = (
-    configurationId: string,
-    slotIndex: number,
-  ) => {
+  const removeSlotPhoto = (configurationId: string, slotIndex: number) => {
     const configuration = configurations.find(
-      (currentConfiguration) =>
-        currentConfiguration.id === configurationId,
+      (currentConfiguration) => currentConfiguration.id === configurationId,
     );
 
     const slot = configuration?.slots[slotIndex] ?? null;
@@ -851,9 +841,7 @@ const PhotostripCustomizer = () => {
     }
   };
 
-  const createFinalPrint = async (
-    configuration: PhotostripConfiguration,
-  ) => {
+  const createFinalPrint = async (configuration: PhotostripConfiguration) => {
     const template = templateMap.get(configuration.templateId);
 
     if (!template || !isConfigurationComplete(configuration)) {
@@ -888,13 +876,15 @@ const PhotostripCustomizer = () => {
 
       const targetAspect = slot.geometry.width / slot.geometry.height;
 
-      const cropPixels =
-        slot.croppedAreaPixels ??
-        (await getDefaultCrop(
-          slot.photo.src,
-          slot.rotation,
-          targetAspect,
-        ));
+      const source = await loadImage(slot.photo.src);
+      const cropPixels = polaroidCrop(
+        source.naturalWidth,
+        source.naturalHeight,
+        slot.rotation,
+        slot.zoom,
+        slot.crop,
+        targetAspect,
+      ).pixels;
 
       const croppedPhotoUrl = await createCroppedImage(
         slot.photo.src,
@@ -926,16 +916,23 @@ const PhotostripCustomizer = () => {
       throw new Error("The selected template could not be found.");
     }
 
-    const finalPrintUrl = await createFinalPrint(configuration);
+    const variant = variantFor(template.id);
+    if (!variant || !available(variant))
+      throw new Error(`${template.name} is unavailable.`);
+    const artwork = await createFinalPrint(configuration);
+    const finalPrintUrl = await uploadAsset(artwork, "PHOTOSTRIP_FINAL");
 
     return {
       productType: "photostrip",
       name: `${template.name} ${
         template.format === "collage" ? "Photo Collage" : "Photostrip"
       } ${index + 1}`,
-      unitPrice: BASE_PRICE,
+      unitPrice: Number(variant.sellingPrice),
+      variantSku: variant.sku,
+      availableQuantity: variant.availableQuantity,
       quantity: configuration.quantity,
-      previewUrl: finalPrintUrl,
+      previewUrl: await cartThumbnail(artwork),
+      customization: { finalPngUrl: finalPrintUrl },
       options: {
         templateId: template.id,
         templateName: template.name,
@@ -958,22 +955,27 @@ const PhotostripCustomizer = () => {
       return;
     }
 
+    if (submissionLock.current) return;
+    submissionLock.current = true;
     setIsAddingToCart(true);
+    setSubmitError("");
 
     try {
-      const cartItems = await Promise.all(
-        configurations.map(prepareCartItem),
-      );
+      const cartItems = await prepareInBatches(configurations, prepareCartItem);
 
       addItems(cartItems);
+      await draft.finish();
       router.push("/cart");
     } catch (error) {
       console.error("Could not prepare photostrips:", error);
 
-      window.alert(
-        "Something went wrong while preparing your photostrips. Please check that every photo slot is complete and that the template files are in the correct public folder.",
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Could not prepare your photostrips. Please retry.",
       );
     } finally {
+      submissionLock.current = false;
       setIsAddingToCart(false);
     }
   };
@@ -1012,8 +1014,25 @@ const PhotostripCustomizer = () => {
     };
   }, []);
 
+  if (!draft.ready)
+    return (
+      <p role="status" className="p-8 text-center">
+        Getting your design ready…
+      </p>
+    );
   return (
     <>
+      {configurations.length > 0 && true && (
+        <DraftNotice notice={draft.notice} onDiscard={draft.discard} />
+      )}
+      {submitError && (
+        <p
+          role="alert"
+          className="mx-auto my-4 max-w-[1240px] rounded-xl border border-burgundy px-5 py-3 text-sm"
+        >
+          {submitError}
+        </p>
+      )}
       <section className="px-4 pb-28 pt-6 sm:px-5 md:px-7 md:pt-10 lg:pb-16 lg:pt-14">
         <div className="mx-auto max-w-[1240px]">
           {configurations.length === 0 ? (
@@ -1042,7 +1061,7 @@ const PhotostripCustomizer = () => {
               </button>
 
               <p className="mt-4 text-xs font-semibold text-ink/50">
-                {formatPrice(BASE_PRICE)} per finished design
+                Prices shown for each design
               </p>
             </div>
           ) : (
@@ -1128,9 +1147,7 @@ const PhotostripCustomizer = () => {
                             <span
                               className={[
                                 "mt-1 inline-flex items-center gap-1 text-[9px] font-bold sm:text-[10px]",
-                                isComplete
-                                  ? "text-burgundy"
-                                  : "text-ink/45",
+                                isComplete ? "text-burgundy" : "text-ink/45",
                               ].join(" ")}
                             >
                               {isComplete && <LuCheck className="h-3 w-3" />}
@@ -1173,8 +1190,7 @@ const PhotostripCustomizer = () => {
                                 type="button"
                                 aria-label={`Decrease quantity for ${template.name}`}
                                 disabled={
-                                  configuration.quantity <= 1 ||
-                                  isAddingToCart
+                                  configuration.quantity <= 1 || isAddingToCart
                                 }
                                 onClick={() =>
                                   changeQuantity(configuration.id, -1)
@@ -1204,7 +1220,8 @@ const PhotostripCustomizer = () => {
 
                           <p className="mt-2 text-right text-[11px] font-bold text-burgundy sm:text-sm">
                             {formatPrice(
-                              configuration.quantity * BASE_PRICE,
+                              configuration.quantity *
+                                priceFor(configuration.templateId),
                             )}
                           </p>
                         </div>
@@ -1283,6 +1300,7 @@ const PhotostripCustomizer = () => {
           <input
             ref={fileInputRef}
             type="file"
+            multiple
             accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
             className="hidden"
@@ -1312,9 +1330,7 @@ const PhotostripCustomizer = () => {
             {isAddingToCart
               ? "Preparing…"
               : !allConfigurationsComplete
-                ? `Finish ${
-                    configurations.length - completedConfigurations
-                  }`
+                ? `Finish ${configurations.length - completedConfigurations}`
                 : "Add to Cart"}
           </button>
         </div>
@@ -1377,6 +1393,8 @@ const PhotostripCustomizer = () => {
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
                 {visibleTemplates.map((template) => {
                   const count = templateCounts[template.id] ?? 0;
+                  const selected = variantFor(template.id);
+                  if (!selected) return null;
 
                   return (
                     <article
@@ -1401,7 +1419,13 @@ const PhotostripCustomizer = () => {
 
                       <div className="mt-3">
                         <p className="truncate text-xs font-bold text-ink sm:text-sm">
-                          {template.name}
+                          {template.name} ·{" "}
+                          {formatPrice(
+                            selected.sellingPrice
+                              ? Number(selected.sellingPrice)
+                              : 0,
+                          )}
+                          {!available(selected) && " — unavailable"}
                         </p>
 
                         <p className="mt-1 text-[9px] leading-4 text-ink/50 sm:text-[10px]">
@@ -1419,6 +1443,7 @@ const PhotostripCustomizer = () => {
                         {count === 0 ? (
                           <button
                             type="button"
+                            disabled={!available(selected)}
                             onClick={() => increaseTemplateCount(template)}
                             className="flex h-8 items-center justify-center rounded-full border-2 border-ink bg-cream px-3 text-[10px] font-bold shadow-[2px_2px_0_#2A211C]"
                           >
@@ -1443,6 +1468,7 @@ const PhotostripCustomizer = () => {
                             <button
                               type="button"
                               aria-label={`Add another ${template.name} strip`}
+                              disabled={!available(selected)}
                               onClick={() => increaseTemplateCount(template)}
                               className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-ink bg-paper text-xs font-bold"
                             >
@@ -1534,11 +1560,35 @@ const PhotostripCustomizer = () => {
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:overflow-hidden">
-              <div className="flex min-h-[520px] items-center justify-center bg-blush p-5 sm:min-h-[650px] sm:p-8 lg:min-h-[720px]">
+              <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 bg-blush p-5 sm:min-h-[650px] sm:p-8 lg:min-h-[720px]">
+                <button
+                  type="button"
+                  onClick={() =>
+                    openPhotoPicker(activeConfiguration.id, 0, true)
+                  }
+                  className="rounded-full border-2 border-ink bg-paper px-4 py-2 text-sm font-bold"
+                >
+                  {activeConfiguration.slots.some((slot) => !slot.photo)
+                    ? "Choose photos"
+                    : "Replace photos"}
+                </button>
+                <p className="text-center text-xs">
+                  Select photos together. Tap a photo to adjust it.
+                </p>
+                {uploadNotice && (
+                  <p role="status" className="text-center text-xs">
+                    {uploadNotice}
+                  </p>
+                )}
                 <PhotostripPreview
                   template={activeTemplate}
                   slots={activeConfiguration.slots}
                   editableSlotIndex={editingSlotIndex}
+                  onSelectSlot={(index) => {
+                    if (activeConfiguration.slots[index].photo)
+                      setEditingSlotIndex(index);
+                    else openPhotoPicker(activeConfiguration.id, index);
+                  }}
                   onSlotChange={(slotIndex, updates) =>
                     updateSlot(activeConfiguration.id, slotIndex, updates)
                   }
@@ -1571,8 +1621,8 @@ const PhotostripCustomizer = () => {
                     </h2>
 
                     <p className="mt-2 text-sm leading-6 text-ink/60">
-                      Drag the highlighted photo directly inside the strip,
-                      then adjust its zoom or orientation.
+                      Drag the highlighted photo directly inside the strip, then
+                      adjust its zoom or orientation.
                     </p>
 
                     <div className="mt-7">
@@ -1592,13 +1642,9 @@ const PhotostripCustomizer = () => {
                         step={0.01}
                         value={activeSlot.zoom}
                         onChange={(event) =>
-                          updateSlot(
-                            activeConfiguration.id,
-                            editingSlotIndex,
-                            {
-                              zoom: Number(event.target.value),
-                            },
-                          )
+                          updateSlot(activeConfiguration.id, editingSlotIndex, {
+                            zoom: Number(event.target.value),
+                          })
                         }
                         className="mt-4 w-full accent-burgundy"
                       />
@@ -1615,8 +1661,7 @@ const PhotostripCustomizer = () => {
 
                       <div className="mt-3 grid grid-cols-4 gap-2">
                         {ROTATION_OPTIONS.map((rotation) => {
-                          const isSelected =
-                            activeSlot.rotation === rotation;
+                          const isSelected = activeSlot.rotation === rotation;
 
                           return (
                             <button
@@ -1718,35 +1763,15 @@ const PhotostripCustomizer = () => {
                                   aspectRatio: `${slot.geometry.width} / ${slot.geometry.height}`,
                                 }}
                               >
-                                <Cropper
-                                  image={slot.photo.src}
+                                <FramedPhoto
+                                  key={slot.photo.src}
+                                  src={slot.photo.src}
                                   crop={slot.crop}
                                   zoom={slot.zoom}
                                   rotation={slot.rotation}
                                   aspect={
                                     slot.geometry.width / slot.geometry.height
                                   }
-                                  objectFit="cover"
-                                  cropShape="rect"
-                                  showGrid={false}
-                                  restrictPosition
-                                  onCropChange={() => undefined}
-                                  onZoomChange={() => undefined}
-                                  onCropComplete={() => undefined}
-                                  style={{
-                                    containerStyle: {
-                                      position: "absolute",
-                                      inset: 0,
-                                      pointerEvents: "none",
-                                    },
-                                    cropAreaStyle: {
-                                      border: "none",
-                                      boxShadow: "none",
-                                    },
-                                    mediaStyle: {
-                                      pointerEvents: "none",
-                                    },
-                                  }}
                                 />
                               </div>
 
@@ -1766,9 +1791,7 @@ const PhotostripCustomizer = () => {
 
                                 <button
                                   type="button"
-                                  onClick={() =>
-                                    setEditingSlotIndex(slotIndex)
-                                  }
+                                  onClick={() => setEditingSlotIndex(slotIndex)}
                                   className="rounded-full border-2 border-ink bg-blush px-2 py-2 text-[8px] font-bold shadow-[1px_1px_0_#2A211C] sm:text-[9px]"
                                 >
                                   Edit crop
@@ -1805,8 +1828,8 @@ const PhotostripCustomizer = () => {
                             One copy is one finished {activeTemplate.sizeLabel}{" "}
                             {activeTemplate.format === "collage"
                               ? "collage"
-                              : "strip"}.
-
+                              : "strip"}
+                            .
                           </p>
                         </div>
 

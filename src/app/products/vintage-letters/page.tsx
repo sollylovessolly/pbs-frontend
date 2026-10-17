@@ -1,3 +1,4 @@
+import ProductProvider from "@/component/products/shared/ProductProvider";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -16,19 +17,13 @@ const VintageLettersPage = () => {
       <section className="border-b-2 border-ink bg-burgundy text-cream">
         <div className="mx-auto max-w-[1240px] px-5 py-10 md:px-7 md:py-14">
           <div className="mb-4 text-sm font-semibold text-cream/45">
-            <Link
-              href="/"
-              className="transition hover:text-cream"
-            >
+            <Link href="/" className="transition hover:text-cream">
               Home
             </Link>
 
             <span className="mx-2">/</span>
 
-            <Link
-              href="/products"
-              className="transition hover:text-cream"
-            >
+            <Link href="/products" className="transition hover:text-cream">
               Products
             </Link>
 
@@ -54,7 +49,9 @@ const VintageLettersPage = () => {
 
       <TornDivider color="cream" />
 
-      <VintageLetterCustomizer />
+      <ProductProvider category="VINTAGE_LETTER">
+        <VintageLetterCustomizer />
+      </ProductProvider>
     </main>
   );
 };

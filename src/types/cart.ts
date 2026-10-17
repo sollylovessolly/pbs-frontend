@@ -1,15 +1,14 @@
 import type { Area, Point } from "react-easy-crop";
 
 export type CartProductType =
-  | "polaroid"
-  | "photostrip"
-  | "vintage-letter"
-  | "phone-case"
-  | "album";
+  "polaroid" | "photostrip" | "vintage-letter" | "phone-case" | "album";
 
 export type CartItem = {
   id: string;
   productType: CartProductType;
+  variantSku?: string;
+  availableQuantity?: number | null;
+  customization?: Record<string, string>;
   name: string;
   unitPrice: number;
   quantity: number;

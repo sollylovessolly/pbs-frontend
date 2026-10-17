@@ -4,18 +4,13 @@ import {
   timelessEmberFont,
 } from "@/lib/fonts/vintageLetterFonts";
 
-export const VINTAGE_LETTER_CLASSIC_PRICE = 3500;
-export const VINTAGE_LETTER_BURNT_PRICE = 4000;
-
 export const A4_OUTPUT_WIDTH = 2480;
 export const A4_OUTPUT_HEIGHT = 3508;
 
 export type VintageLetterFinish = "classic" | "burnt";
 
 export type VintageLetterTemplateId =
-  | "rusted-petals"
-  | "timeless-ember"
-  | "amber";
+  "rusted-petals" | "timeless-ember" | "amber";
 
 export type LetterPageTextArea = {
   /**
@@ -67,9 +62,6 @@ export type VintageLetterTemplate = {
   backTextArea: LetterPageTextArea;
 
   maxCharacters: number;
-
-  classicPrice: number;
-  burntPrice: number;
 };
 
 export const VINTAGE_LETTER_TEMPLATES: VintageLetterTemplate[] = [
@@ -79,10 +71,8 @@ export const VINTAGE_LETTER_TEMPLATES: VintageLetterTemplate[] = [
     description:
       "An ornate brown parchment with dramatic Victorian flourishes.",
 
-    frontSrc:
-      "/images/vintage-letters/templates/rusted-petals.svg",
-    backSrc:
-      "/images/vintage-letters/templates/rusted-petals.svg",
+    frontSrc: "/images/vintage-letters/templates/rusted-petals.svg",
+    backSrc: "/images/vintage-letters/templates/rusted-petals.svg",
 
     sourceWidth: 595.5,
     sourceHeight: 842.249979,
@@ -122,21 +112,15 @@ export const VINTAGE_LETTER_TEMPLATES: VintageLetterTemplate[] = [
     },
 
     maxCharacters: 2400,
-
-    classicPrice: VINTAGE_LETTER_CLASSIC_PRICE,
-    burntPrice: VINTAGE_LETTER_BURNT_PRICE,
   },
 
   {
     id: "timeless-ember",
     name: "Timeless Ember",
-    description:
-      "A soft peach heirloom paper with delicate corner details.",
+    description: "A soft peach heirloom paper with delicate corner details.",
 
-    frontSrc:
-      "/images/vintage-letters/templates/timeless-ember.svg",
-    backSrc:
-      "/images/vintage-letters/templates/timeless-ember.svg",
+    frontSrc: "/images/vintage-letters/templates/timeless-ember.svg",
+    backSrc: "/images/vintage-letters/templates/timeless-ember.svg",
 
     sourceWidth: 1190.25,
     sourceHeight: 1683.749949,
@@ -176,16 +160,12 @@ export const VINTAGE_LETTER_TEMPLATES: VintageLetterTemplate[] = [
     },
 
     maxCharacters: 3200,
-
-    classicPrice: VINTAGE_LETTER_CLASSIC_PRICE,
-    burntPrice: VINTAGE_LETTER_BURNT_PRICE,
   },
 
   {
     id: "amber",
     name: "Amber",
-    description:
-      "A warm golden parchment framed with pressed floral details.",
+    description: "A warm golden parchment framed with pressed floral details.",
 
     frontSrc: "/images/vintage-letters/templates/amber.svg",
     backSrc: "/images/vintage-letters/templates/amber.svg",
@@ -228,33 +208,17 @@ export const VINTAGE_LETTER_TEMPLATES: VintageLetterTemplate[] = [
     },
 
     maxCharacters: 2500,
-
-    classicPrice: VINTAGE_LETTER_CLASSIC_PRICE,
-    burntPrice: VINTAGE_LETTER_BURNT_PRICE,
   },
 ];
 
 export const VINTAGE_LETTER_TEMPLATE_MAP = new Map(
-  VINTAGE_LETTER_TEMPLATES.map((template) => [
-    template.id,
-    template,
-  ]),
+  VINTAGE_LETTER_TEMPLATES.map((template) => [template.id, template]),
 );
 
 export const getVintageLetterTemplate = (
   templateId: VintageLetterTemplateId,
 ) => {
   return (
-    VINTAGE_LETTER_TEMPLATE_MAP.get(templateId) ??
-    VINTAGE_LETTER_TEMPLATES[0]
+    VINTAGE_LETTER_TEMPLATE_MAP.get(templateId) ?? VINTAGE_LETTER_TEMPLATES[0]
   );
-};
-
-export const getVintageLetterPrice = (
-  template: VintageLetterTemplate,
-  finish: VintageLetterFinish,
-) => {
-  return finish === "burnt"
-    ? template.burntPrice
-    : template.classicPrice;
 };

@@ -6,45 +6,42 @@ const categories = [
     title: "Polaroid Prints",
     description: "Classic frame, your photo",
     href: "/products/polaroids",
-    src: "/images/categories/polaroid-prints.jpg",
+    src: "/images/products/polaroids.jpg",
     alt: "A collection of premium polaroid prints",
   },
   {
     title: "Photostrips",
     description: "2–4 photos, one strip",
     href: "/products/photostrips",
-    src: "/images/categories/photo-strips.jpg",
+    src: "/images/products/photostrips.jpg",
     alt: "A personalised photo strip",
   },
   {
     title: "Vintage Letters",
     description: "A note, kept forever",
     href: "/products/vintage-letters",
-    src: "/images/categories/vintage-letter.jpg",
+    src: "/images/products/vintage-letters.jpg",
     alt: "A handwritten vintage letter",
   },
   {
     title: "Phone Cases",
     description: "Wear the memory daily",
     href: "/products/phone-cases",
-    src: "/images/categories/polaroid-phonecase.jpeg",
+    src: "/images/products/phone-case.jpg",
     alt: "A personalised polaroid phone case",
   },
   {
     title: "Photo Albums",
     description: "A whole story, bound",
     href: "/products/albums",
-    src: "/images/categories/photo-album.jpg",
+    src: "/images/products/albums.jpg",
     alt: "A personalised photo album",
   },
 ];
 
 const Categories = () => {
   return (
-    <section
-      id="categories"
-      className="bg-cream py-12 sm:py-16 lg:py-24"
-    >
+    <section id="categories" className="bg-cream py-12 sm:py-16 lg:py-24">
       <div className="mx-auto max-w-site px-4 sm:px-5 md:px-7">
         <div className="mb-7 flex flex-col justify-between gap-4 sm:mb-10 md:flex-row md:items-end lg:mb-12">
           <div>
@@ -58,8 +55,8 @@ const Categories = () => {
           </div>
 
           <p className="max-w-[460px] font-sans text-sm leading-6 text-brown sm:text-[15px]">
-            From a single polaroid to a full album — every product starts with
-            a photo that means something.
+            From a single polaroid to a full album — every product starts with a
+            photo that means something.
           </p>
         </div>
 

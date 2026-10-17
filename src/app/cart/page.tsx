@@ -3,8 +3,7 @@ import CartPage from "@/component/cart/CartPage";
 
 export const metadata: Metadata = {
   title: "Your Cart | PolaroidsBySolly",
-  description:
-    "Review your customized keepsakes before checkout.",
+  description: "Review your customized keepsakes before checkout.",
 };
 
 const CartRoute = () => {

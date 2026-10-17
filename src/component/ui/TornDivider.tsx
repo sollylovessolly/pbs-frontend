@@ -1,7 +1,7 @@
 type TornDividerProps = {
   color?: "cream" | "paper" | "burgundy" | "blush" | "beige" | "ink";
   direction?: "up" | "down";
-  height?: number;          // px, default 116 — taller now, needed for the deeper under-sheet
+  height?: number; // px, default 116 — taller now, needed for the deeper under-sheet
   className?: string;
 };
 
@@ -38,7 +38,9 @@ const TornDivider = ({
   return (
     <div
       aria-hidden="true"
-      className={["relative z-30 w-full pointer-events-none", className].filter(Boolean).join(" ")}
+      className={["relative z-30 w-full pointer-events-none", className]
+        .filter(Boolean)
+        .join(" ")}
       style={{
         marginTop: -height,
         transform: direction === "down" ? "rotate(180deg)" : undefined,
@@ -49,7 +51,7 @@ const TornDivider = ({
         preserveAspectRatio="none"
         width="100%"
         height={height}
-        style={{ display: "block", overflow: "visible"}}
+        style={{ display: "block", overflow: "visible" }}
       >
         <path d={UNDER_PATH} fill={underMap[color]} />
         <path

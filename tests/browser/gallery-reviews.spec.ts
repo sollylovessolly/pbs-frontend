@@ -1,0 +1,282 @@
+import { test, expect, type Page } from "@playwright/test";
+const admin = { id: "admin-qa", name: "Solly", email: "qa@example.com" };
+const photo = {
+  id: "photo-1",
+  url: "/images/products/polaroids.jpg",
+  thumbnailUrl: "/images/products/polaroids.jpg",
+  width: 736,
+  height: 981,
+  caption: "The station setup",
+  alt: "Prints on a table",
+  featured: true,
+};
+const album = {
+  id: "album-1",
+  slug: "gtco-event",
+  title: "GTCO Event",
+  description: "A day of memories.",
+  status: "PUBLISHED",
+  version: 1,
+  permissionConfirmed: true,
+  coverPhotoId: photo.id,
+  photos: [photo, { ...photo, id: "photo-2", caption: "The celebration" }],
+  updatedAt: "2026-09-22T10:00:00.000Z",
+};
+const review = {
+  id: "review-1",
+  displayName: "Ada O.",
+  rating: 3,
+  text: "The prints were lovely. Delivery could have been quicker.",
+  createdAt: "2026-09-22T10:00:00.000Z",
+  photos: [photo],
+  verifiedPurchase: false,
+  status: "PENDING",
+  version: 1,
+  phone: "08012345678",
+  orderNumber: null,
+  publicationConsent: true,
+  moderationReason: null,
+};
+const paged = (data: unknown[]) => ({
+  data,
+  pagination: {
+    page: 1,
+    limit: 20,
+    total: data.length,
+    totalPages: data.length ? 1 : 0,
+  },
+});
+async function session(page: Page) {
+  await page.addInitScript(
+    (admin) =>
+      sessionStorage.setItem(
+        "pbs-admin-session-v1",
+        JSON.stringify({
+          accessToken: "qa-token",
+          expiresAt: Date.now() + 3600000,
+          admin,
+        }),
+      ),
+    admin,
+  );
+}
+async function setup(page: Page) {
+  await page.route("**/api/**", (route) => {
+    const path = new URL(route.request().url()).pathname.replace(/^\/api/, "");
+    if (path === "/auth/admin/me") return route.fulfill({ json: admin });
+    if (path === "/gallery/albums")
+      return route.fulfill({
+        json: paged([{ ...album, photoCount: 2, cover: photo }]),
+      });
+    if (path === "/gallery/albums/gtco-event")
+      return route.fulfill({ json: album });
+    if (path === "/reviews" && route.request().method() === "GET")
+      return route.fulfill({
+        json: paged([
+          {
+            ...review,
+            status: undefined,
+            phone: undefined,
+            orderNumber: undefined,
+          },
+        ]),
+      });
+    return route.fulfill({ status: 404, json: { message: "Unavailable" } });
+  });
+}
+const file = {
+  name: "review.png",
+  mimeType: "image/png",
+  buffer: Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j2ioAAAAASUVORK5CYII=",
+    "base64",
+  ),
+};
+
+test("public named albums and photo captions work in a mobile lightbox", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/gallery");
+  await page.getByRole("link", { name: /GTCO Event/ }).click();
+  await expect(page).toHaveURL(/\/gallery\/gtco-event$/);
+  await page.getByRole("button", { name: /The station setup/ }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("dialog").getByRole("button", { name: /Next/ }).click();
+  await expect(
+    page.getByRole("dialog").getByText("The celebration"),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+    360,
+  );
+});
+
+test("admin bulk uploads, arranges, saves a draft and publishes with permission", async ({
+  page,
+}) => {
+  await session(page);
+  await setup(page);
+  let uploads = 0;
+  let saved = { ...album, status: "DRAFT", permissionConfirmed: false };
+  await page.route("**/api/admin/gallery/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    expect(route.request().headers().authorization).toBe("Bearer qa-token");
+    if (path.endsWith("/uploads")) {
+      uploads++;
+      expect(route.request().headers()["content-type"]).toContain(
+        "multipart/form-data; boundary=",
+      );
+      expect(route.request().postDataBuffer()!.toString()).toContain(
+        'name="requestKey"',
+      );
+      return route.fulfill({
+        status: 201,
+        json: { ...photo, id: `photo-${uploads}` },
+      });
+    }
+    if (route.request().method() === "POST") {
+      const body = route.request().postDataJSON();
+      expect(body.requestKey).toBeTruthy();
+      expect(body.photos.map((p: { id: string }) => p.id)).toEqual([
+        "photo-2",
+        "photo-1",
+      ]);
+      saved = {
+        ...album,
+        ...body,
+        photos: body.photos.map((p: object) => ({ ...photo, ...p })),
+      };
+      return route.fulfill({ status: 201, json: saved });
+    }
+    if (route.request().method() === "PATCH") {
+      const body = route.request().postDataJSON();
+      expect(body.permissionConfirmed).toBe(true);
+      expect(body.status).toBe("PUBLISHED");
+      expect(body.expectedVersion).toBe(1);
+      saved = {
+        ...saved,
+        ...body,
+        photos: body.photos.map((p: object) => ({ ...photo, ...p })),
+        version: 2,
+      };
+      return route.fulfill({ json: saved });
+    }
+    return route.fulfill({ json: saved });
+  });
+  await page.goto("/admin/gallery/new");
+  await page.getByLabel("Album name").fill("GTCO Event");
+  await page
+    .getByLabel("Add photos", { exact: true })
+    .setInputFiles([file, { ...file, name: "second.png" }]);
+  await expect(page.getByText("Photos (2/100)")).toBeVisible();
+  await page.getByRole("button", { name: "Move photo 2 earlier" }).click();
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page).toHaveURL(/\/admin\/gallery\/album-1$/);
+  await page.getByLabel("Visibility").selectOption("PUBLISHED");
+  await page.getByRole("button", { name: "Save & publish" }).click();
+  await expect(page.locator("p[role=alert]")).toContainText(
+    "confirm permission",
+  );
+  await page.getByRole("checkbox", { name: /I have permission/ }).check();
+  await page.getByRole("button", { name: "Save & publish" }).click();
+  await expect(
+    page.getByText("Album published.", { exact: true }),
+  ).toBeVisible();
+  expect(uploads).toBe(2);
+});
+
+test("customer review photos submit privately for moderation with safe retry", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.setViewportSize({ width: 360, height: 800 });
+  let calls = 0;
+  let firstKey = "";
+  await page.route("**/api/reviews", (route) => {
+    if (route.request().method() === "GET")
+      return route.fulfill({ json: paged([]) });
+    calls++;
+    const body = route.request().postDataBuffer()!.toString();
+    const key = body.match(/name="requestKey"\r\n\r\n([^\r]+)/)![1];
+    expect(body).toContain('name="photos"');
+    expect(body).toContain("review-publication-v1");
+    expect(body).not.toContain('name="orderNumber"');
+    if (calls === 1) {
+      firstKey = key;
+      return route.fulfill({ status: 503, json: { message: "Try again" } });
+    }
+    expect(key).toBe(firstKey);
+    return route.fulfill({
+      status: 201,
+      json: { id: "review-new", status: "PENDING" },
+    });
+  });
+  await page.goto("/reviews");
+  await page.getByLabel("Display name", { exact: true }).fill("Ada O.");
+  await page.getByLabel("Your rating").selectOption("3");
+  await page
+    .getByLabel("Your review")
+    .fill("Lovely prints, though delivery could be faster.");
+  await page.getByLabel("Phone number (private)").fill("08012345678");
+  await page.locator('input[type="file"]').setInputFiles(file);
+  await expect(page.getByAltText("Selected review photo 1")).toBeVisible();
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Submit review" }).click();
+  await expect(page.locator("p[role=alert]")).toBeVisible();
+  await expect(
+    page.getByText("Your review has been submitted", { exact: false }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Submit review" }).click();
+  await expect(
+    page.getByText("Thank you! Your review has been submitted for approval."),
+  ).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+    360,
+  );
+});
+
+test("admin can publish a lower-rated review and public cards do not show contacts", async ({
+  page,
+}) => {
+  await session(page);
+  await setup(page);
+  let published = false;
+  await page.route("**/api/admin/reviews**", (route) => {
+    expect(route.request().headers().authorization).toBe("Bearer qa-token");
+    if (route.request().method() === "PATCH") {
+      expect(route.request().postDataJSON()).toEqual({
+        expectedVersion: 1,
+        status: "PUBLISHED",
+        moderationReason: null,
+      });
+      published = true;
+      return route.fulfill({
+        json: { ...review, status: "PUBLISHED", version: 2 },
+      });
+    }
+    return route.fulfill({ json: paged(published ? [] : [review]) });
+  });
+  await page.goto("/admin/reviews");
+  await page.getByRole("button", { name: "Publish review" }).click();
+  await expect(
+    page.getByText("Review published.", { exact: true }),
+  ).toBeVisible();
+  await page.goto("/reviews");
+  await expect(page.getByText(review.text)).toBeVisible();
+  await expect(page.getByText(review.phone, { exact: true })).toHaveCount(0);
+});
+
+test("missing gallery backend gives an honest admin error", async ({
+  page,
+}) => {
+  await session(page);
+  await setup(page);
+  await page.goto("/admin/gallery");
+  await expect(page.locator("p[role=alert]")).toContainText(
+    "isn’t connected yet",
+  );
+  await expect(page.getByText("Draft saved.")).toHaveCount(0);
+});

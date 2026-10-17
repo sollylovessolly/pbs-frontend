@@ -1,3 +1,4 @@
+import ProductProvider from "@/component/products/shared/ProductProvider";
 import type { Metadata } from "next";
 
 import AlbumProductPage from "@/component/albums/AlbumProductPage";
@@ -9,7 +10,11 @@ export const metadata: Metadata = {
 };
 
 const AlbumsPage = () => {
-  return <AlbumProductPage />;
+  return (
+    <ProductProvider category="ALBUM">
+      <AlbumProductPage />
+    </ProductProvider>
+  );
 };
 
 export default AlbumsPage;

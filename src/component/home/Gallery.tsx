@@ -1,42 +1,101 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { apiRequest } from "@/lib/api/client";
+import { galleryImage, type FeaturedPhoto } from "@/lib/gallery/types";
+import GalleryPhoto from "./GalleryPhoto";
 import Button from "@/component/ui/Button";
 
-const galleryItems = [
-  "bg-gradient-to-br from-[#d6a98e] to-[#b97b63]",
-  "bg-gradient-to-br from-rose to-burgundy",
-  "bg-gradient-to-br from-beige to-gold",
-  "bg-gradient-to-br from-[#8b5e4e] to-[#4e362d]",
-  "bg-gradient-to-br from-blush to-rose",
-  "bg-gradient-to-br from-burgundy to-burgundy-deep",
-];
+const localItems = [
+  {
+    src: "/images/gallery/gallery-01.jpg",
+    alt: "Polaroid prints from PolaroidsBySolly",
+    fallback: "/images/products/polaroids.jpg",
+  },
+  {
+    src: "/images/gallery/gallery-02.jpg",
+    alt: "Photostrip keepsakes from PolaroidsBySolly",
+    fallback: "/images/products/photostrips.jpg",
+  },
+  {
+    src: "/images/gallery/gallery-03.jpg",
+    alt: "A Polaroid station at an event",
+    fallback: "/images/products/polaroids.jpg",
+  },
+  {
+    src: "/images/gallery/gallery-04.jpg",
+    alt: "A personalised vintage letter",
+    fallback: "/images/products/vintage-letters.jpg",
+  },
+  {
+    src: "/images/gallery/gallery-05.jpg",
+    alt: "A Polaroid phone case",
+    fallback: "/images/products/phone-case.jpg",
+  },
+  {
+    src: "/images/gallery/gallery-06.jpg",
+    alt: "A photo album filled with memories",
+    fallback: "/images/products/albums.jpg",
+  },
+].map((item, index) => ({
+  ...item,
+  href: "/gallery",
+  title: [
+    "Polaroid prints",
+    "Photostrips",
+    "Station setups",
+    "Vintage letters",
+    "Phone cases",
+    "Photo albums",
+  ][index],
+}));
 
 const GalleryItem = ({
   item,
-  index,
 }: {
-  item: string;
+  item: (typeof localItems)[number];
   index: number;
-}) => {
-  return (
-    <div
-      className={[
-        "group relative aspect-square w-[145px] shrink-0",
-        "overflow-hidden rounded-[10px] border-2 border-ink",
-        "sm:w-[180px] lg:w-[215px]",
-        item,
-      ].join(" ")}
+}) => (
+  <Link
+    href={item.href}
+    className="group relative aspect-square w-[145px] shrink-0 overflow-hidden rounded-[10px] border-2 border-ink bg-beige sm:w-[180px] lg:w-[215px]"
+  >
+    <GalleryPhoto {...item} />
+    <span className="absolute inset-x-0 bottom-0 bg-ink/80 px-3 py-2 text-xs font-bold text-cream">
+      {item.title}
+    </span>
+    <span
+      aria-hidden="true"
+      className="absolute bottom-2 right-2 text-base text-white drop-shadow transition-transform duration-150 group-hover:scale-125"
     >
-      <span className="absolute bottom-2 right-2 text-base text-white drop-shadow transition-transform duration-150 group-hover:scale-125 sm:bottom-2.5 sm:right-2.5">
-        ♡
-      </span>
-
-      <span className="sr-only">
-        Gallery image {index + 1}
-      </span>
-    </div>
-  );
-};
+      ♡
+    </span>
+  </Link>
+);
 
 const Gallery = () => {
+  const [galleryItems, setGalleryItems] = useState(localItems);
+  useEffect(() => {
+    const controller = new AbortController();
+    apiRequest<FeaturedPhoto[]>("/gallery/featured?limit=12", {
+      signal: controller.signal,
+    })
+      .then((photos) =>
+        setGalleryItems(
+          photos.map((photo) => ({
+            src: galleryImage(photo.thumbnailUrl),
+            alt: photo.alt || photo.caption || photo.albumTitle,
+            fallback: "/images/products/polaroids.jpg",
+            href: `/gallery/${encodeURIComponent(photo.albumSlug)}`,
+            title: photo.albumTitle,
+          })),
+        ),
+      )
+      .catch(() => {
+        /* Keep the existing local gallery while the gallery API is unavailable. */
+      });
+    return () => controller.abort();
+  }, []);
   return (
     <section className="overflow-hidden bg-cream py-12 sm:py-16 lg:py-[72px]">
       <div className="mx-auto max-w-site px-4 sm:px-5 md:px-7">
@@ -46,34 +105,27 @@ const Gallery = () => {
           </h2>
 
           <div className="shrink-0">
-            <Button
-              href="https://www.instagram.com/polaroidsbysolly"
-              variant="ghost"
-              size="small"
-            >
-              <span className="sm:hidden">
-                Follow us
-              </span>
+            <Button href="/gallery" variant="ghost" size="small">
+              <span className="sm:hidden">View gallery</span>
 
-              <span className="hidden sm:inline">
-                Follow @polaroidsbysolly
-              </span>
+              <span className="hidden sm:inline">View gallery</span>
             </Button>
           </div>
         </div>
       </div>
 
+      {!galleryItems.length && (
+        <p className="mx-auto max-w-site px-5">
+          New albums are on their way. Explore the gallery for more.
+        </p>
+      )}
       {/* Moving carousel */}
       <div className="gallery-marquee overflow-hidden">
         <div className="gallery-marquee-track flex w-max items-center">
           {/* First copy */}
           <div className="flex shrink-0 gap-3 pr-3 sm:gap-4 sm:pr-4">
             {galleryItems.map((item, index) => (
-              <GalleryItem
-                key={`gallery-${index}`}
-                item={item}
-                index={index}
-              />
+              <GalleryItem key={`gallery-${index}`} item={item} index={index} />
             ))}
           </div>
 

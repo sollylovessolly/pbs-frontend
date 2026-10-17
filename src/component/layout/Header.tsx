@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  LuMenu,
-  LuShoppingBag,
-  LuX,
-} from "react-icons/lu";
+import { LuMenu, LuShoppingBag, LuX } from "react-icons/lu";
 
 import Button from "@/component/ui/Button";
 import { useCart } from "@/context/CartContext";
@@ -21,8 +18,8 @@ const navigationLinks = [
     href: "/products",
   },
   {
-    label: "How It Works",
-    href: "/#how-it-works",
+    label: "Polaroid Station",
+    href: "/polaroid-station",
   },
   {
     label: "Track Order",
@@ -32,13 +29,14 @@ const navigationLinks = [
 
 const Header = () => {
   const { cartCount } = useCart();
+  const isHome = usePathname() === "/";
+  const actionHref = isHome ? "/products" : "/";
+  const actionLabel = isHome ? "Start Creating" : "Back to home";
 
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen
-      ? "hidden"
-      : "";
+    document.body.style.overflow = menuOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -87,12 +85,8 @@ const Header = () => {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Desktop only */}
             <div className="hidden lg:block">
-              <Button
-                variant="ghost"
-                size="small"
-                href="/products"
-              >
-                Start Creating
+              <Button variant="ghost" size="small" href={actionHref}>
+                {actionLabel}
               </Button>
             </div>
 
@@ -122,10 +116,7 @@ const Header = () => {
               onClick={() => setMenuOpen(true)}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper lg:hidden"
             >
-              <LuMenu
-                aria-hidden="true"
-                className="h-5 w-5"
-              />
+              <LuMenu aria-hidden="true" className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -146,9 +137,7 @@ const Header = () => {
         aria-hidden={!menuOpen}
         className={[
           "fixed right-0 top-0 z-[70] flex h-dvh w-[82%] max-w-[340px] flex-col border-l-2 border-ink bg-cream p-5 transition-transform duration-300 ease-out lg:hidden",
-          menuOpen
-            ? "translate-x-0"
-            : "translate-x-full",
+          menuOpen ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
       >
         <div className="flex items-center justify-between border-b-2 border-ink/15 pb-4">
@@ -163,10 +152,7 @@ const Header = () => {
             onClick={closeMenu}
             className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink bg-paper"
           >
-            <LuX
-              aria-hidden="true"
-              className="h-5 w-5"
-            />
+            <LuX aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
 
@@ -194,11 +180,11 @@ const Header = () => {
         </nav>
 
         <Button
-          href="/products"
+          href={actionHref}
           className="mt-auto w-full"
           onClick={closeMenu}
         >
-          Start Creating
+          {actionLabel}
         </Button>
       </aside>
     </>

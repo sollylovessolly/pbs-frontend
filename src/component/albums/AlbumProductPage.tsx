@@ -16,27 +16,15 @@ import {
   LuShoppingBag,
 } from "react-icons/lu";
 
+import { useProduct } from "@/component/products/shared/ProductProvider";
 import { useCart } from "@/context/CartContext";
 import type { NewCartItem } from "@/types/cart";
-
-const ALBUM_PRICE = 5000;
-const ALBUM_COMPARE_AT_PRICE = 6000;
 
 const ALBUM_IMAGES = [
   {
     id: "cover",
-    src: "/images/albums/memory-album-cover.jpg",
-    alt: "Memory Photo Album cover",
-  },
-  {
-    id: "open",
-    src: "/images/albums/memory-album-open.jpg",
-    alt: "Memory Photo Album opened to show its pages",
-  },
-  {
-    id: "pockets",
-    src: "/images/albums/memory-album-pockets.jpg",
-    alt: "Front and back Polaroid pockets inside the album",
+    src: "/images/products/albums.jpg",
+    alt: "Memory Photo Album",
   },
 ];
 
@@ -44,26 +32,23 @@ type AlbumProductPageProps = {
   inStock?: boolean;
 };
 
-const formatPrice = (amount: number) =>
-  `₦${amount.toLocaleString("en-NG")}`;
+const formatPrice = (amount: number) => `₦${amount.toLocaleString("en-NG")}`;
 
 const AlbumProductPage = ({
-  inStock = true,
+  inStock: initialInStock = true,
 }: AlbumProductPageProps) => {
   const router = useRouter();
+  const { variant } = useProduct();
+  const ALBUM_PRICE = Number(variant.sellingPrice);
+  const inStock = initialInStock && variant.inStock;
   const { addItems } = useCart();
 
-  const [activeImageId, setActiveImageId] = useState(
-    ALBUM_IMAGES[0].id,
-  );
+  const [activeImageId, setActiveImageId] = useState(ALBUM_IMAGES[0].id);
   const [quantity, setQuantity] = useState(1);
-  const [isAddingToCart, setIsAddingToCart] =
-    useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const activeImage =
-    ALBUM_IMAGES.find(
-      (image) => image.id === activeImageId,
-    ) ?? ALBUM_IMAGES[0];
+    ALBUM_IMAGES.find((image) => image.id === activeImageId) ?? ALBUM_IMAGES[0];
 
   const totalPrice = ALBUM_PRICE * quantity;
 
@@ -77,6 +62,8 @@ const AlbumProductPage = ({
         productType: "album",
         name: "Memory Photo Album",
         unitPrice: ALBUM_PRICE,
+        variantSku: variant.sku,
+        availableQuantity: variant.availableQuantity,
         quantity,
         previewUrl: ALBUM_IMAGES[0].src,
         options: {
@@ -85,9 +72,7 @@ const AlbumProductPage = ({
           pocketCount: "30 pockets",
           capacity: "Up to 30 Polaroid prints",
           arrangement: "Front and back pockets",
-          originalPrice: formatPrice(
-            ALBUM_COMPARE_AT_PRICE,
-          ),
+          originalPrice: formatPrice(ALBUM_PRICE),
         },
         turnaround: "Ready in 24–48hrs",
         editHref: "/products/albums",
@@ -96,6 +81,12 @@ const AlbumProductPage = ({
 
       addItems([cartItem]);
       router.push("/cart");
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Could not add this album. Please retry.",
+      );
     } finally {
       setIsAddingToCart(false);
     }
@@ -109,11 +100,11 @@ const AlbumProductPage = ({
             <div className="min-w-0">
               <div className="relative flex min-h-[420px] items-center justify-center overflow-hidden rounded-[18px] border-2 border-ink bg-blush p-5 shadow-[6px_6px_0_#2A211C] sm:min-h-[580px] sm:p-8">
                 <div className="absolute left-4 top-4 z-10 -rotate-2 rounded-full border-2 border-ink bg-cream px-3 py-1 text-[10px] font-bold text-burgundy shadow-[2px_2px_0_#2A211C] sm:left-6 sm:top-6 sm:text-xs">
-                  SALE
+                  KEEPSAKE
                 </div>
 
                 <div className="absolute inset-0 flex items-center justify-center p-10 text-center font-serif text-lg font-semibold text-ink/25">
-                  Add your album photo here
+                  Memory Photo Album
                 </div>
 
                 <img
@@ -129,8 +120,7 @@ const AlbumProductPage = ({
 
               <div className="mt-3 grid grid-cols-3 gap-3 sm:mt-4">
                 {ALBUM_IMAGES.map((image, index) => {
-                  const isActive =
-                    image.id === activeImage.id;
+                  const isActive = image.id === activeImage.id;
 
                   return (
                     <button
@@ -138,9 +128,7 @@ const AlbumProductPage = ({
                       type="button"
                       aria-label={`View album image ${index + 1}`}
                       aria-pressed={isActive}
-                      onClick={() =>
-                        setActiveImageId(image.id)
-                      }
+                      onClick={() => setActiveImageId(image.id)}
                       className={[
                         "relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[12px] border-2 bg-beige p-2 transition",
                         isActive
@@ -156,8 +144,7 @@ const AlbumProductPage = ({
                         src={image.src}
                         alt=""
                         onError={(event) => {
-                          event.currentTarget.style.display =
-                            "none";
+                          event.currentTarget.style.display = "none";
                         }}
                         className="relative z-[1] h-full w-full object-cover"
                       />
@@ -177,26 +164,15 @@ const AlbumProductPage = ({
               </h1>
 
               <p className="mt-4 max-w-[560px] text-sm leading-6 text-ink/60 sm:text-base sm:leading-7">
-                A simple keepsake album for collecting,
-                arranging and revisiting your favourite
-                Polaroid prints. It arrives empty, so you
-                can fill it in your own order.
+                A simple keepsake album for collecting, arranging and revisiting
+                your favourite Polaroid prints. It arrives empty, so you can
+                fill it in your own order.
               </p>
 
               <div className="mt-6 flex flex-wrap items-end gap-3">
                 <p className="font-serif text-4xl font-bold text-burgundy">
                   {formatPrice(ALBUM_PRICE)}
                 </p>
-
-                <p className="pb-1 text-base font-bold text-ink/40 line-through decoration-2">
-                  {formatPrice(
-                    ALBUM_COMPARE_AT_PRICE,
-                  )}
-                </p>
-
-                <span className="mb-1 rounded-full bg-burgundy px-2.5 py-1 text-[10px] font-bold text-cream">
-                  SAVE ₦1,000
-                </span>
               </div>
 
               <div className="mt-7 grid grid-cols-3 gap-2.5 sm:gap-3">
@@ -242,9 +218,8 @@ const AlbumProductPage = ({
                       The album arrives empty
                     </p>
                     <p className="mt-1 text-xs leading-5 text-ink/55 sm:text-sm">
-                      Each of the 15 pages has a pocket on
-                      the front and back, giving you space
-                      for up to 30 Polaroids altogether.
+                      Each of the 15 pages has a pocket on the front and back,
+                      giving you space for up to 30 Polaroids altogether.
                     </p>
                   </div>
                 </div>
@@ -252,9 +227,7 @@ const AlbumProductPage = ({
 
               <div className="mt-7 flex items-center justify-between gap-4 border-y border-dashed border-ink/25 py-5">
                 <div>
-                  <p className="text-sm font-bold text-ink">
-                    How many albums?
-                  </p>
+                  <p className="text-sm font-bold text-ink">How many albums?</p>
                   <p className="mt-1 text-xs text-ink/50">
                     Each album holds up to 30 prints.
                   </p>
@@ -266,9 +239,7 @@ const AlbumProductPage = ({
                     aria-label="Decrease album quantity"
                     disabled={quantity <= 1}
                     onClick={() =>
-                      setQuantity((current) =>
-                        Math.max(1, current - 1),
-                      )
+                      setQuantity((current) => Math.max(1, current - 1))
                     }
                     className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink bg-paper disabled:cursor-not-allowed disabled:opacity-35"
                   >
@@ -283,8 +254,11 @@ const AlbumProductPage = ({
                     type="button"
                     aria-label="Increase album quantity"
                     onClick={() =>
-                      setQuantity(
-                        (current) => current + 1,
+                      setQuantity((current) =>
+                        Math.min(
+                          current + 1,
+                          variant.availableQuantity ?? Infinity,
+                        ),
                       )
                     }
                     className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink bg-paper"
@@ -299,22 +273,16 @@ const AlbumProductPage = ({
                   <span
                     className={[
                       "inline-flex items-center gap-2 text-xs font-bold",
-                      inStock
-                        ? "text-burgundy"
-                        : "text-ink/45",
+                      inStock ? "text-burgundy" : "text-ink/45",
                     ].join(" ")}
                   >
                     <span
                       className={[
                         "h-2.5 w-2.5 rounded-full",
-                        inStock
-                          ? "bg-burgundy"
-                          : "bg-ink/30",
+                        inStock ? "bg-burgundy" : "bg-ink/30",
                       ].join(" ")}
                     />
-                    {inStock
-                      ? "In stock"
-                      : "Currently unavailable"}
+                    {inStock ? "In stock" : "Currently unavailable"}
                   </span>
 
                   <p className="font-serif text-xl font-bold text-burgundy">
@@ -325,9 +293,7 @@ const AlbumProductPage = ({
                 <button
                   type="button"
                   aria-busy={isAddingToCart}
-                  disabled={
-                    !inStock || isAddingToCart
-                  }
+                  disabled={!inStock || isAddingToCart}
                   onClick={handleAddToCart}
                   className="hidden w-full items-center justify-center rounded-full border-2 border-ink bg-burgundy px-6 py-4 text-sm font-bold text-cream shadow-[4px_4px_0_#2A211C] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 lg:flex"
                 >
@@ -369,10 +335,9 @@ const AlbumProductPage = ({
                 </h2>
 
                 <p className="mt-3 max-w-[560px] text-sm leading-6 text-ink/60">
-                  Slide one Polaroid into the front pocket,
-                  turn the page and add another at the back.
-                  Repeat across all 15 pages to store up to
-                  30 prints.
+                  Slide one Polaroid into the front pocket, turn the page and
+                  add another at the back. Repeat across all 15 pages to store
+                  up to 30 prints.
                 </p>
 
                 <div className="mt-6 grid grid-cols-3 gap-2 text-center">
@@ -403,8 +368,7 @@ const AlbumProductPage = ({
       <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t-2 border-ink bg-cream px-4 py-3 lg:hidden">
         <div className="shrink-0">
           <p className="text-[10px] font-semibold text-ink/55">
-            {quantity}{" "}
-            {quantity === 1 ? "album" : "albums"}
+            {quantity} {quantity === 1 ? "album" : "albums"}
           </p>
 
           <p className="font-serif text-base font-bold text-burgundy">

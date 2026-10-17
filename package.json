@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --require ./tests/register.cjs --test tests/*.test.cjs",
+    "test:e2e": "playwright test",
+    "format": "prettier --write src tests playwright.config.ts",
+    "format:check": "prettier --check src tests playwright.config.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",
@@ -18,12 +23,14 @@
     "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "prettier": "^3.9.7",
     "tailwindcss": "^4.3.2",
     "typescript": "^5"
   }

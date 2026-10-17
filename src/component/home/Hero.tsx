@@ -4,44 +4,37 @@ import Button from "@/component/ui/Button";
 const heroPolaroids = [
   {
     src: "/images/hero/polaroid01.png",
-    position:
-      "top-[-35px] left-[2%] w-[135px] -rotate-[12deg] sm:w-[165px]",
+    position: "top-[-35px] left-[2%] w-[135px] -rotate-[12deg] sm:w-[165px]",
     floatClass: "hero-float-one",
   },
   {
     src: "/images/hero/polaroid02.png",
-    position:
-      "top-[20%] left-[5%] w-[120px] rotate-[7deg] sm:w-[155px]",
+    position: "top-[20%] left-[5%] w-[120px] rotate-[7deg] sm:w-[155px]",
     floatClass: "hero-float-two",
   },
   {
     src: "/images/hero/polaroid03.png",
-    position:
-      "bottom-[-35px] left-[3%] w-[145px] rotate-[8deg] sm:w-[185px]",
+    position: "bottom-[-35px] left-[3%] w-[145px] rotate-[8deg] sm:w-[185px]",
     floatClass: "hero-float-three",
   },
   {
     src: "/images/hero/polaroid02.png",
-    position:
-      "top-[-45px] right-[3%] w-[140px] rotate-[10deg] sm:w-[175px]",
+    position: "top-[-45px] right-[3%] w-[140px] rotate-[10deg] sm:w-[175px]",
     floatClass: "hero-float-two",
   },
   {
     src: "/images/hero/polaroid03.png",
-    position:
-      "top-[24%] right-[5%] w-[125px] -rotate-[8deg] sm:w-[165px]",
+    position: "top-[24%] right-[5%] w-[125px] -rotate-[8deg] sm:w-[165px]",
     floatClass: "hero-float-one",
   },
   {
     src: "/images/hero/polaroid01.png",
-    position:
-      "bottom-[-45px] right-[2%] w-[150px] -rotate-[5deg] sm:w-[195px]",
+    position: "bottom-[-45px] right-[2%] w-[150px] -rotate-[5deg] sm:w-[195px]",
     floatClass: "hero-float-three",
   },
   {
     src: "/images/hero/polaroid03.png",
-    position:
-      "top-[-55px] left-[28%] hidden w-[120px] rotate-[5deg] lg:block",
+    position: "top-[-55px] left-[28%] hidden w-[120px] rotate-[5deg] lg:block",
     floatClass: "hero-float-three",
   },
   {
@@ -67,58 +60,92 @@ const heroPolaroids = [
 const Hero = () => {
   return (
     <>
-      <section className="relative min-h-[720px] overflow-hidden bg-blush">
+      <section className="relative min-h-[560px] overflow-hidden bg-blush sm:min-h-[720px]">
         {/* Starts from the far-left edge and covers the hero */}
         <div className="hero-cover absolute inset-0 z-0 bg-burgundy" />
 
         {/* Text appears after the burgundy transition */}
-        <div className="hero-copy-reveal relative z-30 mx-auto flex min-h-[720px] max-w-[960px] flex-col items-center justify-center px-7 py-20 text-center">
-          <span className="mb-6 w-fit -rotate-3 rounded-full border-2 border-ink bg-beige px-4 py-1 font-handwritten text-xl font-bold text-ink shadow-soft">
-            made from your camera roll
+        <div className="hero-copy-reveal relative z-30 mx-auto flex min-h-[560px] max-w-[960px] flex-col items-center justify-center px-5 pt-32 pb-28 text-center sm:min-h-[720px] sm:px-7 sm:py-20">
+          <span className="mb-5 w-fit -rotate-3 rounded-md border-2 border-ink bg-beige px-3 py-1 font-handwritten text-base font-bold text-ink shadow-soft sm:mb-6 sm:px-4 sm:text-xl">
+            from your camera roll to your celebrations
           </span>
 
-          <h1 className="font-poster text-[clamp(44px,6vw,84px)] leading-[0.98] font-semibold text-cream">
+          <h1 className="max-w-[680px] font-poster text-[36px] leading-[0.98] font-semibold text-cream sm:text-6xl lg:text-7xl">
             Turn your favorite
             <br />
-            memories into{" "}
-            <em className="font-medium text-blush">keepsakes</em>
+            memories into <em className="font-medium text-blush">keepsakes</em>
           </h1>
 
-          <p className="mt-7 max-w-[560px] font-sans text-base leading-7 text-[#f3e3de] sm:text-[17px]">
-            Upload the photo, customize it your way, pay securely, and we
-            deliver it to your door in Lagos — printed, framed, and ready to
-            hold.
+          <p className="mt-5 max-w-[560px] font-sans text-sm leading-6 text-[#f3e3de] sm:mt-7 sm:text-[17px] sm:leading-7">
+            Order personalised prints from your camera roll, or bring our
+            Polaroid station to your next event. Memories to hold, wherever you
+            make them.
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <div className="mt-6 flex w-full max-w-[320px] flex-col justify-center gap-3 sm:mt-8 sm:w-auto sm:max-w-none sm:flex-row sm:gap-4">
             <Button
               href="/products"
               variant="ghost"
-              className="!bg-cream !text-ink"
+              className="w-full !bg-cream !text-ink sm:w-auto"
             >
               Start Creating →
             </Button>
 
             <Button
-              href="/products"
+              href="/polaroid-station"
               variant="ghost"
-              className="!border-cream !bg-transparent !text-cream"
+              className="w-full !border-cream !bg-transparent !text-cream sm:w-auto"
             >
-              Shop Products
+              Book our Polaroid station
             </Button>
           </div>
 
-          <div className="mt-11 flex flex-wrap justify-center gap-x-7 gap-y-3 text-[13px] font-semibold text-[#ebd3cd]">
+          <div className="mt-8 flex max-w-[300px] flex-col justify-center gap-2 text-xs font-semibold text-[#ebd3cd] sm:mt-11 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-x-7 sm:gap-y-3 sm:text-[13px]">
             <TrustItem text="Delivery across Lagos & Nigeria" />
             <TrustItem text="Pay securely online" />
             <TrustItem text="Loved by 2,000+ customers" />
           </div>
         </div>
 
+        <div
+          aria-hidden="true"
+          data-testid="mobile-hero-polaroids"
+          className="pointer-events-none absolute inset-0 z-20 sm:hidden"
+        >
+          <HeroImage
+            src="/images/hero/polaroid01.png"
+            className="left-5 top-3 w-[85px] -rotate-12"
+            floatClass="hero-float-one"
+            revealDelay="0.4s"
+            floatDelay="0s"
+          />
+          <HeroImage
+            src="/images/hero/polaroid02.png"
+            className="right-5 top-2 w-[85px] rotate-12"
+            floatClass="hero-float-two"
+            revealDelay="0.6s"
+            floatDelay="-1s"
+          />
+          <HeroImage
+            src="/images/hero/polaroid03.png"
+            className="bottom-0 left-8 w-[75px] rotate-6"
+            floatClass="hero-float-three"
+            revealDelay="0.8s"
+            floatDelay="-2s"
+          />
+          <HeroImage
+            src="/images/hero/polaroid01.png"
+            className="bottom-0 right-8 w-[75px] -rotate-6"
+            floatClass="hero-float-one"
+            revealDelay="1s"
+            floatDelay="-1s"
+          />
+        </div>
+
         {/* Polaroids appear after the text */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-20"
+          className="pointer-events-none absolute inset-0 z-20 hidden sm:block"
         >
           {heroPolaroids.map((polaroid, index) => (
             <HeroImage
@@ -133,16 +160,14 @@ const Hero = () => {
           ))}
         </div>
 
-        <span className="hero-sticker-reveal hero-float-two absolute top-[14%] right-[8%] z-40 hidden rotate-[9deg] rounded-full border-2 border-ink bg-blush px-4 py-1 font-handwritten text-xl font-bold text-ink shadow-soft sm:inline-flex">
+        <span className="hero-sticker-reveal hero-float-two absolute top-[14%] right-[8%] z-40 hidden rotate-[9deg] rounded-md border-2 border-ink bg-blush px-4 py-1 font-handwritten text-xl font-bold text-ink shadow-soft sm:inline-flex">
           bestie era ✨
         </span>
 
-        <span className="hero-sticker-reveal hero-float-one absolute right-[7%] bottom-[12%] z-40 hidden -rotate-[8deg] rounded-full border-2 border-ink bg-burgundy px-4 py-1 font-handwritten text-xl font-bold text-cream shadow-soft sm:inline-flex">
+        <span className="hero-sticker-reveal hero-float-one absolute right-[7%] bottom-[12%] z-40 hidden -rotate-[8deg] rounded-md border-2 border-ink bg-burgundy px-4 py-1 font-handwritten text-xl font-bold text-cream shadow-soft sm:inline-flex">
           printed with love
         </span>
       </section>
-
-      
     </>
   );
 };
@@ -183,10 +208,7 @@ const HeroImage = ({
         className="hero-polaroid-reveal"
         style={{ animationDelay: revealDelay }}
       >
-        <div
-          className={floatClass}
-          style={{ animationDelay: floatDelay }}
-        >
+        <div className={floatClass} style={{ animationDelay: floatDelay }}>
           <Image
             src={src}
             alt=""

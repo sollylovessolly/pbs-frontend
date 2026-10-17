@@ -40,7 +40,7 @@ export default function Button({
 }: ButtonProps) {
   const styles = [
     "inline-flex items-center justify-center gap-2",
-    "rounded-full border-2 border-ink",
+    "rounded-md border-2 border-ink",
     "font-sans font-bold",
     "shadow-button",
     "transition-[transform,box-shadow] duration-150",

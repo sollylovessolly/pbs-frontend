@@ -1,60 +1,13 @@
+"use client";
+import { useEffect, useState } from "react";
+import { getProducts } from "@/lib/api";
+import type { BackendProduct } from "@/lib/api/types";
+import { productAssets, money, available } from "@/lib/commerce/catalogue";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  LuImagePlus,
-  LuPackage,
-  LuTruck,
-} from "react-icons/lu";
+import { LuImagePlus, LuPackage, LuTruck } from "react-icons/lu";
 
 import Button from "@/component/ui/Button";
-
-const bestSellers = [
-  {
-    title: "Classic Polaroid Print",
-    price: "₦3,500",
-    time: "Ready in 24hrs",
-    href: "/products/polaroids",
-    src: "/images/categories/polaroid-prints.jpg",
-    alt: "Classic personalised Polaroid prints",
-    isBestSeller: true,
-  },
-  {
-    title: "4-Cut Photostrip",
-    price: "₦4,000",
-    time: "Up to 48hrs",
-    href: "/products/photostrips",
-    src: "/images/categories/photo-strips.jpg",
-    alt: "Four-cut personalised photostrip",
-    isBestSeller: false,
-  },
-  {
-    title: "Vintage Letter",
-    price: "₦3,000–₦4,000",
-    time: "Ready in 48hrs",
-    href: "/products/vintage-letters",
-    src: "/images/categories/vintage-letter.jpg",
-    alt: "A personalised vintage letter",
-    isBestSeller: false,
-  },
-  {
-    title: "Polaroid Phone Case",
-    price: "from ₦5,500",
-    time: "Ready in 48hrs",
-    href: "/products/phone-cases",
-    src: "/images/categories/polaroid-phonecase.jpeg",
-    alt: "A personalised Polaroid phone case",
-    isBestSeller: true,
-  },
-  {
-    title: "Memory Photo Album",
-    price: "Coming soon",
-    time: "Launching soon",
-    href: "/products/albums",
-    src: "/images/categories/photo-album.jpg",
-    alt: "A personalised memory photo album",
-    isBestSeller: false,
-  },
-];
 
 const deliveryInfo = [
   {
@@ -72,6 +25,38 @@ const deliveryInfo = [
 ];
 
 const BestSellers = () => {
+  const [products, setProducts] = useState<BackendProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    const c = new AbortController();
+    getProducts(c.signal)
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (!c.signal.aborted) {
+          setError(e.message);
+          setLoading(false);
+        }
+      });
+    return () => c.abort();
+  }, [attempt]);
+  const bestSellers = products
+    .filter((p) => p.isActive && p.variants.some((v) => v.isActive))
+    .map((p) => ({
+      title: p.name,
+      price: `From ${money(Math.min(...p.variants.filter((v) => v.isActive).map((v) => Number(v.sellingPrice))))}`,
+      time: p.variants.some(available)
+        ? "Made to order"
+        : "Currently unavailable",
+      href: `/products/${productAssets[p.category].path}`,
+      src: productAssets[p.category].image,
+      alt: p.name,
+      isBestSeller: false,
+    }));
   return (
     <>
       <section className="bg-cream py-12 sm:py-16 lg:py-24">
@@ -82,22 +67,32 @@ const BestSellers = () => {
             </h2>
 
             <div className="shrink-0">
-              <Button
-                href="/products"
-                variant="ghost"
-                size="small"
-              >
-                <span className="sm:hidden">
-                  View all
-                </span>
+              <Button href="/products" variant="ghost" size="small">
+                <span className="sm:hidden">View all</span>
 
-                <span className="hidden sm:inline">
-                  View all products
-                </span>
+                <span className="hidden sm:inline">View all products</span>
               </Button>
             </div>
           </div>
 
+          {loading && <p role="status">Loading keepsakes…</p>}
+          {error && (
+            <p role="alert">
+              {error}{" "}
+              <button
+                onClick={() => {
+                  setError("");
+                  setLoading(true);
+                  setAttempt((x) => x + 1);
+                }}
+              >
+                Retry
+              </button>
+            </p>
+          )}
+          {!loading && !error && !bestSellers.length && (
+            <p>New keepsakes are coming soon.</p>
+          )}
           <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-6 lg:grid-cols-5">
             {bestSellers.map((product) => (
               <Link
@@ -106,7 +101,7 @@ const BestSellers = () => {
                 className="group relative block min-w-0"
               >
                 {product.isBestSeller && (
-                  <span className="absolute -left-1 -top-2 z-20 -rotate-[8deg] rounded-full border-2 border-ink bg-burgundy px-2 py-0.5 font-handwritten text-xs font-bold text-cream sm:-left-2 sm:-top-3 sm:px-3.5 sm:py-1 sm:text-lg">
+                  <span className="absolute -left-1 -top-2 z-20 -rotate-[8deg] rounded-md border-2 border-ink bg-burgundy px-2 py-0.5 font-handwritten text-xs font-bold text-cream sm:-left-2 sm:-top-3 sm:px-3.5 sm:py-1 sm:text-lg">
                     bestseller
                   </span>
                 )}

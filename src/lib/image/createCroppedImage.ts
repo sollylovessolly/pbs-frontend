@@ -4,11 +4,7 @@ const getRadians = (degrees: number) => {
   return (degrees * Math.PI) / 180;
 };
 
-const getRotatedSize = (
-  width: number,
-  height: number,
-  rotation: number,
-) => {
+const getRotatedSize = (width: number, height: number, rotation: number) => {
   const radians = getRadians(rotation);
 
   return {
@@ -22,16 +18,13 @@ const getRotatedSize = (
 };
 
 const loadImage = (src: string) => {
-  return new Promise<HTMLImageElement>(
-    (resolve, reject) => {
-      const image = new Image();
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
 
-      image.onload = () => resolve(image);
-      image.onerror = () =>
-        reject(new Error("Could not load image."));
-      image.src = src;
-    },
-  );
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Could not load image."));
+    image.src = src;
+  });
 };
 
 export const createCroppedImage = async (
@@ -47,21 +40,15 @@ export const createCroppedImage = async (
     rotation,
   );
 
-  const rotationCanvas =
-    document.createElement("canvas");
-  const rotationContext =
-    rotationCanvas.getContext("2d");
+  const rotationCanvas = document.createElement("canvas");
+  const rotationContext = rotationCanvas.getContext("2d");
 
   if (!rotationContext) {
     throw new Error("Canvas is not supported.");
   }
 
-  rotationCanvas.width = Math.round(
-    rotatedSize.width,
-  );
-  rotationCanvas.height = Math.round(
-    rotatedSize.height,
-  );
+  rotationCanvas.width = Math.round(rotatedSize.width);
+  rotationCanvas.height = Math.round(rotatedSize.height);
 
   rotationContext.translate(
     rotationCanvas.width / 2,
@@ -70,17 +57,12 @@ export const createCroppedImage = async (
 
   rotationContext.rotate(getRadians(rotation));
 
-  rotationContext.translate(
-    -image.naturalWidth / 2,
-    -image.naturalHeight / 2,
-  );
+  rotationContext.translate(-image.naturalWidth / 2, -image.naturalHeight / 2);
 
   rotationContext.drawImage(image, 0, 0);
 
-  const outputCanvas =
-    document.createElement("canvas");
-  const outputContext =
-    outputCanvas.getContext("2d");
+  const outputCanvas = document.createElement("canvas");
+  const outputContext = outputCanvas.getContext("2d");
 
   if (!outputContext) {
     throw new Error("Canvas is not supported.");

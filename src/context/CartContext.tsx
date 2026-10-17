@@ -9,10 +9,9 @@ import {
   useState,
 } from "react";
 
-import type {
-  CartItem,
-  NewCartItem,
-} from "@/types/cart";
+import type { CartItem, NewCartItem } from "@/types/cart";
+
+import { restoreCart, cartPreview } from "@/lib/commerce/cart";
 
 const CART_STORAGE_KEY = "polaroidsbysolly-cart";
 
@@ -24,53 +23,39 @@ type CartContextValue = {
 
   addItems: (items: NewCartItem[]) => void;
 
-  updateItem: (
-    itemId: string,
-    updates: Partial<Omit<CartItem, "id">>,
-  ) => void;
+  updateItem: (itemId: string, updates: Partial<Omit<CartItem, "id">>) => void;
 
-  updateQuantity: (
-    itemId: string,
-    quantity: number,
-  ) => void;
+  updateQuantity: (itemId: string, quantity: number) => void;
 
   removeItem: (itemId: string) => void;
   clearCart: () => void;
 };
 
-const CartContext = createContext<CartContextValue | null>(
-  null,
-);
+const CartContext = createContext<CartContextValue | null>(null);
 
 type CartProviderProps = {
   children: ReactNode;
 };
 
-export const CartProvider = ({
-  children,
-}: CartProviderProps) => {
+export const CartProvider = ({ children }: CartProviderProps) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     try {
-      const savedCart = window.localStorage.getItem(
-        CART_STORAGE_KEY,
-      );
+      const savedCart = window.localStorage.getItem(CART_STORAGE_KEY);
 
       if (savedCart) {
-        const parsedCart = JSON.parse(
-          savedCart,
-        ) as CartItem[];
+        const parsedCart = restoreCart(JSON.parse(savedCart));
 
         if (Array.isArray(parsedCart)) {
-          setItems(parsedCart);
+          queueMicrotask(() => setItems(parsedCart));
         }
       }
     } catch (error) {
       console.error("Could not load cart:", error);
     } finally {
-      setIsReady(true);
+      queueMicrotask(() => setIsReady(true));
     }
   }, []);
 
@@ -80,7 +65,13 @@ export const CartProvider = ({
     try {
       window.localStorage.setItem(
         CART_STORAGE_KEY,
-        JSON.stringify(items),
+        JSON.stringify(
+          items.map((item) => ({
+            ...item,
+            sourceImageUrl: undefined,
+            previewUrl: cartPreview(item),
+          })),
+        ),
       );
     } catch (error) {
       console.error("Could not save cart:", error);
@@ -88,17 +79,24 @@ export const CartProvider = ({
   }, [items, isReady]);
 
   const addItems = (newItems: NewCartItem[]) => {
-    const cartItems: CartItem[] = newItems.map(
-      (item) => ({
-        ...item,
-        id: crypto.randomUUID(),
-      }),
-    );
+    for (const item of newItems) {
+      const combined = [...items, ...newItems]
+        .filter((i) => i.variantSku === item.variantSku)
+        .reduce((sum, i) => sum + i.quantity, 0);
+      if (
+        !item.variantSku ||
+        (item.availableQuantity != null && combined > item.availableQuantity)
+      )
+        throw new Error(
+          "The requested quantity is unavailable. Please reduce your selection.",
+        );
+    }
+    const cartItems: CartItem[] = newItems.map((item) => ({
+      ...item,
+      id: crypto.randomUUID(),
+    }));
 
-    setItems((currentItems) => [
-      ...currentItems,
-      ...cartItems,
-    ]);
+    setItems((currentItems) => [...currentItems, ...cartItems]);
   };
 
   const updateItem = (
@@ -117,16 +115,36 @@ export const CartProvider = ({
     );
   };
 
-  const updateQuantity = (
-    itemId: string,
-    quantity: number,
-  ) => {
+  const updateQuantity = (itemId: string, quantity: number) => {
     setItems((currentItems) =>
       currentItems.map((item) =>
         item.id === itemId
           ? {
               ...item,
-              quantity: Math.max(1, quantity),
+              quantity: Number.isFinite(quantity)
+                ? Math.max(
+                    1,
+                    Math.min(
+                      Math.floor(quantity),
+                      item.availableQuantity == null
+                        ? Infinity
+                        : Math.max(
+                            1,
+                            item.availableQuantity -
+                              currentItems
+                                .filter(
+                                  (other) =>
+                                    other.id !== itemId &&
+                                    other.variantSku === item.variantSku,
+                                )
+                                .reduce(
+                                  (sum, other) => sum + other.quantity,
+                                  0,
+                                ),
+                          ),
+                    ),
+                  )
+                : item.quantity,
             }
           : item,
       ),
@@ -144,16 +162,12 @@ export const CartProvider = ({
   };
 
   const cartCount = useMemo(() => {
-    return items.reduce(
-      (total, item) => total + item.quantity,
-      0,
-    );
+    return items.reduce((total, item) => total + item.quantity, 0);
   }, [items]);
 
   const subtotal = useMemo(() => {
     return items.reduce(
-      (total, item) =>
-        total + item.unitPrice * item.quantity,
+      (total, item) => total + item.unitPrice * item.quantity,
       0,
     );
   }, [items]);
@@ -170,20 +184,14 @@ export const CartProvider = ({
     clearCart,
   };
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {
   const context = useContext(CartContext);
 
   if (!context) {
-    throw new Error(
-      "useCart must be used inside CartProvider",
-    );
+    throw new Error("useCart must be used inside CartProvider");
   }
 
   return context;

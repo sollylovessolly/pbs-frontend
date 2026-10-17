@@ -4,13 +4,7 @@
 
 import Cropper, { type Area } from "react-easy-crop";
 import { useRouter } from "next/navigation";
-import {
-  type ChangeEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuArrowLeft,
   LuCheck,
@@ -25,22 +19,16 @@ import {
   LuX,
 } from "react-icons/lu";
 
+import { useProduct } from "@/component/products/shared/ProductProvider";
+import { available } from "@/lib/commerce/catalogue";
 import { useCart } from "@/context/CartContext";
-import {
-  phoneCaseModels,
-  type PhoneCasePackage,
-} from "@/data/phoneCaseModels";
+import { type PhoneCasePackage } from "@/data/phoneCaseModels";
 import { createCroppedImage } from "@/lib/image/createCroppedImage";
 import type { NewCartItem } from "@/types/cart";
 
 const INITIAL_MODEL_COUNT = 8;
 
-const ROTATION_OPTIONS = [
-  0,
-  90,
-  180,
-  270,
-] as const;
+const ROTATION_OPTIONS = [0, 90, 180, 270] as const;
 
 /**
  * Position of the photo opening inside:
@@ -102,9 +90,7 @@ type PhoneCaseMockupProps = {
   photo: UploadedPhoto | null;
   configuration: CaseConfiguration;
   editable?: boolean;
-  onChange?: (
-    updates: Partial<CaseConfiguration>,
-  ) => void;
+  onChange?: (updates: Partial<CaseConfiguration>) => void;
   className?: string;
 };
 
@@ -112,13 +98,11 @@ const formatPrice = (amount: number) => {
   return `₦${amount.toLocaleString("en-NG")}`;
 };
 
-const createConfiguration = (
-  modelId: string,
-): CaseConfiguration => {
+const createConfiguration = (modelId: string): CaseConfiguration => {
   return {
     id: crypto.randomUUID(),
     modelId,
-    packageType: "with-polaroid",
+    packageType: "case-only",
     photo: null,
     crop: {
       x: 0,
@@ -130,33 +114,24 @@ const createConfiguration = (
   };
 };
 
-const isConfigurationComplete = (
-  configuration: CaseConfiguration,
-) => {
+const isConfigurationComplete = (configuration: CaseConfiguration) => {
   return (
-    configuration.packageType === "case-only" ||
-    Boolean(configuration.photo)
+    configuration.packageType === "case-only" || Boolean(configuration.photo)
   );
 };
 
 const loadImage = (src: string) => {
-  return new Promise<HTMLImageElement>(
-    (resolve, reject) => {
-      const image = new Image();
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
 
-      image.onload = () => resolve(image);
+    image.onload = () => resolve(image);
 
-      image.onerror = () => {
-        reject(
-          new Error(
-            "The uploaded image could not be loaded.",
-          ),
-        );
-      };
+    image.onerror = () => {
+      reject(new Error("The uploaded image could not be loaded."));
+    };
 
-      image.src = src;
-    },
-  );
+    image.src = src;
+  });
 };
 
 const getDefaultSquareCrop = async (
@@ -165,37 +140,23 @@ const getDefaultSquareCrop = async (
 ): Promise<Area> => {
   const image = await loadImage(imageSrc);
 
-  const isSideways =
-    rotation === 90 || rotation === 270;
+  const isSideways = rotation === 90 || rotation === 270;
 
-  const rotatedWidth = isSideways
-    ? image.naturalHeight
-    : image.naturalWidth;
+  const rotatedWidth = isSideways ? image.naturalHeight : image.naturalWidth;
 
-  const rotatedHeight = isSideways
-    ? image.naturalWidth
-    : image.naturalHeight;
+  const rotatedHeight = isSideways ? image.naturalWidth : image.naturalHeight;
 
-  const cropSize = Math.min(
-    rotatedWidth,
-    rotatedHeight,
-  );
+  const cropSize = Math.min(rotatedWidth, rotatedHeight);
 
   return {
-    x: Math.round(
-      (rotatedWidth - cropSize) / 2,
-    ),
-    y: Math.round(
-      (rotatedHeight - cropSize) / 2,
-    ),
+    x: Math.round((rotatedWidth - cropSize) / 2),
+    y: Math.round((rotatedHeight - cropSize) / 2),
     width: Math.round(cropSize),
     height: Math.round(cropSize),
   };
 };
 
-const createPersistentImageUrl = async (
-  imageSrc: string,
-) => {
+const createPersistentImageUrl = async (imageSrc: string) => {
   if (imageSrc.startsWith("data:")) {
     return imageSrc;
   }
@@ -203,44 +164,30 @@ const createPersistentImageUrl = async (
   const response = await fetch(imageSrc);
 
   if (!response.ok) {
-    throw new Error(
-      "The original image could not be prepared.",
-    );
+    throw new Error("The original image could not be prepared.");
   }
 
   const blob = await response.blob();
 
-  return new Promise<string>(
-    (resolve, reject) => {
-      const reader = new FileReader();
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
 
-      reader.onload = () => {
-        if (
-          typeof reader.result !== "string"
-        ) {
-          reject(
-            new Error(
-              "The original image could not be stored.",
-            ),
-          );
+    reader.onload = () => {
+      if (typeof reader.result !== "string") {
+        reject(new Error("The original image could not be stored."));
 
-          return;
-        }
+        return;
+      }
 
-        resolve(reader.result);
-      };
+      resolve(reader.result);
+    };
 
-      reader.onerror = () => {
-        reject(
-          new Error(
-            "The original image could not be stored.",
-          ),
-        );
-      };
+    reader.onerror = () => {
+      reject(new Error("The original image could not be stored."));
+    };
 
-      reader.readAsDataURL(blob);
-    },
-  );
+    reader.readAsDataURL(blob);
+  });
 };
 
 const escapeXml = (value: string) => {
@@ -252,10 +199,7 @@ const escapeXml = (value: string) => {
     .replaceAll("'", "&apos;");
 };
 
-const createPhoneCaseCartPreview = (
-  modelName: string,
-  photoUrl?: string,
-) => {
+const createPhoneCaseCartPreview = (modelName: string, photoUrl?: string) => {
   const photoMarkup = photoUrl
     ? `
       <g transform="rotate(-7 300 320)">
@@ -403,9 +347,7 @@ const createPhoneCaseCartPreview = (
     </svg>
   `;
 
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-    svg,
-  )}`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
 
 const PhoneCaseMockup = ({
@@ -438,93 +380,84 @@ const PhoneCaseMockup = ({
         <span className="absolute bottom-3 right-3 h-2.5 w-2.5 rounded-full bg-gold sm:bottom-4 sm:right-4 sm:h-3 sm:w-3" />
       </div>
 
-      {packageType === "with-polaroid" &&
-        photo && (
-          <div className="absolute left-[22%] top-[31%] z-10 w-[57%] -rotate-6">
-            <div className="relative w-full">
-              <img
-                src="/images/polaroid-frame.svg"
-                alt=""
-                aria-hidden="true"
-                draggable={false}
-                className="invisible block h-auto w-full select-none"
-              />
+      {packageType === "with-polaroid" && photo && (
+        <div className="absolute left-[22%] top-[31%] z-10 w-[57%] -rotate-6">
+          <div className="relative w-full">
+            <img
+              src="/images/polaroid-frame.svg"
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="invisible block h-auto w-full select-none"
+            />
 
-              <div
-                className="absolute z-0 overflow-hidden bg-beige"
-                style={PHOTO_WINDOW}
-              >
-                <Cropper
-                  image={photo.src}
-                  crop={configuration.crop}
-                  zoom={configuration.zoom}
-                  rotation={
-                    configuration.rotation
-                  }
-                  aspect={1}
-                  objectFit="cover"
-                  cropShape="rect"
-                  showGrid={false}
-                  restrictPosition
-                  onCropChange={(crop) => {
-                    if (!editable) return;
+            <div
+              className="absolute z-0 overflow-hidden bg-beige"
+              style={PHOTO_WINDOW}
+            >
+              <Cropper
+                image={photo.src}
+                crop={configuration.crop}
+                zoom={configuration.zoom}
+                rotation={configuration.rotation}
+                aspect={1}
+                objectFit="cover"
+                cropShape="rect"
+                showGrid={false}
+                restrictPosition
+                onCropChange={(crop) => {
+                  if (!editable) return;
 
-                    onChange?.({
-                      crop,
-                    });
-                  }}
-                  onZoomChange={(zoom) => {
-                    if (!editable) return;
+                  onChange?.({
+                    crop,
+                  });
+                }}
+                onZoomChange={(zoom) => {
+                  if (!editable) return;
 
-                    onChange?.({
-                      zoom,
-                    });
-                  }}
-                  onCropComplete={(
-                    _,
+                  onChange?.({
+                    zoom,
+                  });
+                }}
+                onCropComplete={(_, croppedAreaPixels) => {
+                  if (!editable) return;
+
+                  onChange?.({
                     croppedAreaPixels,
-                  ) => {
-                    if (!editable) return;
-
-                    onChange?.({
-                      croppedAreaPixels,
-                    });
-                  }}
-                  style={{
-                    containerStyle: {
-                      position: "absolute",
-                      inset: 0,
-                      pointerEvents: editable
-                        ? "auto"
-                        : "none",
-                    },
-                    cropAreaStyle: {
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    mediaStyle: {
-                      pointerEvents: "none",
-                    },
-                  }}
-                />
-              </div>
-
-              <img
-                src="/images/polaroid-frame.svg"
-                alt="Polaroid inside phone case"
-                draggable={false}
-                className="pointer-events-none absolute inset-0 z-10 block h-full w-full select-none"
+                  });
+                }}
+                style={{
+                  containerStyle: {
+                    position: "absolute",
+                    inset: 0,
+                    pointerEvents: editable ? "auto" : "none",
+                  },
+                  cropAreaStyle: {
+                    border: "none",
+                    boxShadow: "none",
+                  },
+                  mediaStyle: {
+                    pointerEvents: "none",
+                  },
+                }}
               />
             </div>
-          </div>
-        )}
 
-      {packageType === "with-polaroid" &&
-        !photo && (
-          <div className="absolute left-[22%] top-[34%] z-10 flex aspect-[3/4] w-[57%] -rotate-6 items-center justify-center border-2 border-dashed border-ink/30 bg-paper p-3 text-center text-[9px] font-bold leading-4 text-ink/40">
-            Upload a photo for this case
+            <img
+              src="/images/polaroid-frame.svg"
+              alt="Polaroid inside phone case"
+              draggable={false}
+              className="pointer-events-none absolute inset-0 z-10 block h-full w-full select-none"
+            />
           </div>
-        )}
+        </div>
+      )}
+
+      {packageType === "with-polaroid" && !photo && (
+        <div className="absolute left-[22%] top-[34%] z-10 flex aspect-[3/4] w-[57%] -rotate-6 items-center justify-center border-2 border-dashed border-ink/30 bg-paper p-3 text-center text-[9px] font-bold leading-4 text-ink/40">
+          Upload a photo for this case
+        </div>
+      )}
 
       {packageType === "case-only" && (
         <div className="absolute inset-x-5 bottom-24 rounded-xl border-2 border-dashed border-ink/20 p-4 text-center sm:bottom-28">
@@ -549,93 +482,79 @@ const PhoneCaseCustomizer = ({
   editItemId = null,
 }: PhoneCaseCustomizerProps) => {
   const router = useRouter();
-
-  const {
-    items,
-    isReady,
-    addItems,
-    updateItem,
-  } = useCart();
-
-  const fileInputRef =
-    useRef<HTMLInputElement>(null);
-
-  const objectUrlsRef = useRef<Set<string>>(
-    new Set(),
+  const submissionLock = useRef(false);
+  const { products } = useProduct();
+  const phoneCaseModels = useMemo(
+    () =>
+      products
+        .flatMap((p) => p.variants.filter((v) => v.isActive))
+        .map((v) => ({
+          id: v.sku,
+          name: v.name,
+          inStock: available(v),
+          caseOnlyPrice: Number(v.sellingPrice),
+          withPolaroidPrice: Number(v.sellingPrice),
+          availableQuantity: v.availableQuantity,
+        })),
+    [products],
   );
 
-  const loadedEditItemIdRef = useRef<
+  const { items, isReady, addItems, updateItem } = useCart();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const objectUrlsRef = useRef<Set<string>>(new Set());
+
+  const loadedEditItemIdRef = useRef<string | null>(null);
+
+  const [configurations, setConfigurations] = useState<CaseConfiguration[]>([]);
+
+  const [expandedConfigurationId, setExpandedConfigurationId] = useState<
     string | null
   >(null);
 
-  const [configurations, setConfigurations] =
-    useState<CaseConfiguration[]>([]);
+  const [uploadTargetConfigurationId, setUploadTargetConfigurationId] =
+    useState<string | null>(null);
 
-  const [
-    expandedConfigurationId,
-    setExpandedConfigurationId,
-  ] = useState<string | null>(null);
+  const [editingConfigurationId, setEditingConfigurationId] = useState<
+    string | null
+  >(null);
 
-  const [
-    uploadTargetConfigurationId,
-    setUploadTargetConfigurationId,
-  ] = useState<string | null>(null);
+  const [showAllModels, setShowAllModels] = useState(false);
 
-  const [
-    editingConfigurationId,
-    setEditingConfigurationId,
-  ] = useState<string | null>(null);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const [showAllModels, setShowAllModels] =
-    useState(false);
-
-  const [isAddingToCart, setIsAddingToCart] =
-    useState(false);
-
-  const [successModalOpen, setSuccessModalOpen] =
-    useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const editingCartItem = useMemo(() => {
     if (!editItemId) return null;
 
-    return (
-      items.find(
-        (item) => item.id === editItemId,
-      ) ?? null
-    );
+    return items.find((item) => item.id === editItemId) ?? null;
   }, [editItemId, items]);
 
   const modelMap = useMemo(() => {
-    return new Map(
-      phoneCaseModels.map((model) => [
-        model.id,
-        model,
-      ]),
-    );
-  }, []);
+    return new Map(phoneCaseModels.map((model) => [model.id, model]));
+  }, [phoneCaseModels]);
 
   const orderedModels = useMemo(() => {
     return [...phoneCaseModels].reverse();
-  }, []);
+  }, [phoneCaseModels]);
 
   const modelCounts = useMemo(() => {
-    return configurations.reduce<
-      Record<string, number>
-    >((counts, configuration) => {
-      counts[configuration.modelId] =
-        (counts[configuration.modelId] ?? 0) +
-        1;
+    return configurations.reduce<Record<string, number>>(
+      (counts, configuration) => {
+        counts[configuration.modelId] =
+          (counts[configuration.modelId] ?? 0) + 1;
 
-      return counts;
-    }, {});
+        return counts;
+      },
+      {},
+    );
   }, [configurations]);
 
   const selectedModelIds = useMemo(() => {
     return new Set(
-      configurations.map(
-        (configuration) =>
-          configuration.modelId,
-      ),
+      configurations.map((configuration) => configuration.modelId),
     );
   }, [configurations]);
 
@@ -644,221 +563,153 @@ const PhoneCaseCustomizer = ({
       return orderedModels;
     }
 
-    const latestModels = orderedModels.slice(
+    const latestModels = orderedModels.slice(0, INITIAL_MODEL_COUNT);
+
+    const hiddenSelectedModels = orderedModels.filter(
+      (model) =>
+        selectedModelIds.has(model.id) &&
+        !latestModels.some((latestModel) => latestModel.id === model.id),
+    );
+
+    return [...hiddenSelectedModels, ...latestModels].slice(
       0,
       INITIAL_MODEL_COUNT,
     );
+  }, [orderedModels, selectedModelIds, showAllModels]);
 
-    const hiddenSelectedModels =
-      orderedModels.filter(
-        (model) =>
-          selectedModelIds.has(model.id) &&
-          !latestModels.some(
-            (latestModel) =>
-              latestModel.id === model.id,
-          ),
-      );
+  const editingConfiguration = useMemo(() => {
+    return (
+      configurations.find(
+        (configuration) => configuration.id === editingConfigurationId,
+      ) ?? null
+    );
+  }, [configurations, editingConfigurationId]);
 
-    return [
-      ...hiddenSelectedModels,
-      ...latestModels,
-    ].slice(0, INITIAL_MODEL_COUNT);
-  }, [
-    orderedModels,
-    selectedModelIds,
-    showAllModels,
-  ]);
+  const editingPhoto = editingConfiguration?.photo ?? null;
 
-  const editingConfiguration =
-    useMemo(() => {
-      return (
-        configurations.find(
-          (configuration) =>
-            configuration.id ===
-            editingConfigurationId,
-        ) ?? null
-      );
-    }, [
-      configurations,
-      editingConfigurationId,
-    ]);
-
-  const editingPhoto =
-    editingConfiguration?.photo ?? null;
-
-  const completedConfigurations =
-    useMemo(() => {
-      return configurations.filter(
-        isConfigurationComplete,
-      ).length;
-    }, [configurations]);
+  const completedConfigurations = useMemo(() => {
+    return configurations.filter(isConfigurationComplete).length;
+  }, [configurations]);
 
   const allConfigurationsComplete =
     configurations.length > 0 &&
-    completedConfigurations ===
-      configurations.length;
+    completedConfigurations === configurations.length;
 
   const totalPrice = useMemo(() => {
-    return configurations.reduce(
-      (total, configuration) => {
-        const model = modelMap.get(
-          configuration.modelId,
-        );
+    return configurations.reduce((total, configuration) => {
+      const model = modelMap.get(configuration.modelId);
 
-        if (!model) return total;
+      if (!model) return total;
 
-        const price =
-          configuration.packageType ===
-          "with-polaroid"
-            ? model.withPolaroidPrice
-            : model.caseOnlyPrice;
+      const price =
+        configuration.packageType === "with-polaroid"
+          ? model.withPolaroidPrice
+          : model.caseOnlyPrice;
 
-        return total + price;
-      },
-      0,
-    );
+      return total + price;
+    }, 0);
   }, [configurations, modelMap]);
 
   const updateConfiguration = (
     configurationId: string,
     updates: Partial<CaseConfiguration>,
   ) => {
-    setConfigurations(
-      (currentConfigurations) =>
-        currentConfigurations.map(
-          (configuration) =>
-            configuration.id ===
-            configurationId
-              ? {
-                  ...configuration,
-                  ...updates,
-                }
-              : configuration,
-        ),
+    setConfigurations((currentConfigurations) =>
+      currentConfigurations.map((configuration) =>
+        configuration.id === configurationId
+          ? {
+              ...configuration,
+              ...updates,
+            }
+          : configuration,
+      ),
     );
   };
 
   const revokeConfigurationPhoto = (
-    configuration:
-      | CaseConfiguration
-      | undefined,
+    configuration: CaseConfiguration | undefined,
   ) => {
-    const photoUrl =
-      configuration?.photo?.src;
+    const photoUrl = configuration?.photo?.src;
 
-    if (
-      photoUrl &&
-      objectUrlsRef.current.has(photoUrl)
-    ) {
+    if (photoUrl && objectUrlsRef.current.has(photoUrl)) {
       URL.revokeObjectURL(photoUrl);
 
       objectUrlsRef.current.delete(photoUrl);
     }
   };
 
-  const increaseModelQuantity = (
-    modelId: string,
-  ) => {
+  const increaseModelQuantity = (modelId: string) => {
+    const model = modelMap.get(modelId);
+    if (
+      !model?.inStock ||
+      (model.availableQuantity !== null &&
+        configurations.filter((c) => c.modelId === modelId).length >=
+          model.availableQuantity)
+    )
+      return;
     if (editItemId) {
-      const existingConfiguration =
-        configurations[0];
+      const existingConfiguration = configurations[0];
 
       if (existingConfiguration) {
-        updateConfiguration(
-          existingConfiguration.id,
-          {
-            modelId,
-          },
-        );
+        updateConfiguration(existingConfiguration.id, {
+          modelId,
+        });
       } else {
-        const configuration =
-          createConfiguration(modelId);
+        const configuration = createConfiguration(modelId);
 
-        setConfigurations([
-          configuration,
-        ]);
+        setConfigurations([configuration]);
 
-        setExpandedConfigurationId(
-          configuration.id,
-        );
+        setExpandedConfigurationId(configuration.id);
       }
 
       return;
     }
 
-    const newConfiguration =
-      createConfiguration(modelId);
+    const newConfiguration = createConfiguration(modelId);
 
-    setConfigurations(
-      (currentConfigurations) => [
-        ...currentConfigurations,
-        newConfiguration,
-      ],
-    );
+    setConfigurations((currentConfigurations) => [
+      ...currentConfigurations,
+      newConfiguration,
+    ]);
 
-    setExpandedConfigurationId(
-      newConfiguration.id,
-    );
+    setExpandedConfigurationId(newConfiguration.id);
   };
 
-  const decreaseModelQuantity = (
-    modelId: string,
-  ) => {
+  const decreaseModelQuantity = (modelId: string) => {
     if (editItemId) return;
 
-    const matchingConfigurations =
-      configurations.filter(
-        (configuration) =>
-          configuration.modelId === modelId,
-      );
+    const matchingConfigurations = configurations.filter(
+      (configuration) => configuration.modelId === modelId,
+    );
 
     const configurationToRemove =
-      matchingConfigurations[
-        matchingConfigurations.length - 1
-      ];
+      matchingConfigurations[matchingConfigurations.length - 1];
 
     if (!configurationToRemove) return;
 
-    revokeConfigurationPhoto(
-      configurationToRemove,
+    revokeConfigurationPhoto(configurationToRemove);
+
+    setConfigurations((currentConfigurations) =>
+      currentConfigurations.filter(
+        (configuration) => configuration.id !== configurationToRemove.id,
+      ),
     );
 
-    setConfigurations(
-      (currentConfigurations) =>
-        currentConfigurations.filter(
-          (configuration) =>
-            configuration.id !==
-            configurationToRemove.id,
-        ),
-    );
-
-    if (
-      expandedConfigurationId ===
-      configurationToRemove.id
-    ) {
+    if (expandedConfigurationId === configurationToRemove.id) {
       setExpandedConfigurationId(null);
     }
 
-    if (
-      editingConfigurationId ===
-      configurationToRemove.id
-    ) {
+    if (editingConfigurationId === configurationToRemove.id) {
       setEditingConfigurationId(null);
     }
 
-    if (
-      uploadTargetConfigurationId ===
-      configurationToRemove.id
-    ) {
+    if (uploadTargetConfigurationId === configurationToRemove.id) {
       setUploadTargetConfigurationId(null);
     }
   };
 
-  const selectModel = (
-    modelId: string,
-  ) => {
-    const currentCount =
-      modelCounts[modelId] ?? 0;
+  const selectModel = (modelId: string) => {
+    const currentCount = modelCounts[modelId] ?? 0;
 
     if (editItemId) {
       increaseModelQuantity(modelId);
@@ -870,19 +721,13 @@ const PhoneCaseCustomizer = ({
     }
   };
 
-  const openPhotoPicker = (
-    configurationId: string,
-  ) => {
-    setUploadTargetConfigurationId(
-      configurationId,
-    );
+  const openPhotoPicker = (configurationId: string) => {
+    setUploadTargetConfigurationId(configurationId);
 
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (
@@ -894,82 +739,56 @@ const PhoneCaseCustomizer = ({
       return;
     }
 
-    const targetConfiguration =
-      configurations.find(
-        (configuration) =>
-          configuration.id ===
-          uploadTargetConfigurationId,
-      );
-
-    revokeConfigurationPhoto(
-      targetConfiguration,
+    const targetConfiguration = configurations.find(
+      (configuration) => configuration.id === uploadTargetConfigurationId,
     );
 
-    const objectUrl =
-      URL.createObjectURL(file);
+    revokeConfigurationPhoto(targetConfiguration);
 
-    objectUrlsRef.current.add(
-      objectUrl,
-    );
+    const objectUrl = URL.createObjectURL(file);
 
-    updateConfiguration(
-      uploadTargetConfigurationId,
-      {
-        photo: {
-          name: file.name,
-          src: objectUrl,
-        },
-        crop: {
-          x: 0,
-          y: 0,
-        },
-        zoom: 1,
-        rotation: 0,
-        croppedAreaPixels: null,
+    objectUrlsRef.current.add(objectUrl);
+
+    updateConfiguration(uploadTargetConfigurationId, {
+      photo: {
+        name: file.name,
+        src: objectUrl,
       },
-    );
+      crop: {
+        x: 0,
+        y: 0,
+      },
+      zoom: 1,
+      rotation: 0,
+      croppedAreaPixels: null,
+    });
 
-    setExpandedConfigurationId(
-      uploadTargetConfigurationId,
-    );
+    setExpandedConfigurationId(uploadTargetConfigurationId);
 
     setUploadTargetConfigurationId(null);
 
     event.target.value = "";
   };
 
-  const removeConfigurationPhoto = (
-    configurationId: string,
-  ) => {
-    const configuration =
-      configurations.find(
-        (currentConfiguration) =>
-          currentConfiguration.id ===
-          configurationId,
-      );
-
-    revokeConfigurationPhoto(
-      configuration,
+  const removeConfigurationPhoto = (configurationId: string) => {
+    const configuration = configurations.find(
+      (currentConfiguration) => currentConfiguration.id === configurationId,
     );
 
-    updateConfiguration(
-      configurationId,
-      {
-        photo: null,
-        crop: {
-          x: 0,
-          y: 0,
-        },
-        zoom: 1,
-        rotation: 0,
-        croppedAreaPixels: null,
+    revokeConfigurationPhoto(configuration);
+
+    updateConfiguration(configurationId, {
+      photo: null,
+      crop: {
+        x: 0,
+        y: 0,
       },
-    );
+      zoom: 1,
+      rotation: 0,
+      croppedAreaPixels: null,
+    });
 
-    if (
-      editingConfigurationId ===
-      configurationId
-    ) {
+    if (editingConfigurationId === configurationId) {
       setEditingConfigurationId(null);
     }
   };
@@ -978,20 +797,13 @@ const PhoneCaseCustomizer = ({
     configurationId: string,
     packageType: PhoneCasePackage,
   ) => {
-    updateConfiguration(
-      configurationId,
-      {
-        packageType,
-      },
-    );
+    updateConfiguration(configurationId, {
+      packageType,
+    });
   };
 
-  const openPhotoEditor = (
-    configurationId: string,
-  ) => {
-    setEditingConfigurationId(
-      configurationId,
-    );
+  const openPhotoEditor = (configurationId: string) => {
+    setEditingConfigurationId(configurationId);
   };
 
   const closePhotoEditor = () => {
@@ -1002,38 +814,30 @@ const PhoneCaseCustomizer = ({
     configuration: CaseConfiguration,
     index: number,
   ): Promise<NewCartItem> => {
-    const model = modelMap.get(
-      configuration.modelId,
-    );
+    const model = modelMap.get(configuration.modelId);
 
     if (!model) {
-      throw new Error(
-        "The selected phone model could not be found.",
-      );
+      throw new Error("The selected phone model could not be found.");
     }
 
     const unitPrice =
-      configuration.packageType ===
-      "with-polaroid"
+      configuration.packageType === "with-polaroid"
         ? model.withPolaroidPrice
         : model.caseOnlyPrice;
 
-    if (
-      configuration.packageType ===
-      "case-only"
-    ) {
+    if (configuration.packageType === "case-only") {
       return {
         productType: "phone-case",
+        variantSku: model.id,
+        availableQuantity: model.availableQuantity,
+        customization: { package: "CASE_ONLY" },
 
         name: `${model.name} Clear Phone Case`,
 
         unitPrice,
         quantity: 1,
 
-        previewUrl:
-          createPhoneCaseCartPreview(
-            model.name,
-          ),
+        previewUrl: createPhoneCaseCartPreview(model.name),
 
         options: {
           packageType: "case-only",
@@ -1041,59 +845,54 @@ const PhoneCaseCustomizer = ({
           phoneModelId: model.id,
           phoneModel: model.name,
           caseStyle: "Clear",
-          configurationNumber: String(
-            index + 1,
-          ),
+          configurationNumber: String(index + 1),
         },
 
         turnaround: "Ready in 48hrs",
-        editHref:
-          "/products/phone-cases",
+        editHref: "/products/phone-cases",
         isFast: false,
       };
     }
 
-    const assignedPhoto =
-      configuration.photo;
+    // The current backend strips photo URLs from phone-case customization.
+    // Do not accept a personalized order whose production artwork would be lost.
+    const requirePhotoFulfillment: () => void = () => {
+      throw new Error(
+        "Personalized phone cases are temporarily unavailable. Please choose Case Only until photo fulfillment is enabled.",
+      );
+    };
+    requirePhotoFulfillment();
+
+    const assignedPhoto = configuration.photo;
 
     if (!assignedPhoto) {
-      throw new Error(
-        `A photo has not been uploaded for ${model.name}.`,
-      );
+      throw new Error(`A photo has not been uploaded for ${model.name}.`);
     }
 
     const cropPixels =
       configuration.croppedAreaPixels ??
-      (await getDefaultSquareCrop(
-        assignedPhoto.src,
-        configuration.rotation,
-      ));
+      (await getDefaultSquareCrop(assignedPhoto.src, configuration.rotation));
 
-    const croppedPhotoUrl =
-      await createCroppedImage(
-        assignedPhoto.src,
-        cropPixels,
-        configuration.rotation,
-      );
+    const croppedPhotoUrl = await createCroppedImage(
+      assignedPhoto.src,
+      cropPixels,
+      configuration.rotation,
+    );
 
-    const sourceImageUrl =
-      await createPersistentImageUrl(
-        assignedPhoto.src,
-      );
+    const sourceImageUrl = await createPersistentImageUrl(assignedPhoto.src);
 
     return {
       productType: "phone-case",
+      variantSku: model.id,
+      availableQuantity: model.availableQuantity,
+      customization: { package: "WITH_POLAROID" },
 
       name: `${model.name} Polaroid Phone Case`,
 
       unitPrice,
       quantity: 1,
 
-      previewUrl:
-        createPhoneCaseCartPreview(
-          model.name,
-          croppedPhotoUrl,
-        ),
+      previewUrl: createPhoneCaseCartPreview(model.name, croppedPhotoUrl),
 
       sourceImageUrl,
 
@@ -1103,83 +902,63 @@ const PhoneCaseCustomizer = ({
       rotation: configuration.rotation,
 
       options: {
-        packageType: "with-polaroid",
-        packageLabel:
-          "Polaroid + Case",
+        packageType: "case-only",
+        packageLabel: "Polaroid + Case",
         phoneModelId: model.id,
         phoneModel: model.name,
         caseStyle: "Clear",
         photoName: assignedPhoto.name,
-        configurationNumber: String(
-          index + 1,
-        ),
+        configurationNumber: String(index + 1),
       },
 
       turnaround: "Ready in 48hrs",
-      editHref:
-        "/products/phone-cases",
+      editHref: "/products/phone-cases",
       isFast: false,
     };
   };
 
   const handleAddToCart = async () => {
-    if (
-      !allConfigurationsComplete ||
-      isAddingToCart
-    ) {
+    if (!allConfigurationsComplete || isAddingToCart) {
       return;
     }
 
+    if (submissionLock.current) return;
+    submissionLock.current = true;
     setIsAddingToCart(true);
 
     try {
       if (editItemId) {
-        const updatedItem =
-          await prepareCartItem(
-            configurations[0],
-            0,
-          );
+        const updatedItem = await prepareCartItem(configurations[0], 0);
 
-        updateItem(
-          editItemId,
-          updatedItem,
-        );
+        updateItem(editItemId, updatedItem);
 
         router.push("/cart");
         return;
       }
 
-      const newCartItems =
-        await Promise.all(
-          configurations.map(
-            prepareCartItem,
-          ),
-        );
+      const newCartItems = await Promise.all(
+        configurations.map(prepareCartItem),
+      );
 
       addItems(newCartItems);
 
       setSuccessModalOpen(true);
     } catch (error) {
-      console.error(
-        "Could not prepare phone cases:",
-        error,
-      );
+      console.error("Could not prepare phone cases:", error);
 
       window.alert(
-        "Something went wrong while preparing your phone cases. Please check that every Polaroid + Case configuration has a photo.",
+        error instanceof Error
+          ? error.message
+          : "Could not prepare your cases. Please retry.",
       );
     } finally {
+      submissionLock.current = false;
       setIsAddingToCart(false);
     }
   };
 
   useEffect(() => {
-    if (
-      !editItemId ||
-      !isReady ||
-      loadedEditItemIdRef.current ===
-        editItemId
-    ) {
+    if (!editItemId || !isReady || loadedEditItemIdRef.current === editItemId) {
       return;
     }
 
@@ -1188,118 +967,81 @@ const PhoneCaseCustomizer = ({
       return;
     }
 
-    const packageType:
-      PhoneCasePackage =
-      editingCartItem.options
-        ?.packageType === "case-only"
+    const packageType: PhoneCasePackage =
+      editingCartItem.options?.packageType === "case-only"
         ? "case-only"
         : "with-polaroid";
 
     const modelId =
-      editingCartItem.options
-        ?.phoneModelId ??
-      phoneCaseModels[0]?.id;
+      editingCartItem.options?.phoneModelId ?? phoneCaseModels[0]?.id;
 
     if (!modelId) {
       router.replace("/cart");
       return;
     }
 
-    const configurationId =
-      crypto.randomUUID();
+    const configurationId = crypto.randomUUID();
 
     const savedPhoto =
       packageType === "with-polaroid" &&
-      (editingCartItem.sourceImageUrl ||
-        editingCartItem.previewUrl)
+      (editingCartItem.sourceImageUrl || editingCartItem.previewUrl)
         ? {
-            name:
-              editingCartItem.options
-                ?.photoName ??
-              editingCartItem.name,
-            src:
-              editingCartItem
-                .sourceImageUrl ??
-              editingCartItem.previewUrl,
+            name: editingCartItem.options?.photoName ?? editingCartItem.name,
+            src: editingCartItem.sourceImageUrl ?? editingCartItem.previewUrl,
           }
         : null;
 
-    setConfigurations([
-      {
-        id: configurationId,
-        modelId,
-        packageType,
-        photo: savedPhoto,
+    queueMicrotask(() => {
+      setConfigurations([
+        {
+          id: configurationId,
+          modelId,
+          packageType,
+          photo: savedPhoto,
 
-        crop:
-          editingCartItem.crop ?? {
+          crop: editingCartItem.crop ?? {
             x: 0,
             y: 0,
           },
 
-        zoom:
-          editingCartItem.zoom ?? 1,
+          zoom: editingCartItem.zoom ?? 1,
 
-        rotation:
-          editingCartItem.rotation ??
-          0,
+          rotation: editingCartItem.rotation ?? 0,
 
-        croppedAreaPixels:
-          editingCartItem
-            .croppedAreaPixels ??
-          null,
-      },
-    ]);
+          croppedAreaPixels: editingCartItem.croppedAreaPixels ?? null,
+        },
+      ]);
 
-    setExpandedConfigurationId(
-      configurationId,
-    );
+      setExpandedConfigurationId(configurationId);
 
-    loadedEditItemIdRef.current =
-      editItemId;
-  }, [
-    editItemId,
-    editingCartItem,
-    isReady,
-    router,
-  ]);
+      loadedEditItemIdRef.current = editItemId;
+    });
+  }, [editItemId, editingCartItem, phoneCaseModels, isReady, router]);
 
   useEffect(() => {
     if (!editingConfigurationId) return;
 
-    const previousOverflow =
-      document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
 
-    document.body.style.overflow =
-      "hidden";
+    document.body.style.overflow = "hidden";
 
-    const handleKeyDown = (
-      event: KeyboardEvent,
-    ) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closePhotoEditor();
       }
     };
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown,
-    );
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow =
-        previousOverflow;
+      document.body.style.overflow = previousOverflow;
 
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown,
-      );
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [editingConfigurationId]);
 
   useEffect(() => {
-    const objectUrls =
-      objectUrlsRef.current;
+    const objectUrls = objectUrlsRef.current;
 
     return () => {
       objectUrls.forEach((url) => {
@@ -1315,6 +1057,13 @@ const PhoneCaseCustomizer = ({
       <section className="px-4 pb-28 pt-6 sm:px-5 md:px-7 md:pt-10 lg:pb-20 lg:pt-14">
         <div className="mx-auto grid max-w-[1240px] items-start gap-7 lg:grid-cols-[minmax(0,1fr)_350px] lg:gap-10">
           <div className="min-w-0 space-y-6">
+            <p
+              role="status"
+              className="mb-5 rounded-xl border-2 border-ink bg-beige p-4"
+            >
+              Case-only orders are available. Personalized photo cases are
+              temporarily unavailable.
+            </p>
             {/* Step 1: Select models */}
             <section className="rounded-[18px] border-2 border-ink bg-paper p-4 shadow-[0_5px_0_rgba(42,33,28,0.08)] sm:p-6">
               <div className="flex items-start gap-3">
@@ -1337,127 +1086,95 @@ const PhoneCaseCustomizer = ({
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:grid-cols-3">
-                {visibleModels.map(
-                  (model) => {
-                    const quantity =
-                      modelCounts[
-                        model.id
-                      ] ?? 0;
+                {visibleModels.map((model) => {
+                  const quantity = modelCounts[model.id] ?? 0;
 
-                    const isSelected =
-                      quantity > 0;
+                  const isSelected = quantity > 0;
 
-                    return (
-                      <div
-                        key={model.id}
-                        className={[
-                          "relative min-h-[76px] rounded-xl border-2 p-2.5 transition sm:min-h-[86px] sm:p-3",
+                  return (
+                    <div
+                      key={model.id}
+                      className={[
+                        "relative min-h-[76px] rounded-xl border-2 p-2.5 transition sm:min-h-[86px] sm:p-3",
 
-                          isSelected
-                            ? "border-ink bg-blush shadow-[3px_3px_0_#2A211C]"
-                            : model.inStock
-                              ? "border-ink/20 bg-cream hover:border-ink hover:bg-beige"
-                              : "border-ink/10 bg-ink/5 opacity-45",
-                        ].join(" ")}
-                      >
-                        <button
-                          type="button"
-                          disabled={
-                            !model.inStock ||
-                            isAddingToCart
-                          }
-                          onClick={() =>
-                            selectModel(
-                              model.id,
-                            )
-                          }
-                          className="absolute inset-0 rounded-xl"
-                          aria-label={`Select ${model.name}`}
-                        />
+                        isSelected
+                          ? "border-ink bg-blush shadow-[3px_3px_0_#2A211C]"
+                          : model.inStock
+                            ? "border-ink/20 bg-cream hover:border-ink hover:bg-beige"
+                            : "border-ink/10 bg-ink/5 opacity-45",
+                      ].join(" ")}
+                    >
+                      <button
+                        type="button"
+                        disabled={!model.inStock || isAddingToCart}
+                        onClick={() => selectModel(model.id)}
+                        className="absolute inset-0 rounded-xl"
+                        aria-label={`Select ${model.name}`}
+                      />
 
-                        <div className="pointer-events-none relative z-10 flex items-start gap-2">
-                          <span
-                            className={[
-                              "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
+                      <div className="pointer-events-none relative z-10 flex items-start gap-2">
+                        <span
+                          className={[
+                            "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
 
-                              isSelected
-                                ? "border-ink bg-burgundy text-cream"
-                                : "border-ink/30 bg-transparent",
-                            ].join(" ")}
+                            isSelected
+                              ? "border-ink bg-burgundy text-cream"
+                              : "border-ink/30 bg-transparent",
+                          ].join(" ")}
+                        >
+                          {isSelected && <LuCheck className="h-3 w-3" />}
+                        </span>
+
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold leading-4 text-ink sm:text-xs">
+                            {model.name}
+                          </p>
+
+                          {!model.inStock && (
+                            <p className="mt-1 text-[8px] font-bold uppercase tracking-wide text-burgundy">
+                              Out of stock
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {isSelected && !editItemId && (
+                        <div className="relative z-20 mt-3 flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            aria-label={`Decrease ${model.name} quantity`}
+                            disabled={isAddingToCart}
+                            onClick={() => decreaseModelQuantity(model.id)}
+                            className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-paper text-xs font-bold"
                           >
-                            {isSelected && (
-                              <LuCheck className="h-3 w-3" />
-                            )}
+                            −
+                          </button>
+
+                          <span className="min-w-4 text-center font-serif text-sm font-bold">
+                            {quantity}
                           </span>
 
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-bold leading-4 text-ink sm:text-xs">
-                              {model.name}
-                            </p>
-
-                            {!model.inStock && (
-                              <p className="mt-1 text-[8px] font-bold uppercase tracking-wide text-burgundy">
-                                Out of stock
-                              </p>
-                            )}
-                          </div>
+                          <button
+                            type="button"
+                            aria-label={`Increase ${model.name} quantity`}
+                            disabled={isAddingToCart}
+                            onClick={() => increaseModelQuantity(model.id)}
+                            className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-paper text-xs font-bold"
+                          >
+                            +
+                          </button>
                         </div>
-
-                        {isSelected &&
-                          !editItemId && (
-                            <div className="relative z-20 mt-3 flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                aria-label={`Decrease ${model.name} quantity`}
-                                disabled={
-                                  isAddingToCart
-                                }
-                                onClick={() =>
-                                  decreaseModelQuantity(
-                                    model.id,
-                                  )
-                                }
-                                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-paper text-xs font-bold"
-                              >
-                                −
-                              </button>
-
-                              <span className="min-w-4 text-center font-serif text-sm font-bold">
-                                {quantity}
-                              </span>
-
-                              <button
-                                type="button"
-                                aria-label={`Increase ${model.name} quantity`}
-                                disabled={
-                                  isAddingToCart
-                                }
-                                onClick={() =>
-                                  increaseModelQuantity(
-                                    model.id,
-                                  )
-                                }
-                                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-paper text-xs font-bold"
-                              >
-                                +
-                              </button>
-                            </div>
-                          )}
-                      </div>
-                    );
-                  },
-                )}
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
-              {orderedModels.length >
-                INITIAL_MODEL_COUNT && (
+              {orderedModels.length > INITIAL_MODEL_COUNT && (
                 <button
                   type="button"
                   onClick={() =>
-                    setShowAllModels(
-                      (currentValue) =>
-                        !currentValue,
-                    )
+                    setShowAllModels((currentValue) => !currentValue)
                   }
                   className="mx-auto mt-5 flex items-center gap-2 text-xs font-bold text-burgundy underline underline-offset-4 sm:text-sm"
                 >
@@ -1475,16 +1192,11 @@ const PhoneCaseCustomizer = ({
                 </button>
               )}
 
-              {configurations.length >
-                0 && (
+              {configurations.length > 0 && (
                 <div className="mt-5 flex items-center justify-between rounded-xl bg-beige px-3 py-2.5 text-xs font-semibold text-ink/65 sm:px-4 sm:text-sm">
                   <span>
                     {configurations.length}{" "}
-                    {configurations.length ===
-                    1
-                      ? "case"
-                      : "cases"}{" "}
-                    selected
+                    {configurations.length === 1 ? "case" : "cases"} selected
                   </span>
 
                   <span className="font-bold text-burgundy">
@@ -1495,468 +1207,358 @@ const PhoneCaseCustomizer = ({
             </section>
 
             {/* Step 2: Configure each case */}
-            {configurations.length >
-              0 && (
-                <section className="rounded-[18px] border-2 border-ink bg-paper p-4 shadow-[0_5px_0_rgba(42,33,28,0.08)] sm:p-6">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-burgundy font-serif text-sm font-bold text-cream sm:h-10 sm:w-10">
-                      2
-                    </span>
+            {configurations.length > 0 && (
+              <section className="rounded-[18px] border-2 border-ink bg-paper p-4 shadow-[0_5px_0_rgba(42,33,28,0.08)] sm:p-6">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-burgundy font-serif text-sm font-bold text-cream sm:h-10 sm:w-10">
+                    2
+                  </span>
 
-                    <div className="min-w-0">
-                      <h2 className="font-serif text-xl font-semibold text-ink sm:text-2xl">
-                        Customise each case
-                      </h2>
+                  <div className="min-w-0">
+                    <h2 className="font-serif text-xl font-semibold text-ink sm:text-2xl">
+                      Customise each case
+                    </h2>
 
-                      <p className="mt-1 text-xs leading-5 text-ink/60 sm:text-sm sm:leading-6">
-                        Choose the package and
-                        photo for each physical
-                        case separately.
-                      </p>
-                    </div>
+                    <p className="mt-1 text-xs leading-5 text-ink/60 sm:text-sm sm:leading-6">
+                      Choose the package and photo for each physical case
+                      separately.
+                    </p>
                   </div>
+                </div>
 
-                  <div className="mt-5 space-y-3 sm:mt-6">
-                    {configurations.map(
-                      (
-                        configuration,
-                        configurationIndex,
-                      ) => {
-                        const model =
-                          modelMap.get(
-                            configuration.modelId,
-                          );
+                <div className="mt-5 space-y-3 sm:mt-6">
+                  {configurations.map((configuration, configurationIndex) => {
+                    const model = modelMap.get(configuration.modelId);
 
-                        if (!model) {
-                          return null;
-                        }
+                    if (!model) {
+                      return null;
+                    }
 
-                        const matchingCases =
-                          configurations.filter(
-                            (
-                              currentConfiguration,
-                            ) =>
-                              currentConfiguration.modelId ===
-                              configuration.modelId,
-                          );
+                    const matchingCases = configurations.filter(
+                      (currentConfiguration) =>
+                        currentConfiguration.modelId === configuration.modelId,
+                    );
 
-                        const caseNumber =
-                          matchingCases.findIndex(
-                            (
-                              currentConfiguration,
-                            ) =>
-                              currentConfiguration.id ===
-                              configuration.id,
-                          ) + 1;
+                    const caseNumber =
+                      matchingCases.findIndex(
+                        (currentConfiguration) =>
+                          currentConfiguration.id === configuration.id,
+                      ) + 1;
 
-                        const isExpanded =
-                          expandedConfigurationId ===
-                          configuration.id;
+                    const isExpanded =
+                      expandedConfigurationId === configuration.id;
 
-                        const isComplete =
-                          isConfigurationComplete(
-                            configuration,
-                          );
+                    const isComplete = isConfigurationComplete(configuration);
 
-                        const configurationPrice =
-                          configuration.packageType ===
-                          "with-polaroid"
-                            ? model.withPolaroidPrice
-                            : model.caseOnlyPrice;
+                    const configurationPrice =
+                      configuration.packageType === "with-polaroid"
+                        ? model.withPolaroidPrice
+                        : model.caseOnlyPrice;
 
-                        const showCaseNumber =
-                          matchingCases.length >
-                          1;
+                    const showCaseNumber = matchingCases.length > 1;
 
-                        return (
-                          <article
-                            key={
-                              configuration.id
-                            }
-                            className={[
-                              "overflow-hidden rounded-[16px] border-2 transition",
+                    return (
+                      <article
+                        key={configuration.id}
+                        className={[
+                          "overflow-hidden rounded-[16px] border-2 transition",
 
-                              isComplete
-                                ? "border-ink bg-cream"
-                                : "border-burgundy bg-blush/30",
-                            ].join(" ")}
-                          >
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setExpandedConfigurationId(
-                                  isExpanded
-                                    ? null
-                                    : configuration.id,
-                                )
-                              }
-                              className="flex w-full items-center justify-between gap-3 p-3.5 text-left sm:p-4"
+                          isComplete
+                            ? "border-ink bg-cream"
+                            : "border-burgundy bg-blush/30",
+                        ].join(" ")}
+                      >
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedConfigurationId(
+                              isExpanded ? null : configuration.id,
+                            )
+                          }
+                          className="flex w-full items-center justify-between gap-3 p-3.5 text-left sm:p-4"
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span
+                              className={[
+                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xs font-bold",
+
+                                isComplete
+                                  ? "bg-burgundy text-cream"
+                                  : "bg-paper text-burgundy",
+                              ].join(" ")}
                             >
-                              <div className="flex min-w-0 items-center gap-3">
-                                <span
-                                  className={[
-                                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xs font-bold",
+                              {isComplete ? (
+                                <LuCheck className="h-4 w-4" />
+                              ) : (
+                                configurationIndex + 1
+                              )}
+                            </span>
 
-                                    isComplete
-                                      ? "bg-burgundy text-cream"
-                                      : "bg-paper text-burgundy",
-                                  ].join(" ")}
-                                >
-                                  {isComplete ? (
-                                    <LuCheck className="h-4 w-4" />
-                                  ) : (
-                                    configurationIndex +
-                                    1
-                                  )}
-                                </span>
+                            <div className="min-w-0">
+                              <h3 className="truncate font-serif text-sm font-semibold text-ink sm:text-base">
+                                {model.name}
+                                {showCaseNumber ? ` — Case ${caseNumber}` : ""}
+                              </h3>
 
-                                <div className="min-w-0">
-                                  <h3 className="truncate font-serif text-sm font-semibold text-ink sm:text-base">
-                                    {model.name}
-                                    {showCaseNumber
-                                      ? ` — Case ${caseNumber}`
-                                      : ""}
-                                  </h3>
+                              <p className="mt-0.5 truncate text-[10px] font-semibold text-ink/50 sm:text-xs">
+                                {configuration.packageType === "with-polaroid"
+                                  ? configuration.photo
+                                    ? "Polaroid + Case · Photo uploaded"
+                                    : "Polaroid + Case · Needs a photo"
+                                  : "Case Only · Ready"}
+                              </p>
+                            </div>
+                          </div>
 
-                                  <p className="mt-0.5 truncate text-[10px] font-semibold text-ink/50 sm:text-xs">
-                                    {configuration.packageType ===
-                                    "with-polaroid"
-                                      ? configuration.photo
-                                        ? "Polaroid + Case · Photo uploaded"
-                                        : "Polaroid + Case · Needs a photo"
-                                      : "Case Only · Ready"}
-                                  </p>
-                                </div>
-                              </div>
+                          <div className="flex shrink-0 items-center gap-3">
+                            <span className="hidden text-xs font-bold text-burgundy sm:block">
+                              {formatPrice(configurationPrice)}
+                            </span>
 
-                              <div className="flex shrink-0 items-center gap-3">
-                                <span className="hidden text-xs font-bold text-burgundy sm:block">
-                                  {formatPrice(
-                                    configurationPrice,
-                                  )}
-                                </span>
+                            {isExpanded ? (
+                              <LuChevronUp className="h-5 w-5" />
+                            ) : (
+                              <LuChevronDown className="h-5 w-5" />
+                            )}
+                          </div>
+                        </button>
 
-                                {isExpanded ? (
-                                  <LuChevronUp className="h-5 w-5" />
-                                ) : (
-                                  <LuChevronDown className="h-5 w-5" />
-                                )}
-                              </div>
-                            </button>
+                        {isExpanded && (
+                          <div className="border-t-2 border-ink/10 p-3.5 sm:p-5">
+                            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_230px]">
+                              <div>
+                                <p className="text-xs font-bold text-ink">
+                                  Choose package
+                                </p>
 
-                            {isExpanded && (
-                              <div className="border-t-2 border-ink/10 p-3.5 sm:p-5">
-                                <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_230px]">
-                                  <div>
-                                    <p className="text-xs font-bold text-ink">
-                                      Choose package
+                                <div className="mt-3 grid grid-cols-2 gap-2.5">
+                                  <button
+                                    type="button"
+                                    disabled
+                                    onClick={() =>
+                                      setConfigurationPackage(
+                                        configuration.id,
+                                        "with-polaroid",
+                                      )
+                                    }
+                                    className={[
+                                      "rounded-xl border-2 p-3 text-left transition",
+
+                                      configuration.packageType ===
+                                      "with-polaroid"
+                                        ? "border-ink bg-blush shadow-[3px_3px_0_#2A211C]"
+                                        : "border-ink/20 bg-paper hover:border-ink",
+                                    ].join(" ")}
+                                  >
+                                    <LuImages className="h-5 w-5" />
+
+                                    <p className="mt-2 text-xs font-bold leading-4 sm:text-sm">
+                                      Polaroid + Case
                                     </p>
 
-                                    <div className="mt-3 grid grid-cols-2 gap-2.5">
+                                    <p className="mt-1 text-[9px] leading-4 text-ink/50 sm:text-[10px]">
+                                      Clear case with one custom Polaroid
+                                    </p>
+
+                                    <p className="mt-2 text-xs font-bold text-burgundy">
+                                      {formatPrice(model.withPolaroidPrice)}
+                                    </p>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    disabled={isAddingToCart}
+                                    onClick={() =>
+                                      setConfigurationPackage(
+                                        configuration.id,
+                                        "case-only",
+                                      )
+                                    }
+                                    className={[
+                                      "rounded-xl border-2 p-3 text-left transition",
+
+                                      configuration.packageType === "case-only"
+                                        ? "border-ink bg-beige shadow-[3px_3px_0_#2A211C]"
+                                        : "border-ink/20 bg-paper hover:border-ink",
+                                    ].join(" ")}
+                                  >
+                                    <LuSmartphone className="h-5 w-5" />
+
+                                    <p className="mt-2 text-xs font-bold leading-4 sm:text-sm">
+                                      Case Only
+                                    </p>
+
+                                    <p className="mt-1 text-[9px] leading-4 text-ink/50 sm:text-[10px]">
+                                      Clear case without a printed Polaroid
+                                    </p>
+
+                                    <p className="mt-2 text-xs font-bold text-burgundy">
+                                      {formatPrice(model.caseOnlyPrice)}
+                                    </p>
+                                  </button>
+                                </div>
+
+                                {configuration.packageType ===
+                                  "with-polaroid" && (
+                                  <div className="mt-6">
+                                    <p className="text-xs font-bold text-ink">
+                                      Add a photo for this case
+                                    </p>
+
+                                    {!configuration.photo ? (
                                       <button
                                         type="button"
-                                        disabled={
-                                          isAddingToCart
-                                        }
+                                        disabled={isAddingToCart}
                                         onClick={() =>
-                                          setConfigurationPackage(
-                                            configuration.id,
-                                            "with-polaroid",
-                                          )
+                                          openPhotoPicker(configuration.id)
                                         }
-                                        className={[
-                                          "rounded-xl border-2 p-3 text-left transition",
-
-                                          configuration.packageType ===
-                                          "with-polaroid"
-                                            ? "border-ink bg-blush shadow-[3px_3px_0_#2A211C]"
-                                            : "border-ink/20 bg-paper hover:border-ink",
-                                        ].join(
-                                          " ",
-                                        )}
+                                        className="mt-3 flex w-full flex-col items-center justify-center rounded-[14px] border-2 border-dashed border-ink bg-paper px-4 py-7 text-center transition hover:bg-beige disabled:opacity-50"
                                       >
-                                        <LuImages className="h-5 w-5" />
+                                        <LuImagePlus className="h-6 w-6" />
 
-                                        <p className="mt-2 text-xs font-bold leading-4 sm:text-sm">
-                                          Polaroid +
-                                          Case
-                                        </p>
+                                        <span className="mt-2 text-xs font-bold sm:text-sm">
+                                          Upload photo
+                                        </span>
 
-                                        <p className="mt-1 text-[9px] leading-4 text-ink/50 sm:text-[10px]">
-                                          Clear case
-                                          with one
-                                          custom
-                                          Polaroid
-                                        </p>
-
-                                        <p className="mt-2 text-xs font-bold text-burgundy">
-                                          {formatPrice(
-                                            model.withPolaroidPrice,
-                                          )}
-                                        </p>
+                                        <span className="mt-1 text-[10px] text-ink/50">
+                                          JPG, PNG or WebP
+                                        </span>
                                       </button>
+                                    ) : (
+                                      <div className="mt-3 rounded-[14px] border-2 border-ink bg-paper p-3">
+                                        <div className="flex items-center gap-3">
+                                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 border-ink bg-beige">
+                                            <img
+                                              src={configuration.photo.src}
+                                              alt={`Photo for ${model.name}`}
+                                              className="h-full w-full object-cover"
+                                            />
+                                          </div>
 
-                                      <button
-                                        type="button"
-                                        disabled={
-                                          isAddingToCart
-                                        }
-                                        onClick={() =>
-                                          setConfigurationPackage(
-                                            configuration.id,
-                                            "case-only",
-                                          )
-                                        }
-                                        className={[
-                                          "rounded-xl border-2 p-3 text-left transition",
+                                          <div className="min-w-0 flex-1">
+                                            <p className="truncate text-xs font-bold text-ink">
+                                              {configuration.photo.name}
+                                            </p>
 
-                                          configuration.packageType ===
-                                          "case-only"
-                                            ? "border-ink bg-beige shadow-[3px_3px_0_#2A211C]"
-                                            : "border-ink/20 bg-paper hover:border-ink",
-                                        ].join(
-                                          " ",
-                                        )}
-                                      >
-                                        <LuSmartphone className="h-5 w-5" />
+                                            <p className="mt-1 text-[10px] text-ink/50">
+                                              Photo uploaded
+                                            </p>
+                                          </div>
 
-                                        <p className="mt-2 text-xs font-bold leading-4 sm:text-sm">
-                                          Case Only
-                                        </p>
-
-                                        <p className="mt-1 text-[9px] leading-4 text-ink/50 sm:text-[10px]">
-                                          Clear case
-                                          without a
-                                          printed
-                                          Polaroid
-                                        </p>
-
-                                        <p className="mt-2 text-xs font-bold text-burgundy">
-                                          {formatPrice(
-                                            model.caseOnlyPrice,
-                                          )}
-                                        </p>
-                                      </button>
-                                    </div>
-
-                                    {configuration.packageType ===
-                                      "with-polaroid" && (
-                                      <div className="mt-6">
-                                        <p className="text-xs font-bold text-ink">
-                                          Add a photo
-                                          for this case
-                                        </p>
-
-                                        {!configuration.photo ? (
                                           <button
                                             type="button"
-                                            disabled={
-                                              isAddingToCart
-                                            }
+                                            aria-label="Remove uploaded photo"
+                                            disabled={isAddingToCart}
                                             onClick={() =>
-                                              openPhotoPicker(
+                                              removeConfigurationPhoto(
                                                 configuration.id,
                                               )
                                             }
-                                            className="mt-3 flex w-full flex-col items-center justify-center rounded-[14px] border-2 border-dashed border-ink bg-paper px-4 py-7 text-center transition hover:bg-beige disabled:opacity-50"
+                                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink/40 transition hover:bg-burgundy hover:text-cream"
                                           >
-                                            <LuImagePlus className="h-6 w-6" />
-
-                                            <span className="mt-2 text-xs font-bold sm:text-sm">
-                                              Upload
-                                              photo
-                                            </span>
-
-                                            <span className="mt-1 text-[10px] text-ink/50">
-                                              JPG, PNG
-                                              or WebP
-                                            </span>
+                                            <LuTrash2 className="h-4 w-4" />
                                           </button>
-                                        ) : (
-                                          <div className="mt-3 rounded-[14px] border-2 border-ink bg-paper p-3">
-                                            <div className="flex items-center gap-3">
-                                              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 border-ink bg-beige">
-                                                <img
-                                                  src={
-                                                    configuration
-                                                      .photo
-                                                      .src
-                                                  }
-                                                  alt={`Photo for ${model.name}`}
-                                                  className="h-full w-full object-cover"
-                                                />
-                                              </div>
+                                        </div>
 
-                                              <div className="min-w-0 flex-1">
-                                                <p className="truncate text-xs font-bold text-ink">
-                                                  {
-                                                    configuration
-                                                      .photo
-                                                      .name
-                                                  }
-                                                </p>
+                                        <div className="mt-3 grid grid-cols-2 gap-2">
+                                          <button
+                                            type="button"
+                                            disabled={isAddingToCart}
+                                            onClick={() =>
+                                              openPhotoPicker(configuration.id)
+                                            }
+                                            className="flex items-center justify-center rounded-full border-2 border-ink bg-cream px-3 py-2.5 text-[10px] font-bold transition hover:bg-beige sm:text-xs"
+                                          >
+                                            <LuImagePlus className="mr-1.5 h-4 w-4" />
+                                            Change photo
+                                          </button>
 
-                                                <p className="mt-1 text-[10px] text-ink/50">
-                                                  Photo
-                                                  uploaded
-                                                </p>
-                                              </div>
-
-                                              <button
-                                                type="button"
-                                                aria-label="Remove uploaded photo"
-                                                disabled={
-                                                  isAddingToCart
-                                                }
-                                                onClick={() =>
-                                                  removeConfigurationPhoto(
-                                                    configuration.id,
-                                                  )
-                                                }
-                                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink/40 transition hover:bg-burgundy hover:text-cream"
-                                              >
-                                                <LuTrash2 className="h-4 w-4" />
-                                              </button>
-                                            </div>
-
-                                            <div className="mt-3 grid grid-cols-2 gap-2">
-                                              <button
-                                                type="button"
-                                                disabled={
-                                                  isAddingToCart
-                                                }
-                                                onClick={() =>
-                                                  openPhotoPicker(
-                                                    configuration.id,
-                                                  )
-                                                }
-                                                className="flex items-center justify-center rounded-full border-2 border-ink bg-cream px-3 py-2.5 text-[10px] font-bold transition hover:bg-beige sm:text-xs"
-                                              >
-                                                <LuImagePlus className="mr-1.5 h-4 w-4" />
-
-                                                Change
-                                                photo
-                                              </button>
-
-                                              <button
-                                                type="button"
-                                                disabled={
-                                                  isAddingToCart
-                                                }
-                                                onClick={() =>
-                                                  openPhotoEditor(
-                                                    configuration.id,
-                                                  )
-                                                }
-                                                className="flex items-center justify-center rounded-full border-2 border-ink bg-blush px-3 py-2.5 text-[10px] font-bold shadow-[2px_2px_0_#2A211C] sm:text-xs"
-                                              >
-                                                <LuPencil className="mr-1.5 h-4 w-4" />
-
-                                                Edit
-                                                position
-                                              </button>
-                                            </div>
-                                          </div>
-                                        )}
+                                          <button
+                                            type="button"
+                                            disabled={isAddingToCart}
+                                            onClick={() =>
+                                              openPhotoEditor(configuration.id)
+                                            }
+                                            className="flex items-center justify-center rounded-full border-2 border-ink bg-blush px-3 py-2.5 text-[10px] font-bold shadow-[2px_2px_0_#2A211C] sm:text-xs"
+                                          >
+                                            <LuPencil className="mr-1.5 h-4 w-4" />
+                                            Edit position
+                                          </button>
+                                        </div>
                                       </div>
                                     )}
                                   </div>
-
-                                  <div className="flex items-center justify-center rounded-[14px] bg-blush/50 p-4">
-                                    <PhoneCaseMockup
-                                      modelName={
-                                        model.name
-                                      }
-                                      packageType={
-                                        configuration.packageType
-                                      }
-                                      photo={
-                                        configuration.photo
-                                      }
-                                      configuration={
-                                        configuration
-                                      }
-                                      className="max-w-[145px] sm:max-w-[175px]"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="mt-4 flex items-center justify-between border-t border-dashed border-ink/20 pt-3">
-                                  <span
-                                    className={[
-                                      "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold",
-
-                                      isComplete
-                                        ? "bg-burgundy text-cream"
-                                        : "bg-paper text-burgundy",
-                                    ].join(" ")}
-                                  >
-                                    {isComplete && (
-                                      <LuCheck className="h-3 w-3" />
-                                    )}
-
-                                    {isComplete
-                                      ? "Configuration ready"
-                                      : "Upload a photo to continue"}
-                                  </span>
-
-                                  <span className="text-xs font-bold text-burgundy">
-                                    {formatPrice(
-                                      configurationPrice,
-                                    )}
-                                  </span>
-                                </div>
+                                )}
                               </div>
-                            )}
-                          </article>
-                        );
-                      },
-                    )}
-                  </div>
-                </section>
-              )}
 
-            {configurations.length >
-              0 && (
-                <section className="rounded-[18px] border-2 border-ink bg-beige p-4 lg:hidden">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold text-ink/55">
-                        {
-                          configurations.length
-                        }{" "}
-                        {configurations.length ===
-                        1
-                          ? "case"
-                          : "cases"}
-                      </p>
+                              <div className="flex items-center justify-center rounded-[14px] bg-blush/50 p-4">
+                                <PhoneCaseMockup
+                                  modelName={model.name}
+                                  packageType={configuration.packageType}
+                                  photo={configuration.photo}
+                                  configuration={configuration}
+                                  className="max-w-[145px] sm:max-w-[175px]"
+                                />
+                              </div>
+                            </div>
 
-                      <p className="mt-1 font-serif text-2xl font-bold text-burgundy">
-                        {formatPrice(
-                          totalPrice,
+                            <div className="mt-4 flex items-center justify-between border-t border-dashed border-ink/20 pt-3">
+                              <span
+                                className={[
+                                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold",
+
+                                  isComplete
+                                    ? "bg-burgundy text-cream"
+                                    : "bg-paper text-burgundy",
+                                ].join(" ")}
+                              >
+                                {isComplete && <LuCheck className="h-3 w-3" />}
+
+                                {isComplete
+                                  ? "Configuration ready"
+                                  : "Upload a photo to continue"}
+                              </span>
+
+                              <span className="text-xs font-bold text-burgundy">
+                                {formatPrice(configurationPrice)}
+                              </span>
+                            </div>
+                          </div>
                         )}
-                      </p>
-                    </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
-                    <div className="text-right">
-                      <p className="text-[10px] font-semibold text-ink/50">
-                        {
-                          completedConfigurations
-                        }
-                        /
-                        {
-                          configurations.length
-                        }{" "}
-                        configured
-                      </p>
+            {configurations.length > 0 && (
+              <section className="rounded-[18px] border-2 border-ink bg-beige p-4 lg:hidden">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-ink/55">
+                      {configurations.length}{" "}
+                      {configurations.length === 1 ? "case" : "cases"}
+                    </p>
 
-                      <p className="mt-1 text-[10px] text-ink/50">
-                        Ready in 48hrs
-                      </p>
-                    </div>
+                    <p className="mt-1 font-serif text-2xl font-bold text-burgundy">
+                      {formatPrice(totalPrice)}
+                    </p>
                   </div>
-                </section>
-              )}
+
+                  <div className="text-right">
+                    <p className="text-[10px] font-semibold text-ink/50">
+                      {completedConfigurations}/{configurations.length}{" "}
+                      configured
+                    </p>
+
+                    <p className="mt-1 text-[10px] text-ink/50">
+                      Ready in 48hrs
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
 
             {!editItemId && (
               <section className="pt-3 sm:pt-6">
@@ -1965,41 +1567,33 @@ const PhoneCaseCustomizer = ({
                 </span>
 
                 <h2 className="mt-4 font-serif text-2xl font-semibold text-ink sm:text-3xl">
-                  Want to see how yours
-                  might turn out?
+                  Want to see how yours might turn out?
                 </h2>
 
                 <p className="mt-2 max-w-[580px] text-sm leading-6 text-ink/60">
-                  Take a look at some
-                  finished PolaroidsBySolly
-                  cases before creating
-                  yours.
+                  Take a look at some finished PolaroidsBySolly cases before
+                  creating yours.
                 </p>
 
                 <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-                  {caseSamples.map(
-                    (
-                      sample,
-                      sampleIndex,
-                    ) => (
-                      <div
-                        key={sample.src}
-                        className={[
-                          "relative overflow-hidden rounded-[16px] border-2 border-ink bg-beige shadow-[3px_4px_0_rgba(42,33,28,0.12)]",
+                  {caseSamples.map((sample, sampleIndex) => (
+                    <div
+                      key={sample.src}
+                      className={[
+                        "relative overflow-hidden rounded-[16px] border-2 border-ink bg-beige shadow-[3px_4px_0_rgba(42,33,28,0.12)]",
 
-                          sampleIndex === 2
-                            ? "col-span-2 aspect-[16/10] sm:col-span-1 sm:aspect-[4/5]"
-                            : "aspect-[4/5]",
-                        ].join(" ")}
-                      >
-                        <img
-                          src={sample.src}
-                          alt={sample.alt}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    ),
-                  )}
+                        sampleIndex === 2
+                          ? "col-span-2 aspect-[16/10] sm:col-span-1 sm:aspect-[4/5]"
+                          : "aspect-[4/5]",
+                      ].join(" ")}
+                    >
+                      <img
+                        src={sample.src}
+                        alt={sample.alt}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
               </section>
             )}
@@ -2015,89 +1609,65 @@ const PhoneCaseCustomizer = ({
                 </h2>
               </div>
 
-              {configurations.length ===
-              0 ? (
+              {configurations.length === 0 ? (
                 <div className="mt-5 rounded-xl border-2 border-dashed border-ink/20 bg-cream p-5 text-center">
                   <LuSmartphone className="mx-auto h-6 w-6 text-ink/35" />
 
                   <p className="mt-2 text-xs font-semibold leading-5 text-ink/50">
-                    Select a phone model to
-                    start building your
-                    order.
+                    Select a phone model to start building your order.
                   </p>
                 </div>
               ) : (
                 <>
                   <div className="mt-5 space-y-3">
-                    {configurations.map(
-                      (configuration) => {
-                        const model =
-                          modelMap.get(
-                            configuration.modelId,
-                          );
+                    {configurations.map((configuration) => {
+                      const model = modelMap.get(configuration.modelId);
 
-                        if (!model) {
-                          return null;
-                        }
+                      if (!model) {
+                        return null;
+                      }
 
-                        const price =
-                          configuration.packageType ===
-                          "with-polaroid"
-                            ? model.withPolaroidPrice
-                            : model.caseOnlyPrice;
+                      const price =
+                        configuration.packageType === "with-polaroid"
+                          ? model.withPolaroidPrice
+                          : model.caseOnlyPrice;
 
-                        return (
-                          <div
-                            key={
-                              configuration.id
-                            }
-                            className="flex items-start justify-between gap-3 border-b border-dashed border-ink/20 pb-3"
-                          >
-                            <div className="min-w-0">
-                              <p className="truncate text-xs font-bold text-ink">
-                                {model.name}
+                      return (
+                        <div
+                          key={configuration.id}
+                          className="flex items-start justify-between gap-3 border-b border-dashed border-ink/20 pb-3"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-bold text-ink">
+                              {model.name}
+                            </p>
+
+                            <p className="mt-1 text-[10px] text-ink/50">
+                              {configuration.packageType === "with-polaroid"
+                                ? "Polaroid + Case"
+                                : "Case Only"}
+                            </p>
+
+                            {!isConfigurationComplete(configuration) && (
+                              <p className="mt-1 text-[9px] font-bold text-burgundy">
+                                Needs a photo
                               </p>
-
-                              <p className="mt-1 text-[10px] text-ink/50">
-                                {configuration.packageType ===
-                                "with-polaroid"
-                                  ? "Polaroid + Case"
-                                  : "Case Only"}
-                              </p>
-
-                              {!isConfigurationComplete(
-                                configuration,
-                              ) && (
-                                <p className="mt-1 text-[9px] font-bold text-burgundy">
-                                  Needs a photo
-                                </p>
-                              )}
-                            </div>
-
-                            <span className="shrink-0 text-xs font-bold text-burgundy">
-                              {formatPrice(
-                                price,
-                              )}
-                            </span>
+                            )}
                           </div>
-                        );
-                      },
-                    )}
+
+                          <span className="shrink-0 text-xs font-bold text-burgundy">
+                            {formatPrice(price)}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <div className="mt-5 flex items-center justify-between text-xs font-semibold text-ink/55">
-                    <span>
-                      Configured
-                    </span>
+                    <span>Configured</span>
 
                     <span>
-                      {
-                        completedConfigurations
-                      }
-                      /
-                      {
-                        configurations.length
-                      }
+                      {completedConfigurations}/{configurations.length}
                     </span>
                   </div>
 
@@ -2107,9 +1677,7 @@ const PhoneCaseCustomizer = ({
                     </span>
 
                     <span className="font-serif text-2xl font-bold text-burgundy">
-                      {formatPrice(
-                        totalPrice,
-                      )}
+                      {formatPrice(totalPrice)}
                     </span>
                   </div>
                 </>
@@ -2117,44 +1685,26 @@ const PhoneCaseCustomizer = ({
 
               <button
                 type="button"
-                aria-busy={
-                  isAddingToCart
-                }
-                disabled={
-                  !allConfigurationsComplete ||
-                  isAddingToCart
-                }
-                onClick={
-                  handleAddToCart
-                }
+                aria-busy={isAddingToCart}
+                disabled={!allConfigurationsComplete || isAddingToCart}
+                onClick={handleAddToCart}
                 className="mt-5 flex w-full items-center justify-center rounded-full border-2 border-ink bg-burgundy px-5 py-3.5 text-sm font-bold text-cream shadow-[4px_4px_0_#2A211C] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {isAddingToCart
                   ? editItemId
                     ? "Saving Changes…"
                     : "Preparing Your Cases…"
-                  : configurations.length ===
-                      0
+                  : configurations.length === 0
                     ? "Choose a Phone Model"
                     : !allConfigurationsComplete
                       ? `Configure ${
-                          configurations.length -
-                          completedConfigurations
+                          configurations.length - completedConfigurations
                         } Remaining`
                       : editItemId
-                        ? `Save Changes — ${formatPrice(
-                            totalPrice,
-                          )}`
-                        : `Add ${
-                            configurations.length
-                          } ${
-                            configurations.length ===
-                            1
-                              ? "Case"
-                              : "Cases"
-                          } — ${formatPrice(
-                            totalPrice,
-                          )}`}
+                        ? `Save Changes — ${formatPrice(totalPrice)}`
+                        : `Add ${configurations.length} ${
+                            configurations.length === 1 ? "Case" : "Cases"
+                          } — ${formatPrice(totalPrice)}`}
               </button>
             </div>
           </aside>
@@ -2173,12 +1723,8 @@ const PhoneCaseCustomizer = ({
         <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t-2 border-ink bg-cream px-4 py-3 lg:hidden">
           <div className="min-w-0 shrink-0">
             <p className="text-[10px] font-semibold text-ink/55">
-              {
-                configurations.length
-              }{" "}
-              {configurations.length === 1
-                ? "case"
-                : "cases"}
+              {configurations.length}{" "}
+              {configurations.length === 1 ? "case" : "cases"}
             </p>
 
             <p className="font-serif text-base font-bold text-burgundy">
@@ -2188,13 +1734,8 @@ const PhoneCaseCustomizer = ({
 
           <button
             type="button"
-            aria-busy={
-              isAddingToCart
-            }
-            disabled={
-              !allConfigurationsComplete ||
-              isAddingToCart
-            }
+            aria-busy={isAddingToCart}
+            disabled={!allConfigurationsComplete || isAddingToCart}
             onClick={handleAddToCart}
             className="flex flex-1 items-center justify-center rounded-full border-2 border-ink bg-burgundy px-4 py-3 text-sm font-bold text-cream shadow-[3px_3px_0_#2A211C] disabled:cursor-not-allowed disabled:opacity-40"
           >
@@ -2204,8 +1745,7 @@ const PhoneCaseCustomizer = ({
                 : "Preparing…"
               : !allConfigurationsComplete
                 ? `Configure ${
-                    configurations.length -
-                    completedConfigurations
+                    configurations.length - completedConfigurations
                   } Remaining`
                 : editItemId
                   ? "Save Changes"
@@ -2214,213 +1754,158 @@ const PhoneCaseCustomizer = ({
         </div>
       )}
 
-      {editingConfiguration &&
-        editingPhoto && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Edit Polaroid position"
-            className="fixed inset-0 z-[90] flex flex-col bg-cream lg:items-center lg:justify-center lg:bg-ink/50 lg:p-6"
-          >
-            <button
-              type="button"
-              aria-label="Close photo editor"
-              onClick={
-                closePhotoEditor
-              }
-              className="absolute inset-0 hidden lg:block"
-            />
+      {editingConfiguration && editingPhoto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit Polaroid position"
+          className="fixed inset-0 z-[90] flex flex-col bg-cream lg:items-center lg:justify-center lg:bg-ink/50 lg:p-6"
+        >
+          <button
+            type="button"
+            aria-label="Close photo editor"
+            onClick={closePhotoEditor}
+            className="absolute inset-0 hidden lg:block"
+          />
 
-            <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-cream lg:h-auto lg:max-h-[92vh] lg:max-w-[980px] lg:rounded-[22px] lg:border-2 lg:border-ink lg:shadow-[10px_10px_0_#2A211C]">
-              <div className="flex items-center justify-between border-b-2 border-ink bg-paper px-4 py-3 sm:px-5">
-                <button
-                  type="button"
-                  onClick={
-                    closePhotoEditor
+          <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-cream lg:h-auto lg:max-h-[92vh] lg:max-w-[980px] lg:rounded-[22px] lg:border-2 lg:border-ink lg:shadow-[10px_10px_0_#2A211C]">
+            <div className="flex items-center justify-between border-b-2 border-ink bg-paper px-4 py-3 sm:px-5">
+              <button
+                type="button"
+                onClick={closePhotoEditor}
+                className="flex items-center gap-2 text-sm font-bold"
+              >
+                <LuArrowLeft className="h-5 w-5 lg:hidden" />
+                <LuX className="hidden h-5 w-5 lg:block" />
+                Back
+              </button>
+
+              <p className="text-xs font-bold text-ink/55 sm:text-sm">
+                Edit photo position
+              </p>
+
+              <button
+                type="button"
+                onClick={closePhotoEditor}
+                className="rounded-full bg-burgundy px-3 py-2 text-xs font-bold text-cream sm:px-4"
+              >
+                Done
+              </button>
+            </div>
+
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:overflow-hidden">
+              <div className="flex min-h-[420px] items-center justify-center bg-blush p-5 sm:min-h-[550px] sm:p-8 lg:min-h-[620px]">
+                <PhoneCaseMockup
+                  modelName={
+                    modelMap.get(editingConfiguration.modelId)?.name ?? "iPhone"
                   }
-                  className="flex items-center gap-2 text-sm font-bold"
-                >
-                  <LuArrowLeft className="h-5 w-5 lg:hidden" />
-
-                  <LuX className="hidden h-5 w-5 lg:block" />
-
-                  Back
-                </button>
-
-                <p className="text-xs font-bold text-ink/55 sm:text-sm">
-                  Edit photo position
-                </p>
-
-                <button
-                  type="button"
-                  onClick={
-                    closePhotoEditor
+                  packageType={editingConfiguration.packageType}
+                  photo={editingPhoto}
+                  configuration={editingConfiguration}
+                  editable
+                  onChange={(updates) =>
+                    updateConfiguration(editingConfiguration.id, updates)
                   }
-                  className="rounded-full bg-burgundy px-3 py-2 text-xs font-bold text-cream sm:px-4"
-                >
-                  Done
-                </button>
+                  className="max-w-[210px] sm:max-w-[275px]"
+                />
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:overflow-hidden">
-                <div className="flex min-h-[420px] items-center justify-center bg-blush p-5 sm:min-h-[550px] sm:p-8 lg:min-h-[620px]">
-                  <PhoneCaseMockup
-                    modelName={
-                      modelMap.get(
-                        editingConfiguration.modelId,
-                      )?.name ??
-                      "iPhone"
+              <div className="bg-paper p-5 sm:p-7 lg:overflow-y-auto lg:p-8">
+                <span className="inline-flex -rotate-2 rounded-full border-2 border-ink bg-blush px-3 py-1 font-handwritten text-sm font-bold shadow-[2px_2px_0_#2A211C]">
+                  make it yours ✦
+                </span>
+
+                <h2 className="mt-4 font-serif text-2xl font-semibold">
+                  Adjust your Polaroid
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-ink/60">
+                  Drag the image inside the Polaroid, then adjust the zoom or
+                  orientation.
+                </p>
+
+                <div className="mt-7">
+                  <div className="flex items-center justify-between text-sm font-bold">
+                    <label htmlFor="case-photo-zoom">Zoom</label>
+
+                    <span className="text-ink/50">
+                      {Math.round(editingConfiguration.zoom * 100)}%
+                    </span>
+                  </div>
+
+                  <input
+                    id="case-photo-zoom"
+                    type="range"
+                    min={1}
+                    max={3}
+                    step={0.01}
+                    value={editingConfiguration.zoom}
+                    onChange={(event) =>
+                      updateConfiguration(editingConfiguration.id, {
+                        zoom: Number(event.target.value),
+                      })
                     }
-                    packageType={
-                      editingConfiguration.packageType
-                    }
-                    photo={
-                      editingPhoto
-                    }
-                    configuration={
-                      editingConfiguration
-                    }
-                    editable
-                    onChange={(
-                      updates,
-                    ) =>
-                      updateConfiguration(
-                        editingConfiguration.id,
-                        updates,
-                      )
-                    }
-                    className="max-w-[210px] sm:max-w-[275px]"
+                    className="mt-4 w-full accent-burgundy"
                   />
                 </div>
 
-                <div className="bg-paper p-5 sm:p-7 lg:overflow-y-auto lg:p-8">
-                  <span className="inline-flex -rotate-2 rounded-full border-2 border-ink bg-blush px-3 py-1 font-handwritten text-sm font-bold shadow-[2px_2px_0_#2A211C]">
-                    make it yours ✦
-                  </span>
+                <div className="mt-8">
+                  <div className="flex items-center justify-between text-sm font-bold">
+                    <p>Rotate photo</p>
 
-                  <h2 className="mt-4 font-serif text-2xl font-semibold">
-                    Adjust your Polaroid
-                  </h2>
-
-                  <p className="mt-2 text-sm leading-6 text-ink/60">
-                    Drag the image inside
-                    the Polaroid, then adjust
-                    the zoom or orientation.
-                  </p>
-
-                  <div className="mt-7">
-                    <div className="flex items-center justify-between text-sm font-bold">
-                      <label htmlFor="case-photo-zoom">
-                        Zoom
-                      </label>
-
-                      <span className="text-ink/50">
-                        {Math.round(
-                          editingConfiguration.zoom *
-                            100,
-                        )}
-                        %
-                      </span>
-                    </div>
-
-                    <input
-                      id="case-photo-zoom"
-                      type="range"
-                      min={1}
-                      max={3}
-                      step={0.01}
-                      value={
-                        editingConfiguration.zoom
-                      }
-                      onChange={(
-                        event,
-                      ) =>
-                        updateConfiguration(
-                          editingConfiguration.id,
-                          {
-                            zoom: Number(
-                              event.target
-                                .value,
-                            ),
-                          },
-                        )
-                      }
-                      className="mt-4 w-full accent-burgundy"
-                    />
+                    <span className="text-ink/50">
+                      {editingConfiguration.rotation}°
+                    </span>
                   </div>
 
-                  <div className="mt-8">
-                    <div className="flex items-center justify-between text-sm font-bold">
-                      <p>Rotate photo</p>
+                  <div className="mt-3 grid grid-cols-4 gap-2">
+                    {ROTATION_OPTIONS.map((rotation) => {
+                      const isSelected =
+                        editingConfiguration.rotation === rotation;
 
-                      <span className="text-ink/50">
-                        {
-                          editingConfiguration.rotation
-                        }
-                        °
-                      </span>
-                    </div>
+                      return (
+                        <button
+                          key={rotation}
+                          type="button"
+                          onClick={() =>
+                            updateConfiguration(editingConfiguration.id, {
+                              rotation,
+                              zoom: 1,
+                              crop: {
+                                x: 0,
+                                y: 0,
+                              },
+                              croppedAreaPixels: null,
+                            })
+                          }
+                          className={[
+                            "rounded-xl border-2 border-ink px-2 py-2.5 text-xs font-bold",
 
-                    <div className="mt-3 grid grid-cols-4 gap-2">
-                      {ROTATION_OPTIONS.map(
-                        (rotation) => {
-                          const isSelected =
-                            editingConfiguration.rotation ===
-                            rotation;
-
-                          return (
-                            <button
-                              key={
-                                rotation
-                              }
-                              type="button"
-                              onClick={() =>
-                                updateConfiguration(
-                                  editingConfiguration.id,
-                                  {
-                                    rotation,
-                                    zoom: 1,
-                                    crop: {
-                                      x: 0,
-                                      y: 0,
-                                    },
-                                    croppedAreaPixels:
-                                      null,
-                                  },
-                                )
-                              }
-                              className={[
-                                "rounded-xl border-2 border-ink px-2 py-2.5 text-xs font-bold",
-
-                                isSelected
-                                  ? "bg-burgundy text-cream shadow-[2px_2px_0_#2A211C]"
-                                  : "bg-cream hover:bg-beige",
-                              ].join(" ")}
-                            >
-                              {rotation}°
-                            </button>
-                          );
-                        },
-                      )}
-                    </div>
+                            isSelected
+                              ? "bg-burgundy text-cream shadow-[2px_2px_0_#2A211C]"
+                              : "bg-cream hover:bg-beige",
+                          ].join(" ")}
+                        >
+                          {rotation}°
+                        </button>
+                      );
+                    })}
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={
-                      closePhotoEditor
-                    }
-                    className="mt-8 flex w-full items-center justify-center rounded-full border-2 border-ink bg-burgundy px-5 py-3.5 text-sm font-bold text-cream shadow-[4px_4px_0_#2A211C]"
-                  >
-                    <LuCheck className="mr-2 h-5 w-5" />
-
-                    Done editing
-                  </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={closePhotoEditor}
+                  className="mt-8 flex w-full items-center justify-center rounded-full border-2 border-ink bg-burgundy px-5 py-3.5 text-sm font-bold text-cream shadow-[4px_4px_0_#2A211C]"
+                >
+                  <LuCheck className="mr-2 h-5 w-5" />
+                  Done editing
+                </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
       {successModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/55 px-4">
@@ -2430,23 +1915,17 @@ const PhoneCaseCustomizer = ({
             </span>
 
             <h2 className="mt-4 font-serif text-2xl font-semibold text-ink">
-              Your phone cases are in the
-              cart ✦
+              Your phone cases are in the cart ✦
             </h2>
 
             <p className="mx-auto mt-2 max-w-[360px] text-sm leading-6 text-ink/60">
-              Want to add some extra
-              Polaroids to your order?
+              Want to add some extra Polaroids to your order?
             </p>
 
             <div className="mt-6 space-y-3">
               <button
                 type="button"
-                onClick={() =>
-                  router.push(
-                    "/products/polaroids",
-                  )
-                }
+                onClick={() => router.push("/products/polaroids")}
                 className="flex w-full items-center justify-center rounded-full border-2 border-ink bg-blush px-5 py-3 text-sm font-bold text-ink shadow-[3px_3px_0_#2A211C]"
               >
                 Create Extra Polaroids
@@ -2454,9 +1933,7 @@ const PhoneCaseCustomizer = ({
 
               <button
                 type="button"
-                onClick={() =>
-                  router.push("/cart")
-                }
+                onClick={() => router.push("/cart")}
                 className="flex w-full items-center justify-center rounded-full border-2 border-ink bg-burgundy px-5 py-3 text-sm font-bold text-cream shadow-[3px_3px_0_#2A211C]"
               >
                 No, View Cart

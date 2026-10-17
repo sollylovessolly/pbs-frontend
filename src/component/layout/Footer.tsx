@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const shopLinks = [
+  { label: "Book our Polaroid station", href: "/polaroid-station" },
   {
     label: "Polaroid Prints",
     href: "/products/polaroids",
@@ -39,17 +40,13 @@ const supportLinks = [
 ];
 
 const companyLinks = [
+  { label: "Reviews", href: "/reviews" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Terms", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
   {
     label: "About Us",
     href: "/about",
-  },
-  {
-    label: "Terms",
-    href: "/terms",
-  },
-  {
-    label: "Privacy Policy",
-    href: "/privacy",
   },
 ];
 
@@ -69,8 +66,8 @@ const Footer = () => {
             </Link>
 
             <p className="mt-3 max-w-[290px] font-sans text-xs leading-5 text-[#e3bfb8] sm:text-[13.5px] sm:leading-6">
-              A Polaroid experience brand turning your favourite photos into
-              keepsakes worth keeping.
+              Personalised prints and Polaroid stations for your celebrations.
+              Turning your favourite moments into keepsakes worth keeping.
             </p>
           </div>
 
@@ -83,9 +80,7 @@ const Footer = () => {
             <ul className="flex flex-col gap-2.5">
               {supportLinks.map((link) => (
                 <li key={link.label}>
-                  <FooterLink href={link.href}>
-                    {link.label}
-                  </FooterLink>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
                 </li>
               ))}
 
@@ -120,9 +115,7 @@ const Footer = () => {
 
               {companyLinks.map((link) => (
                 <li key={link.label}>
-                  <FooterLink href={link.href}>
-                    {link.label}
-                  </FooterLink>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
                 </li>
               ))}
             </ul>
@@ -155,10 +148,7 @@ type FooterColumnProps = {
   }[];
 };
 
-const FooterColumn = ({
-  title,
-  links,
-}: FooterColumnProps) => {
+const FooterColumn = ({ title, links }: FooterColumnProps) => {
   return (
     <div>
       <FooterHeading>{title}</FooterHeading>
@@ -166,9 +156,7 @@ const FooterColumn = ({
       <ul className="flex flex-col gap-2.5">
         {links.map((link) => (
           <li key={link.label}>
-            <FooterLink href={link.href}>
-              {link.label}
-            </FooterLink>
+            <FooterLink href={link.href}>{link.label}</FooterLink>
           </li>
         ))}
       </ul>
@@ -180,9 +168,7 @@ type FooterHeadingProps = {
   children: React.ReactNode;
 };
 
-const FooterHeading = ({
-  children,
-}: FooterHeadingProps) => {
+const FooterHeading = ({ children }: FooterHeadingProps) => {
   return (
     <h4 className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.06em] text-blush sm:mb-4 sm:text-[13px]">
       {children}
@@ -195,10 +181,7 @@ type FooterLinkProps = {
   children: React.ReactNode;
 };
 
-const FooterLink = ({
-  href,
-  children,
-}: FooterLinkProps) => {
+const FooterLink = ({ href, children }: FooterLinkProps) => {
   return (
     <Link
       href={href}
