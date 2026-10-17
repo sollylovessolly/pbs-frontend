@@ -2,11 +2,19 @@ import PackagePhoto from "./PackagePhoto";
 import Link from "next/link";
 import { giftPackages, packageContents } from "@/lib/commerce/packages";
 import { money } from "@/lib/commerce/catalogue";
-export default function PackageCards() {
+export default function PackageCards({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) {
   return (
     <section
       id="packages"
-      className="mx-auto max-w-site scroll-mt-24 px-5 py-14"
+      className={
+        embedded
+          ? "scroll-mt-24 py-10"
+          : "mx-auto max-w-site scroll-mt-24 px-5 py-14"
+      }
     >
       <p className="font-handwritten text-xl text-burgundy">
         a little more love, all together

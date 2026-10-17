@@ -25,3 +25,9 @@ Package cards, the homepage bestsellers and package detail pages use the existin
 ## Protective packaging
 
 Regular orders can select premium protective packaging at NGN 1,500 per order. Gift packages include it without another fee. The backend calculates and persists the charge and selection; the admin order summary shows both. The fee does not create stock or represent the actual packaging cost, which remains part of your normal inventory/accounting setup.
+
+## Product navigation and review approval
+
+Products opens on the Packages category; All shows packages first followed by individual products. Polaroid, photostrip and vintage-letter product previews use the supplied Product Showcase images.
+
+New customer reviews stay pending. In `/admin/reviews`, use Publish review to approve them for the public reviews page and homepage preview. Only published reviews with publication consent are returned by the public API. The public reviews refresh when the browser tab regains focus. Public review cards consistently use burgundy and cream without pill badges.

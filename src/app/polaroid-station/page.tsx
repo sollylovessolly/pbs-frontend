@@ -11,20 +11,20 @@ export const metadata = {
 export default function PolaroidStationPage() {
   return (
     <main className="bg-cream text-ink">
-      <section className="relative isolate overflow-hidden bg-burgundy px-5 py-14 text-cream sm:py-20">
+      <section className="relative isolate flex min-h-[760px] items-end md:items-center overflow-hidden bg-burgundy px-5 py-14 text-cream sm:min-h-[860px] sm:py-20">
         <Image
           src="/images/station/booking-hero.jpeg"
           alt=""
           fill
           priority
-          sizes="100vw"
-          className="-z-20 object-cover object-[center_35%] sm:object-[center_30%]"
+          sizes="(min-width: 768px) 65vw, 100vw"
+          className="-z-20 object-cover object-center md:object-contain md:object-right"
         />
         <div
           aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-gradient-to-r from-burgundy/95 via-burgundy/85 to-burgundy/45"
+          className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/85 via-ink/25 to-transparent md:bg-gradient-to-r md:from-ink/75 md:via-burgundy/20"
         />
-        <div className="mx-auto max-w-site">
+        <div className="mx-auto w-full max-w-site">
           <Link href="/" className="text-sm underline underline-offset-4">
             Home
           </Link>

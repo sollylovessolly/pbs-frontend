@@ -60,6 +60,7 @@ test("catalogue loads authoritative price, and unavailable product disables purc
 }) => {
   await mock(page);
   await page.goto("/products");
+  await page.getByRole("button", { name: "All", exact: true }).click();
   await expect(page.getByText("from ₦5,000", { exact: false })).toBeVisible();
   await page.route("**/api/products", (r) =>
     r.fulfill({
@@ -443,6 +444,7 @@ test("current public catalogue without active flags appears on homepage and cata
     page.getByText("New keepsakes are coming soon."),
   ).not.toBeVisible();
   await page.goto("/products");
+  await page.getByRole("button", { name: "All", exact: true }).click();
   await expect(page.getByText("from ₦5,000", { exact: false })).toBeVisible();
 });
 

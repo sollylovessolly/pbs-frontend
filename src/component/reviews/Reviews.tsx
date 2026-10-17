@@ -18,6 +18,7 @@ export default function Reviews({ preview = false }: { preview?: boolean }) {
     const controller = new AbortController();
     apiRequest<ReviewPage>(`/reviews?page=${page}&limit=${preview ? 3 : 12}`, {
       signal: controller.signal,
+      cache: "no-store",
     })
       .then((data) => {
         if (!Array.isArray(data.data) || !data.pagination)
@@ -37,6 +38,14 @@ export default function Reviews({ preview = false }: { preview?: boolean }) {
       });
     return () => controller.abort();
   }, [page, preview, attempt]);
+  useEffect(() => {
+    const refresh = () => {
+      setError("");
+      setAttempt((value) => value + 1);
+    };
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, []);
   return (
     <section className="bg-cream px-5 py-14 text-ink">
       <div className="mx-auto max-w-site">

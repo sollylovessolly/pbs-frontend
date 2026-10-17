@@ -17,14 +17,22 @@ export default function PackagePhoto({ id }: { id: string }) {
       </div>
     );
   const photos = [
-    { src: "/images/products/polaroids.jpg", alt: "Custom Polaroid prints" },
+    {
+      src: "/images/gallery/product-showcase/polaroids-prints.jpeg",
+      alt: "Custom Polaroid prints",
+    },
     { src: "/images/products/phone-case.jpg", alt: "Polaroid phone case" },
     {
-      src: "/images/products/vintage-letters.jpg",
+      src: "/images/gallery/product-showcase/vintage-letters-burnt-edges.jpeg",
       alt: "Custom vintage letter",
     },
     ...(p?.strips
-      ? [{ src: "/images/products/photostrips.jpg", alt: "Custom photostrips" }]
+      ? [
+          {
+            src: "/images/gallery/product-showcase/photostrips-keepsakes.jpeg",
+            alt: "Custom photostrips",
+          },
+        ]
       : []),
   ];
   return (

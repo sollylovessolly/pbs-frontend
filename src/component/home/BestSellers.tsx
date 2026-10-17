@@ -70,7 +70,7 @@ const BestSellers = () => {
       compareAt: money(p.compareAt),
       time: `${p.occasion} package · premium packaging included`,
       href: `/products/packages/${p.id}`,
-      src: "/images/products/polaroids.jpg",
+      src: "/images/gallery/product-showcase/polaroids-prints.jpeg",
       packageId: p.id,
       alt: `${p.name} gift package`,
       isBestSeller: false,

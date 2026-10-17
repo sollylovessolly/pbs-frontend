@@ -10,22 +10,23 @@ const localItems = [
   {
     src: "/images/gallery/gallery-01.jpg",
     alt: "Polaroid prints from PolaroidsBySolly",
-    fallback: "/images/products/polaroids.jpg",
+    fallback: "/images/gallery/product-showcase/polaroids-prints.jpeg",
   },
   {
     src: "/images/gallery/gallery-02.jpg",
     alt: "Photostrip keepsakes from PolaroidsBySolly",
-    fallback: "/images/products/photostrips.jpg",
+    fallback: "/images/gallery/product-showcase/photostrips-keepsakes.jpeg",
   },
   {
     src: "/images/gallery/gallery-03.jpg",
     alt: "A Polaroid station at an event",
-    fallback: "/images/products/polaroids.jpg",
+    fallback: "/images/gallery/product-showcase/polaroids-prints.jpeg",
   },
   {
     src: "/images/gallery/gallery-04.jpg",
     alt: "A personalised vintage letter",
-    fallback: "/images/products/vintage-letters.jpg",
+    fallback:
+      "/images/gallery/product-showcase/vintage-letters-burnt-edges.jpeg",
   },
   {
     src: "/images/gallery/gallery-05.jpg",
@@ -90,7 +91,7 @@ const Gallery = () => {
     ? photos.map((photo) => ({
         src: photo.thumbnailUrl,
         alt: photo.alt,
-        fallback: "/images/products/polaroids.jpg",
+        fallback: "/images/gallery/product-showcase/polaroids-prints.jpeg",
         href: `/gallery/${photo.albumSlug}`,
         title: photo.albumTitle,
       }))

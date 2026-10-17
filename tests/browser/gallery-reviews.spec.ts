@@ -237,3 +237,31 @@ test("admin gallery explains the repo workflow without storage uploads", async (
   await expect(page.getByText(/npm run gallery:generate/)).toBeVisible();
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
 });
+
+test("approved reviews refresh on return and every public card stays burgundy without pill badges", async ({
+  page,
+}) => {
+  await setup(page);
+  let published = false;
+  await page.route("**/api/reviews**", (route) =>
+    route.fulfill({ json: paged(published ? [review] : []) }),
+  );
+  await page.goto("/reviews");
+  await expect(page.getByText("Lee", { exact: true })).toBeVisible();
+  await expect(page.getByText(review.text)).toHaveCount(0);
+  published = true;
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(page.getByText(review.text)).toBeVisible();
+  const cards = page
+    .locator("article")
+    .filter({ has: page.locator("blockquote") });
+  await expect(cards).toHaveCount(4);
+  expect(
+    await cards.evaluateAll(
+      (nodes) =>
+        new Set(nodes.map((n) => getComputedStyle(n).backgroundColor)).size,
+    ),
+  ).toBe(1);
+  await expect(cards.locator(".rounded-full")).toHaveCount(0);
+  await expect(page.getByText("a little customer love ♡")).toHaveCount(0);
+});

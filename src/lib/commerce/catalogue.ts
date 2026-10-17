@@ -9,15 +9,15 @@ export const productAssets: Record<
 > = {
   POLAROID: {
     path: "polaroids",
-    image: "/images/products/polaroids.jpg",
+    image: "/images/gallery/product-showcase/polaroids-prints.jpeg",
   },
   PHOTOSTRIP: {
     path: "photostrips",
-    image: "/images/products/photostrips.jpg",
+    image: "/images/gallery/product-showcase/photostrips-keepsakes.jpeg",
   },
   VINTAGE_LETTER: {
     path: "vintage-letters",
-    image: "/images/products/vintage-letters.jpg",
+    image: "/images/gallery/product-showcase/vintage-letters-burnt-edges.jpeg",
   },
   PHONE_CASE: {
     path: "phone-cases",
