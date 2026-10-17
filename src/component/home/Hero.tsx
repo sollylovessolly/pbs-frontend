@@ -3,54 +3,54 @@ import Button from "@/component/ui/Button";
 
 const heroPolaroids = [
   {
-    src: "/images/hero/polaroid01.png",
+    src: "/images/hero/1.png",
     position: "top-[-35px] left-[2%] w-[135px] -rotate-[12deg] sm:w-[165px]",
     floatClass: "hero-float-one",
   },
   {
-    src: "/images/hero/polaroid02.png",
+    src: "/images/hero/2.png",
     position: "top-[20%] left-[5%] w-[120px] rotate-[7deg] sm:w-[155px]",
     floatClass: "hero-float-two",
   },
   {
-    src: "/images/hero/polaroid03.png",
+    src: "/images/hero/3.png",
     position: "bottom-[-35px] left-[3%] w-[145px] rotate-[8deg] sm:w-[185px]",
     floatClass: "hero-float-three",
   },
   {
-    src: "/images/hero/polaroid02.png",
+    src: "/images/hero/4.png",
     position: "top-[-45px] right-[3%] w-[140px] rotate-[10deg] sm:w-[175px]",
     floatClass: "hero-float-two",
   },
   {
-    src: "/images/hero/polaroid03.png",
+    src: "/images/hero/5.png",
     position: "top-[24%] right-[5%] w-[125px] -rotate-[8deg] sm:w-[165px]",
     floatClass: "hero-float-one",
   },
   {
-    src: "/images/hero/polaroid01.png",
+    src: "/images/hero/6.png",
     position: "bottom-[-45px] right-[2%] w-[150px] -rotate-[5deg] sm:w-[195px]",
     floatClass: "hero-float-three",
   },
   {
-    src: "/images/hero/polaroid03.png",
+    src: "/images/hero/7.png",
     position: "top-[-55px] left-[28%] hidden w-[120px] rotate-[5deg] lg:block",
     floatClass: "hero-float-three",
   },
   {
-    src: "/images/hero/polaroid01.png",
+    src: "/images/hero/8.png",
     position:
       "bottom-[-70px] left-[26%] hidden w-[135px] -rotate-[10deg] lg:block",
     floatClass: "hero-float-one",
   },
   {
-    src: "/images/hero/polaroid02.png",
+    src: "/images/hero/9.png",
     position:
       "top-[-50px] right-[28%] hidden w-[120px] -rotate-[6deg] lg:block",
     floatClass: "hero-float-two",
   },
   {
-    src: "/images/hero/polaroid03.png",
+    src: "/images/hero/10.png",
     position:
       "bottom-[-75px] right-[26%] hidden w-[135px] rotate-[9deg] lg:block",
     floatClass: "hero-float-three",
@@ -113,28 +113,28 @@ const Hero = () => {
           className="pointer-events-none absolute inset-0 z-20 sm:hidden"
         >
           <HeroImage
-            src="/images/hero/polaroid01.png"
+            src="/images/hero/1.png"
             className="left-5 top-3 w-[85px] -rotate-12"
             floatClass="hero-float-one"
             revealDelay="0.4s"
             floatDelay="0s"
           />
           <HeroImage
-            src="/images/hero/polaroid02.png"
+            src="/images/hero/4.png"
             className="right-5 top-2 w-[85px] rotate-12"
             floatClass="hero-float-two"
             revealDelay="0.6s"
             floatDelay="-1s"
           />
           <HeroImage
-            src="/images/hero/polaroid03.png"
+            src="/images/hero/7.png"
             className="bottom-0 left-8 w-[75px] rotate-6"
             floatClass="hero-float-three"
             revealDelay="0.8s"
             floatDelay="-2s"
           />
           <HeroImage
-            src="/images/hero/polaroid01.png"
+            src="/images/hero/10.png"
             className="bottom-0 right-8 w-[75px] -rotate-6"
             floatClass="hero-float-one"
             revealDelay="1s"

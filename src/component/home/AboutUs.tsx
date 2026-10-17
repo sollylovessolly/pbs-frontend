@@ -7,19 +7,19 @@ import Button from "@/component/ui/Button";
 
 const polaroids = [
   {
-    src: "/images/hero/polaroid01.png",
+    src: "/images/hero/2.png",
     alt: "A favourite memory printed as a Polaroid",
   },
   {
-    src: "/images/hero/polaroid02.png",
-    alt: "Friends captured in a printed Polaroid",
+    src: "/images/hero/5.png",
+    alt: "A favourite photo turned into a printed keepsake",
   },
   {
-    src: "/images/hero/polaroid03.png",
+    src: "/images/hero/8.png",
     alt: "A special moment turned into a keepsake",
   },
   {
-    src: "/images/hero/polaroid01.png",
+    src: "/images/hero/9.png",
     alt: "A personal photo printed with care",
   },
 ];
